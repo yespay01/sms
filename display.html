@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대기번호 출력 화면 - 창구별 전담 과정</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+        
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* 배경 장식 요소 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
+            animation: float 25s ease-in-out infinite;
+            z-index: 0;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(180deg); }
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            padding: 40px 40px 120px 40px;
+            height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* 왼쪽: 현재 호출 */
+        .current-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 25px;
+            padding: 35px;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .current-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #f1c40f, #e74c3c, #9b59b6, #3498db, #2ecc71);
+            background-size: 300% 100%;
+            animation: rainbow 3s linear infinite;
+            border-radius: 25px 25px 0 0;
+        }
+        
+        @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+        }
+        
+        .section-title {
+            font-size: 2.3rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: #FFD700;
+            text-shadow: 0 2px 15px rgba(255,215,0,0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .section-title:hover {
+            transform: scale(1.05);
+            text-shadow: 0 4px 20px rgba(255,215,0,0.6);
+        }
+        
+        .current-number {
+            font-size: 9rem;
+            font-weight: 900;
+            color: #00FF88;
+            text-shadow: 
+                0 0 30px rgba(0,255,136,0.6),
+                0 0 60px rgba(0,255,136,0.4),
+                0 0 90px rgba(0,255,136,0.2);
+            margin: 20px 0;
+            animation: glow 2.5s ease-in-out infinite alternate;
+            letter-spacing: -3px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        /* 호출 시 강조 효과 */
+        .current-number.calling {
+            animation: callPulse 1s ease-in-out 3;
+            transform: scale(1.1);
+        }
+        
+        @keyframes callPulse {
+            0%, 100% { 
+                transform: scale(1.1);
+                text-shadow: 
+                    0 0 30px rgba(0,255,136,0.6),
+                    0 0 60px rgba(0,255,136,0.4),
+                    0 0 90px rgba(0,255,136,0.2);
+            }
+            50% { 
+                transform: scale(1.2);
+                text-shadow: 
+                    0 0 60px rgba(255,215,0,0.8),
+                    0 0 100px rgba(255,215,0,0.6),
+                    0 0 140px rgba(255,215,0,0.4);
+                color: #FFD700;
+            }
+        }
+        
+        @keyframes glow {
+            from { 
+                text-shadow: 
+                    0 0 30px rgba(0,255,136,0.6),
+                    0 0 60px rgba(0,255,136,0.4),
+                    0 0 90px rgba(0,255,136,0.2);
+            }
+            to { 
+                text-shadow: 
+                    0 0 50px rgba(0,255,136,0.8),
+                    0 0 80px rgba(0,255,136,0.6),
+                    0 0 120px rgba(0,255,136,0.4);
+            }
+        }
+        
+        .counter-info {
+            font-size: 1.8rem;
+            margin-top: 15px;
+            opacity: 0.9;
+            font-weight: 500;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        /* 오른쪽: 대기번호 + 창구현황 */
+        .right-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        /* 대기번호 섹션 */
+        .waiting-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 25px;
+            padding: 25px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .waiting-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3498db, #2ecc71, #f1c40f, #e74c3c, #9b59b6);
+            background-size: 300% 100%;
+            animation: rainbow 3s linear infinite reverse;
+            border-radius: 25px 25px 0 0;
+        }
+        
+        .waiting-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #FFD700;
+            text-shadow: 0 2px 15px rgba(255,215,0,0.4);
+        }
+        
+        .waiting-numbers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 5px;
+            flex: 1;
+        }
+        
+        /* 대기번호 동적 크기 조절 */
+        .waiting-numbers.few .waiting-number .number-text { font-size: 1.6rem; }
+        .waiting-numbers.medium .waiting-number .number-text { font-size: 1.4rem; }
+        .waiting-numbers.many .waiting-number .number-text { font-size: 1.2rem; }
+        
+        /* 스크롤바 커스터마이징 */
+        .waiting-numbers::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .waiting-numbers::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+        
+        .waiting-numbers::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+        }
+        
+        .waiting-numbers::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.5);
+        }
+        
+        .waiting-number {
+            background: rgba(255,255,255,0.15);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            border: 2px solid rgba(255,255,255,0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(10px);
+        }
+        
+        .waiting-number.next {
+            border-color: #FFD700;
+            background: rgba(255,215,0,0.2);
+            animation: pulse 2s infinite;
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(255,215,0,0.3);
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1.05); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1.05); }
+        }
+        
+        .number-text {
+            font-size: 1.3rem;
+            font-weight: 900;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            transition: font-size 0.3s ease;
+        }
+        
+        .course-text {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            font-weight: 500;
+        }
+        
+        .time-text {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            font-weight: 400;
+        }
+        
+        /* 창구현황 섹션 */
+        .counter-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 25px;
+            padding: 25px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .counter-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #e74c3c, #f1c40f, #2ecc71, #3498db, #9b59b6);
+            background-size: 300% 100%;
+            animation: rainbow 3s linear infinite;
+            border-radius: 25px 25px 0 0;
+        }
+        
+        .counter-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #FFD700;
+            text-shadow: 0 2px 15px rgba(255,215,0,0.4);
+        }
+        
+        .counter-status {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        
+        .counter-item {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+        
+        .counter-item.active {
+            border-color: #00FF88;
+            background: rgba(0,255,136,0.15);
+            box-shadow: 0 8px 25px rgba(0,255,136,0.2);
+            transform: scale(1.05);
+        }
+        
+        .counter-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+        
+        .counter-number {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #FFD700;
+            text-shadow: 0 2px 12px rgba(255,215,0,0.4);
+            margin-bottom: 8px;
+        }
+
+        /* 창구별 담당 과정 표시 */
+        .counter-assignment {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            right: 5px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            font-size: 0.65rem;
+            padding: 4px 6px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 500;
+            backdrop-filter: blur(5px);
+            opacity: 0.9;
+            line-height: 1.2;
+            max-height: 32px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .counter-assignment.specialized {
+            background: rgba(0,184,148,0.8);
+            color: white;
+            font-weight: 600;
+        }
+
+        .counter-assignment.all-courses {
+            background: rgba(253,203,110,0.8);
+            color: #2d3436;
+            font-weight: 600;
+        }
+        
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(20px);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            z-index: 10;
+            min-height: 80px;
+        }
+        
+        .total-waiting {
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .last-update {
+            font-size: 1rem;
+            opacity: 0.7;
+            font-weight: 400;
+            transition: color 0.3s ease;
+        }
+        
+        .last-update.connected {
+            color: #00FF88;
+        }
+        
+        .last-update.disconnected {
+            color: #FF6B6B;
+        }
+        
+        .firebase-status {
+            display: none;
+        }
+        
+        .no-waiting {
+            text-align: center;
+            font-size: 1.4rem;
+            opacity: 0.7;
+            padding: 40px;
+            font-weight: 300;
+        }
+        
+        /* 반응형 디자인 */
+        @media (max-width: 1200px) {
+            .main-content {
+                gap: 30px;
+                padding: 25px 30px 110px 30px;
+            }
+            
+            .current-number {
+                font-size: 8rem;
+            }
+            
+            .section-title, .waiting-title, .counter-title {
+                font-size: 1.6rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px 20px 100px 20px;
+                height: auto;
+                min-height: 100vh;
+            }
+            
+            .current-number {
+                font-size: 6rem;
+            }
+            
+            .section-title, .waiting-title, .counter-title {
+                font-size: 1.5rem;
+            }
+            
+            .counter-status {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            .waiting-numbers {
+                grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+                gap: 10px;
+                max-height: 200px;
+            }
+            
+            .number-text {
+                font-size: 1.2rem;
+            }
+            
+            .status-bar {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+                padding: 12px 15px;
+                min-height: 70px;
+            }
+            
+            .total-waiting {
+                font-size: 1.3rem;
+            }
+            
+            .last-update {
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .current-number {
+                font-size: 4rem;
+            }
+            
+            .section-title, .waiting-title, .counter-title {
+                font-size: 1.4rem;
+            }
+            
+            .counter-status {
+                grid-template-columns: 1fr;
+            }
+            
+            .current-section,
+            .waiting-section,
+            .counter-section {
+                padding: 20px;
+            }
+        }
+    </style>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+        import { getDatabase, ref, onValue, off } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+
+        // Firebase 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyCuvEDDEoMLwLB2miGHCWX1-B5u8gKlGEQ",
+            authDomain: "counter-system-26479.firebaseapp.com",
+            databaseURL: "https://counter-system-26479-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "counter-system-26479",
+            storageBucket: "counter-system-26479.firebasestorage.app",
+            messagingSenderId: "316144964417",
+            appId: "1:316144964417:web:8a95a80f9db622f4ee87c0"
+        };
+
+        // Firebase 초기화
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // 전역 변수로 설정
+        window.firebaseDB = database;
+        window.firebaseRef = ref;
+        window.firebaseOnValue = onValue;
+        window.firebaseOff = off;
+
+        // Firebase 연결 상태 모니터링
+        const connectedRef = ref(database, '.info/connected');
+        onValue(connectedRef, (snapshot) => {
+            const connected = snapshot.val();
+            const lastUpdateEl = document.getElementById('lastUpdate');
+            if (lastUpdateEl) {
+                if (connected) {
+                    lastUpdateEl.className = 'last-update connected';
+                } else {
+                    lastUpdateEl.className = 'last-update disconnected';
+                }
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="main-content">
+        <!-- 왼쪽: 현재 호출 -->
+        <div class="current-section">
+            <div class="section-title" id="audioToggle" onclick="toggleAudio()" style="cursor: pointer; user-select: none;">
+                <span id="audioIcon">🔇</span> 현재 호출
+            </div>
+            <div class="current-number" id="currentNumber">-</div>
+            <div class="counter-info" id="counterInfo">대기 중</div>
+        </div>
+
+        <!-- 오른쪽: 대기번호 + 창구현황 -->
+        <div class="right-section">
+            <!-- 대기번호 섹션 -->
+            <div class="waiting-section">
+                <div class="waiting-title">⏳ 대기번호</div>
+                <div class="waiting-numbers" id="waitingNumbers">
+                    <!-- 대기번호들 (최대 10개) -->
+                </div>
+            </div>
+            
+            <!-- 창구현황 섹션 -->
+            <div class="counter-section">
+                <div class="counter-title">🏢 창구현황 (전담 과정별)</div>
+                <div class="counter-status" id="counterStatus">
+                    <!-- 창구별 현황 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <div class="total-waiting">
+            총 대기: <span id="totalWaiting">0</span>명
+        </div>
+        <div class="last-update" id="lastUpdate">
+            마지막 업데이트: <span id="lastUpdateTime">-</span>
+        </div>
+    </div>
+
+    <script>
+        let displayData = {
+            currentCall: { number: '-', counter: 0, course: '-' },
+            waiting: [],
+            counters: [
+                { id: 1, current: null, course: null },
+                { id: 2, current: null, course: null },
+                { id: 3, current: null, course: null },
+                { id: 4, current: null, course: null },
+                { id: 5, current: null, course: null },
+                { id: 6, current: null, course: null }
+            ],
+            counterSettings: {}, // 창구별 설정
+            lastUpdateTime: null,
+            isConnected: false,
+            lastCalledNumber: null
+        };
+
+        let courses = [
+            { code: 'CH', name: '중국어 과정' },
+            { code: 'EN', name: '영어 과정' },
+            { code: 'HSK', name: 'HSK 시험반' },
+            { code: 'TO', name: 'TOEIC 집중반' }
+        ];
+
+        let isDebugMode = false;
+        let lastCallData = null;
+        let audioContext = null;
+        let isAudioEnabled = false;
+
+        // 과정 이름 가져오기
+        function getCourseName(courseCode) {
+            const course = courses.find(c => c.code === courseCode);
+            return course ? course.name : courseCode;
+        }
+
+        // 창구별 담당 과정 정보 가져오기
+        function getCounterAssignment(counterId) {
+            const assignment = displayData.counterSettings[counterId];
+            
+            if (!assignment || assignment === 'ALL') {
+                return {
+                    text: '모든 과정',
+                    type: 'all-courses'
+                };
+            } else {
+                // 과정 코드로 전체 이름 찾기
+                const course = courses.find(c => c.code === assignment);
+                return {
+                    text: course ? course.name : assignment, // 전체 이름으로 표시
+                    type: 'specialized'
+                };
+            }
+        }
+
+        // 오디오 토글 함수
+        function toggleAudio() {
+            if (!isAudioEnabled) {
+                enableAudio();
+            } else {
+                disableAudio();
+            }
+        }
+
+        // 오디오 활성화
+        async function enableAudio() {
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                if (audioContext.state === 'suspended') {
+                    await audioContext.resume();
+                }
+                
+                isAudioEnabled = true;
+                document.getElementById('audioIcon').textContent = '🔊';
+                
+                console.log('✅ 오디오 활성화 완료');
+                playCallSound(false);
+                
+            } catch (error) {
+                console.error('❌ 오디오 활성화 실패:', error);
+                isAudioEnabled = false;
+                document.getElementById('audioIcon').textContent = '🔇';
+            }
+        }
+
+        // 오디오 비활성화
+        function disableAudio() {
+            isAudioEnabled = false;
+            document.getElementById('audioIcon').textContent = '🔇';
+            console.log('🔇 오디오 비활성화');
+        }
+
+        // 개선된 호출음 재생 함수
+        function playCallSound(isRecall = false) {
+            if (!isAudioEnabled || !audioContext) {
+                console.log('🔇 오디오 비활성화됨 - 호출음 건너뜀');
+                return;
+            }
+            
+            try {
+                const context = audioContext;
+                
+                // 첫 번째 음 (띵)
+                const oscillator1 = context.createOscillator();
+                const gainNode1 = context.createGain();
+                
+                oscillator1.connect(gainNode1);
+                gainNode1.connect(context.destination);
+                
+                oscillator1.frequency.setValueAtTime(800, context.currentTime);
+                oscillator1.type = 'sine';
+                
+                gainNode1.gain.setValueAtTime(0.4, context.currentTime);
+                gainNode1.gain.exponentialRampToValueAtTime(0.01, context.currentTime + (isRecall ? 0.8 : 0.5));
+                
+                oscillator1.start(context.currentTime);
+                oscillator1.stop(context.currentTime + (isRecall ? 0.8 : 0.5));
+                
+                // 두 번째 음 (동)
+                setTimeout(() => {
+                    const oscillator2 = context.createOscillator();
+                    const gainNode2 = context.createGain();
+                    
+                    oscillator2.connect(gainNode2);
+                    gainNode2.connect(context.destination);
+                    
+                    oscillator2.frequency.setValueAtTime(600, context.currentTime);
+                    oscillator2.type = 'sine';
+                    
+                    gainNode2.gain.setValueAtTime(0.4, context.currentTime);
+                    gainNode2.gain.exponentialRampToValueAtTime(0.01, context.currentTime + (isRecall ? 0.8 : 0.7));
+                    
+                    oscillator2.start(context.currentTime);
+                    oscillator2.stop(context.currentTime + (isRecall ? 0.8 : 0.7));
+                }, isRecall ? 900 : 600);
+                
+                console.log(`🔊 디스플레이 호출음 재생 ${isRecall ? '(재호출)' : '(일반)'}`);
+                
+            } catch (error) {
+                console.error('호출음 재생 오류:', error);
+            }
+        }
+
+        // 즉시 호출 감지 및 처리
+        function handleImmediateCall(data) {
+            const currentCall = data.currentCall;
+            
+            if (!currentCall || currentCall.number === '-') return;
+            
+            // 즉시 호출 플래그 확인
+            if (currentCall.immediateCall) {
+                const callType = currentCall.isRecall ? '재호출' : 
+                               currentCall.callType === 'direct' ? '직접호출' : '일반호출';
+                
+                console.log('⚡ 즉시 호출 감지:', currentCall.number, `(${callType})`);
+                
+                // 호출 키 생성
+                const callKey = `${currentCall.number}-${currentCall.callTime || currentCall.recallTime || Date.now()}-${currentCall.callType || 'unknown'}`;
+                const lastCallKey = lastCallData ? 
+                    `${lastCallData.number}-${lastCallData.callTime || lastCallData.recallTime}-${lastCallData.callType || 'unknown'}` : null;
+                
+                if (callKey !== lastCallKey) {
+                    // 호출음 즉시 재생
+                    playCallSound(currentCall.isRecall);
+                    
+                    // 화면 강조 효과
+                    const numberEl = document.getElementById('currentNumber');
+                    if (numberEl) {
+                        numberEl.classList.add('calling');
+                        setTimeout(() => {
+                            numberEl.classList.remove('calling');
+                        }, 3000);
+                    }
+                    
+                    // 이전 호출 데이터 업데이트
+                    lastCallData = { ...currentCall };
+                    
+                    console.log(`🔔 DISPLAY 호출음 재생: ${currentCall.number} (${callType})`);
+                }
+            }
+        }
+
+        // Firebase에서 실시간 데이터 수신
+        function setupFirebaseListeners() {
+            if (!window.firebaseDB) {
+                console.error('Firebase가 초기화되지 않았습니다.');
+                return;
+            }
+
+            // 1. 카운터 시스템 데이터 구독
+            const systemRef = window.firebaseRef(window.firebaseDB, 'counterSystem');
+            window.firebaseOnValue(systemRef, (snapshot) => {
+                const data = snapshot.val();
+                console.log('🔥 DISPLAY - Firebase 데이터 수신:', data);
+                
+                if (data) {
+                    // 즉시 호출 처리 (우선순위)
+                    handleImmediateCall(data);
+                    
+                    // 데이터 업데이트
+                    displayData.currentCall = data.currentCall || displayData.currentCall;
+                    displayData.waiting = data.waiting || [];
+                    displayData.counters = data.counters || displayData.counters;
+                    displayData.counterSettings = data.counterSettings || {}; // 창구별 설정 동기화
+                    displayData.lastUpdateTime = new Date();
+                    displayData.isConnected = true;
+                    
+                    // 즉시 화면 업데이트
+                    updateDisplay();
+                    
+                } else {
+                    console.log('📭 DISPLAY - Firebase 데이터 없음');
+                    displayData.isConnected = false;
+                    displayData.waiting = [];
+                    updateDisplay();
+                }
+            });
+
+            // 2. 키오스크 글로벌 설정 구독 (과정 정보)
+            const kioskSettingsRef = window.firebaseRef(window.firebaseDB, 'kioskGlobalSettings');
+            window.firebaseOnValue(kioskSettingsRef, (snapshot) => {
+                const kioskSettings = snapshot.val();
+                if (kioskSettings && kioskSettings.courses) {
+                    console.log('🎫 DISPLAY - 키오스크 과정 설정 수신:', kioskSettings.courses);
+                    courses = kioskSettings.courses;
+                    
+                    // 과정 정보가 업데이트되면 화면도 업데이트
+                    updateDisplay();
+                    
+                    console.log('✅ DISPLAY - 과정 정보 동기화 완료:', courses.length, '개 과정');
+                } else {
+                    console.log('📭 DISPLAY - 키오스크 과정 설정 없음 - 기본값 사용');
+                    setDefaultCourses();
+                }
+            });
+        }
+
+        // 기본 과정 설정 (키오스크 설정이 없을 때)
+        function setDefaultCourses() {
+            if (courses.length === 0) {
+                courses = [
+                    { code: 'CH', name: '중국어 과정', englishName: 'Chinese Course' },
+                    { code: 'EN', name: '영어 과정', englishName: 'English Course' },
+                    { code: 'HSK', name: 'HSK 시험반', englishName: 'HSK Test Prep' },
+                    { code: 'TO', name: 'TOEIC 집중반', englishName: 'TOEIC Course' }
+                ];
+                console.log('📚 DISPLAY - 기본 과정 설정 완료');
+                updateDisplay(); // 기본 과정 설정 후 화면 업데이트
+            }
+        }
+
+        function updateDisplay() {
+            try {
+                console.log('🖥️ DISPLAY 화면 업데이트');
+                console.log('📋 현재 대기열 크기:', displayData.waiting ? displayData.waiting.length : 0);
+                console.log('⚙️ 창구별 설정:', displayData.counterSettings);
+                
+                // 현재 호출번호 업데이트
+                const currentNumber = displayData.currentCall.number || '-';
+                const currentCounter = displayData.currentCall.counter || 0;
+                const currentCourse = displayData.currentCall.course || '대기 중';
+                
+                document.getElementById('currentNumber').textContent = currentNumber;
+                
+                if (currentNumber !== '-' && currentCounter > 0) {
+                    const assignment = getCounterAssignment(currentCounter);
+                    document.getElementById('counterInfo').textContent = 
+                        `${currentCounter}번 창구 (${assignment.text}) - ${currentCourse}`;
+                } else {
+                    document.getElementById('counterInfo').textContent = '대기 중';
+                }
+
+                // 대기번호 목록 업데이트 (최대 10개)
+                const waitingContainer = document.getElementById('waitingNumbers');
+                waitingContainer.innerHTML = '';
+                
+                if (displayData.waiting && displayData.waiting.length > 0) {
+                    // 최대 10개만 표시
+                    const displayWaiting = displayData.waiting.slice(0, 10);
+                    console.log(`📋 ${displayWaiting.length}개의 대기번호 표시 (최대 10개):`, displayWaiting.map(item => item.number));
+                    
+                    // 대기번호 개수에 따른 크기 조절
+                    waitingContainer.className = 'waiting-numbers';
+                    if (displayWaiting.length <= 4) {
+                        waitingContainer.classList.add('few');
+                    } else if (displayWaiting.length <= 7) {
+                        waitingContainer.classList.add('medium');
+                    } else {
+                        waitingContainer.classList.add('many');
+                    }
+                    
+                    displayWaiting.forEach((item, index) => {
+                        const div = document.createElement('div');
+                        div.className = 'waiting-number';
+                        if (index === 0) div.classList.add('next');
+                        
+                        div.innerHTML = `
+                            <div class="number-text">${item.number}</div>
+                            <div class="course-text">${item.course}</div>
+                            <div class="time-text">${item.time}</div>
+                        `;
+                        
+                        waitingContainer.appendChild(div);
+                    });
+                } else {
+                    console.log('📭 대기번호 없음 - 빈 화면 표시');
+                    waitingContainer.innerHTML = '<div class="no-waiting">대기 중인 번호가 없습니다</div>';
+                }
+
+                // 창구 현황 업데이트 (담당 과정 포함)
+                const counterContainer = document.getElementById('counterStatus');
+                counterContainer.innerHTML = '';
+                
+                displayData.counters.slice(0, 6).forEach((counter) => {
+                    const div = document.createElement('div');
+                    div.className = 'counter-item';
+                    
+                    const hasCustomer = counter.current && counter.current !== '-';
+                    if (hasCustomer) {
+                        div.classList.add('active');
+                    }
+                    
+                    // 창구별 담당 과정 정보
+                    const assignment = getCounterAssignment(counter.id);
+                    
+                    div.innerHTML = `
+                        <div class="counter-name">${counter.id}번 창구</div>
+                        <div class="counter-number">${counter.current || '-'}</div>
+                        <div class="counter-assignment ${assignment.type}">${assignment.text}</div>
+                    `;
+                    counterContainer.appendChild(div);
+                });
+
+                // 총 대기인원 및 업데이트 시간
+                const waitingLength = displayData.waiting ? displayData.waiting.length : 0;
+                document.getElementById('totalWaiting').textContent = waitingLength;
+                
+                if (displayData.lastUpdateTime) {
+                    document.getElementById('lastUpdateTime').textContent = 
+                        displayData.lastUpdateTime.toLocaleTimeString('ko-KR');
+                } else {
+                    document.getElementById('lastUpdateTime').textContent = '-';
+                }
+                
+                console.log('✅ DISPLAY 화면 업데이트 완료 - 대기인원:', waitingLength);
+                console.log('🏢 창구별 담당 과정 표시 완료');
+                
+            } catch (error) {
+                console.error('❌ 화면 업데이트 오류:', error);
+            }
+        }
+
+        // 키보드 단축키
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F11') {
+                e.preventDefault();
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+            
+            if (e.key === 'Escape' && document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+            
+            // T키: 테스트 호출음 (오디오 활성화된 경우만)
+            if (e.key === 't' || e.key === 'T') {
+                if (isAudioEnabled) {
+                    playCallSound();
+                    console.log('🎵 테스트 호출음 재생');
+                } else {
+                    console.log('🔇 오디오가 비활성화됨 - T키 무시');
+                }
+            }
+            
+            // R키: 재호출 테스트 (오디오 활성화된 경우만)
+            if (e.key === 'r' || e.key === 'R') {
+                if (isAudioEnabled) {
+                    playCallSound(true);
+                    console.log('🎵 재호출 테스트 음 재생');
+                } else {
+                    console.log('🔇 오디오가 비활성화됨 - R키 무시');
+                }
+            }
+            
+            // S키: 오디오 토글
+            if (e.key === 's' || e.key === 'S') {
+                toggleAudio();
+                console.log('🔊 S키로 오디오 토글');
+            }
+            
+            // D키: 디버그 모드 토글
+            if (e.key === 'd' || e.key === 'D') {
+                isDebugMode = !isDebugMode;
+                console.log('디버그 모드:', isDebugMode ? '활성화' : '비활성화');
+                console.log('현재 데이터:', displayData);
+                console.log('마지막 호출 데이터:', lastCallData);
+                console.log('오디오 상태:', isAudioEnabled ? '활성화' : '비활성화');
+                console.log('창구별 설정:', displayData.counterSettings);
+            }
+        });
+
+        // 관리자 모드 (현재 호출 번호 7번 클릭)
+        let adminClicks = 0;
+        document.addEventListener('click', function(e) {
+            if (e.target.id === 'currentNumber') {
+                adminClicks++;
+                if (adminClicks >= 7) {
+                    isDebugMode = !isDebugMode;
+                    console.log('디버그 모드:', isDebugMode ? '활성화' : '비활성화');
+                    
+                    if (isDebugMode) {
+                        console.log('🎵 키보드 단축키:');
+                        console.log('  T 키: 일반 호출음 테스트 (오디오 활성화 시)');
+                        console.log('  R 키: 재호출음 테스트 (오디오 활성화 시)');
+                        console.log('  S 키: 오디오 토글 (🔇 ↔ 🔊)');
+                        console.log('  D 키: 디버그 정보 표시');
+                        console.log('  F11: 전체화면 토글');
+                        console.log('🔍 성능 정보:');
+                        console.log('  즉시 호출 감지: 활성화');
+                        console.log('  오디오 상태:', isAudioEnabled ? '🔊 활성화' : '🔇 비활성화');
+                        console.log('  현재 데이터:', displayData);
+                        console.log('  마지막 호출:', lastCallData);
+                        console.log('🏢 창구별 설정:');
+                        console.log('  담당 과정 표시: 활성화');
+                        console.log('  창구별 설정:', displayData.counterSettings);
+                        console.log('📋 레이아웃 정보:');
+                        console.log('  대기번호: 최대 10개 표시 (동적 크기)');
+                        console.log('  창구현황: 6개 창구 + 담당 과정 표시');
+                    }
+                    
+                    adminClicks = 0;
+                }
+                setTimeout(() => { adminClicks = 0; }, 3000);
+            }
+        });
+
+        // 초기화 함수
+        function initialize() {
+            console.log('🖥️ DISPLAY 화면 초기화 시작 (창구별 전담 과정 표시)');
+            console.log('📋 레이아웃: 현재 호출 | (대기번호 + 창구현황)');
+            console.log('🔢 대기번호: 최대 10개 표시 (동적 크기 조절)');
+            console.log('🏢 창구현황: 6개 창구 + 담당 과정 표시');
+            console.log('⚙️ 창구별 설정: Firebase에서 실시간 동기화');
+            console.log('📚 과정 정보: 키오스크에서 실시간 동기화');
+            console.log('🔇 오디오 비활성화 상태로 시작 - 🔇 버튼 클릭하여 활성화');
+            console.log('🔄 자동 새로고침: 비활성화 (오디오 설정 유지)');
+            
+            // 기본 과정 설정
+            setDefaultCourses();
+            
+            // Firebase 리스너 설정 (즉시)
+            setupFirebaseListeners();
+            
+            console.log('✅ DISPLAY 화면 초기화 완료');
+        }
+
+        // 페이지 로드 완료 시 초기화
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initialize);
+        } else {
+            initialize();
+        }
+
+        // 윈도우 포커스 시 즉시 업데이트
+        window.addEventListener('focus', () => {
+            console.log('🔄 윈도우 포커스 - 데이터 확인');
+        });
+
+        // 성능 모니터링 (디버그 모드에서만)
+        setInterval(() => {
+            if (isDebugMode) {
+                console.log('📊 성능 정보:');
+                console.log('  Firebase 연결:', displayData.isConnected ? '✅' : '❌');
+                console.log('  대기 인원:', displayData.waiting.length);
+                console.log('  현재 호출:', displayData.currentCall.number);
+                console.log('  오디오 상태:', isAudioEnabled ? '🔊 활성화' : '🔇 비활성화');
+                console.log('  마지막 호출 데이터:', lastCallData?.number || 'None');
+                console.log('  창구별 설정:', displayData.counterSettings);
+                
+                // 창구별 담당 과정 현황
+                for (let i = 1; i <= 6; i++) {
+                    const assignment = getCounterAssignment(i);
+                    console.log(`  ${i}번 창구: ${assignment.text} (${assignment.type})`);
+                }
+            }
+        }, 10000);
+    </script>
+</body>
+</html>
