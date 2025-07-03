@@ -609,15 +609,15 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
         import { getDatabase, ref, set, push, onValue, remove, off } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
-        // Firebase 설정
+        // 🔥 새로운 Firebase 설정 (alimtalk-waiting-ticket)
         const firebaseConfig = {
-            apiKey: "AIzaSyCuvEDDEoMLwLB2miGHCWX1-B5u8gKlGEQ",
-            authDomain: "counter-system-26479.firebaseapp.com",
-            databaseURL: "https://counter-system-26479-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "counter-system-26479",
-            storageBucket: "counter-system-26479.firebasestorage.app",
-            messagingSenderId: "316144964417",
-            appId: "1:316144964417:web:8a95a80f9db622f4ee87c0"
+            apiKey: "AIzaSyCNhcSqZgtSS63QTmjWtiMxgy5g8soOzho",
+            authDomain: "alimtalk-waiting-ticket.firebaseapp.com",
+            databaseURL: "https://alimtalk-waiting-ticket-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "alimtalk-waiting-ticket",
+            storageBucket: "alimtalk-waiting-ticket.firebasestorage.app",
+            messagingSenderId: "313045604729",
+            appId: "1:313045604729:web:2599fe60cad2b573bc37a8"
         };
 
         // Firebase 초기화
@@ -648,6 +648,8 @@
                 }
             }
         });
+
+        console.log('🔥 새로운 Firebase 프로젝트 연결: alimtalk-waiting-ticket');
     </script>
 </head>
 <body>
@@ -1500,7 +1502,7 @@
 
         // 초기화
         function initialize() {
-            console.log('🚀 상담창구 시스템 초기화 시작 (키오스크 과정 동기화)');
+            console.log('🚀 상담창구 시스템 초기화 시작 (새 Firebase: alimtalk-waiting-ticket)');
             
             currentCounter = getCounterFromUrl();
             selectCounter(currentCounter);
@@ -1513,11 +1515,9 @@
                 setupFirebaseListeners();
             }, 1000);
             
-            console.log('✅ 상담창구 시스템 초기화 완료 (과정 정보 키오스크 동기화)');
+            console.log('✅ 상담창구 시스템 초기화 완료 (새 Firebase 연결)');
         }
 
-        // 페이지 로드 시 초기화
-        document.addEventListener('DOMContentLoaded', initialize);
     </script>
 </body>
 </html>
