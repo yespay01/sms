@@ -535,15 +535,15 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
         import { getDatabase, ref, onValue, off } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
-        // Firebase 설정
+        // 🔥 새로운 Firebase 설정 (alimtalk-waiting-ticket)
         const firebaseConfig = {
-            apiKey: "AIzaSyCuvEDDEoMLwLB2miGHCWX1-B5u8gKlGEQ",
-            authDomain: "counter-system-26479.firebaseapp.com",
-            databaseURL: "https://counter-system-26479-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "counter-system-26479",
-            storageBucket: "counter-system-26479.firebasestorage.app",
-            messagingSenderId: "316144964417",
-            appId: "1:316144964417:web:8a95a80f9db622f4ee87c0"
+            apiKey: "AIzaSyCNhcSqZgtSS63QTmjWtiMxgy5g8soOzho",
+            authDomain: "alimtalk-waiting-ticket.firebaseapp.com",
+            databaseURL: "https://alimtalk-waiting-ticket-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "alimtalk-waiting-ticket",
+            storageBucket: "alimtalk-waiting-ticket.firebasestorage.app",
+            messagingSenderId: "313045604729",
+            appId: "1:313045604729:web:2599fe60cad2b573bc37a8"
         };
 
         // Firebase 초기화
@@ -569,6 +569,8 @@
                 }
             }
         });
+
+        console.log('🔥 새로운 Firebase 프로젝트 연결: alimtalk-waiting-ticket (Display)');
     </script>
 </head>
 <body>
@@ -1055,7 +1057,7 @@
 
         // 초기화 함수
         function initialize() {
-            console.log('🖥️ DISPLAY 화면 초기화 시작 (창구별 전담 과정 표시)');
+            console.log('🖥️ DISPLAY 화면 초기화 시작 (새 Firebase: alimtalk-waiting-ticket)');
             console.log('📋 레이아웃: 현재 호출 | (대기번호 + 창구현황)');
             console.log('🔢 대기번호: 최대 10개 표시 (동적 크기 조절)');
             console.log('🏢 창구현황: 6개 창구 + 담당 과정 표시');
