@@ -76,8 +76,28 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            /* 터치 개선 */
             touch-action: manipulation;
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            /* 클릭 영역 확장 */
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* 메인 버튼 터치 영역 확장 */
+        .main-issue-btn::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            right: -15px;
+            bottom: -15px;
+            z-index: -1;
         }
 
         .main-issue-btn:hover {
@@ -189,9 +209,30 @@
             cursor: pointer;
             transition: all 0.2s ease;
             min-height: 80px;
+            min-width: 80px;
+            /* 터치 개선 */
             touch-action: manipulation;
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            /* 클릭 영역 확장 */
+            position: relative;
+            z-index: 10;
             box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        /* 터치 영역 확장 */
+        .number-btn::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            z-index: -1;
         }
 
         .number-btn:hover {
@@ -293,8 +334,28 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            /* 터치 개선 */
             touch-action: manipulation;
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            /* 클릭 영역 확장 */
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* 과정 버튼 터치 영역 확장 */
+        .popup-course-btn::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            z-index: -1;
         }
 
         .popup-course-btn:hover {
@@ -522,7 +583,7 @@
             currentPhoneNumber = '';
         }
 
-        // 번호 추가
+        // 번호 추가 (터치 이벤트도 처리)
         function addNumber(num) {
             let numbersOnly = currentPhoneNumber.replace(/[^0-9]/g, '');
             
@@ -530,6 +591,9 @@
                 numbersOnly += num;
                 currentPhoneNumber = numbersOnly;
                 updatePhoneDisplay();
+                
+                // 터치 피드백
+                navigator.vibrate && navigator.vibrate(50);
                 
                 // 11자리 완성되면 과정 선택으로
                 if (numbersOnly.length === 11) {
@@ -541,20 +605,91 @@
             }
         }
 
-        // 번호 삭제
+        // 번호 삭제 (터치 이벤트도 처리)
         function deleteNumber() {
             let numbersOnly = currentPhoneNumber.replace(/[^0-9]/g, '');
             if (numbersOnly.length > 0) {
                 numbersOnly = numbersOnly.slice(0, -1);
                 currentPhoneNumber = numbersOnly;
                 updatePhoneDisplay();
+                
+                // 터치 피드백
+                navigator.vibrate && navigator.vibrate(30);
             }
         }
 
-        // 번호 전체 삭제
+        // 번호 전체 삭제 (터치 이벤트도 처리)
         function clearPhone() {
             currentPhoneNumber = '';
             updatePhoneDisplay();
+            
+            // 터치 피드백
+            navigator.vibrate && navigator.vibrate([50, 50, 50]);
+        }
+
+        // 과정 선택 (터치 이벤트도 처리)
+        function selectCourse(course, phoneNumber) {
+            // 터치 피드백
+            navigator.vibrate && navigator.vibrate(100);
+            
+            closeCoursePopup();
+            issueTicket(course, phoneNumber);
+        }
+
+        // 메인 버튼 클릭 (터치 이벤트도 처리)
+        function showPhonePopup() {
+            // 터치 피드백
+            navigator.vibrate && navigator.vibrate(80);
+            
+            currentPhoneNumber = '';
+            updatePhoneDisplay();
+            document.getElementById('phonePopup').classList.add('show');
+        }
+
+        // 터치 이벤트 개선 함수들
+        function setupTouchEvents() {
+            // 모든 버튼에 터치 이벤트 추가
+            document.querySelectorAll('button').forEach(button => {
+                // 터치 시작
+                button.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    this.classList.add('touching');
+                }, { passive: false });
+                
+                // 터치 종료
+                button.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('touching');
+                    
+                    // 클릭 이벤트 강제 실행
+                    if (this.onclick) {
+                        this.onclick();
+                    }
+                }, { passive: false });
+                
+                // 터치 취소
+                button.addEventListener('touchcancel', function(e) {
+                    this.classList.remove('touching');
+                });
+            });
+        }
+
+        // 터치 중 스타일
+        function addTouchStyles() {
+            const style = document.createElement('style');
+            style.textContent = `
+                .touching {
+                    transform: scale(0.95) !important;
+                    opacity: 0.8 !important;
+                    transition: all 0.1s ease !important;
+                }
+                
+                /* 터치 영역 시각화 (개발용) */
+                .debug-touch button {
+                    border: 2px dashed rgba(255,0,0,0.3) !important;
+                }
+            `;
+            document.head.appendChild(style);
         }
 
         // 핸드폰 번호 화면 업데이트
@@ -760,6 +895,10 @@
         function initialize() {
             console.log('🚀 키오스크 초기화');
             
+            // 터치 이벤트 설정
+            addTouchStyles();
+            setupTouchEvents();
+            
             // 시간 표시
             updateTime();
             setInterval(updateTime, 1000);
@@ -769,7 +908,7 @@
                 setupFirebaseListener();
             }, 1000);
             
-            console.log('✅ 키오스크 준비 완료');
+            console.log('✅ 키오스크 준비 완료 (터치 최적화)');
         }
 
         // 페이지 로드
