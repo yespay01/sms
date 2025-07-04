@@ -176,41 +176,54 @@
         }
 
         .phone-display {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             font-weight: 700;
             color: #3498db;
-            margin-bottom: 30px;
-            padding: 20px;
+            margin-bottom: 40px;
+            padding: 25px;
             background: #f8f9fa;
-            border-radius: 15px;
-            border: 3px solid #ecf0f1;
-            min-height: 80px;
+            border-radius: 20px;
+            border: 4px solid #ecf0f1;
+            min-height: 100px;
             display: flex;
             align-items: center;
             justify-content: center;
+            letter-spacing: 2px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .phone-display .fixed {
+            color: #7f8c8d;
+            font-weight: 600;
+        }
+
+        .phone-display .input {
+            color: #3498db;
+            font-weight: 900;
         }
 
         .number-pad {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            max-width: 400px;
-            margin: 0 auto 30px auto;
+            gap: 30px;
+            max-width: 500px;
+            margin: 0 auto 40px auto;
+            padding: 20px;
         }
 
         .number-btn {
             background: #3498db;
             color: white;
             border: none;
-            padding: 25px;
-            border-radius: 15px;
-            font-size: 2rem;
+            padding: 35px;
+            border-radius: 20px;
+            font-size: 2.5rem;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s ease;
-            min-height: 80px;
-            min-width: 80px;
-            /* 터치 개선 */
+            transition: all 0.15s ease;
+            min-height: 100px;
+            min-width: 100px;
+            /* 터치 최적화 */
             touch-action: manipulation;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
@@ -221,37 +234,52 @@
             /* 클릭 영역 확장 */
             position: relative;
             z-index: 10;
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+            /* 터치 반응성 개선 */
+            will-change: transform;
         }
         
-        /* 터치 영역 확장 */
+        /* 터치 영역 대폭 확장 */
         .number-btn::before {
             content: '';
             position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
             z-index: -1;
         }
 
         .number-btn:hover {
             background: #2980b9;
-            transform: translateY(-2px);
-            box-shadow: 0 7px 20px rgba(52, 152, 219, 0.4);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(52, 152, 219, 0.5);
         }
 
         .number-btn:active {
-            transform: translateY(0);
+            transform: translateY(0) scale(0.98);
+            transition: all 0.1s ease;
         }
 
         .delete-btn {
             background: #e74c3c !important;
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4) !important;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b !important;
+            box-shadow: 0 12px 35px rgba(231, 76, 60, 0.5) !important;
         }
 
         .clear-btn {
             background: #f39c12 !important;
-            font-size: 1.2rem !important;
+            font-size: 1.4rem !important;
+            box-shadow: 0 8px 25px rgba(243, 156, 18, 0.4) !important;
+        }
+
+        .clear-btn:hover {
+            background: #e67e22 !important;
+            box-shadow: 0 12px 35px rgba(243, 156, 18, 0.5) !important;
         }
 
         .popup-close-btn {
@@ -415,10 +443,10 @@
 
         @media (max-width: 768px) {
             .main-issue-btn {
-                padding: 40px 60px;
-                font-size: 2rem;
-                min-height: 200px;
-                min-width: 350px;
+                padding: 50px 80px;
+                font-size: 2.5rem;
+                min-height: 220px;
+                min-width: 400px;
             }
             
             .main-btn-icon {
@@ -426,34 +454,39 @@
             }
             
             .main-btn-text {
-                font-size: 2rem;
+                font-size: 2.5rem;
             }
             
             .phone-popup-content,
             .course-popup-content {
-                padding: 30px 20px;
+                padding: 40px 25px;
             }
             
             .popup-title {
-                font-size: 2rem;
+                font-size: 2.2rem;
             }
             
             .phone-display {
-                font-size: 2rem;
+                font-size: 2.3rem;
+                padding: 20px;
             }
             
             .number-pad {
-                max-width: 300px;
-                gap: 15px;
+                max-width: 400px;
+                gap: 25px;
+                padding: 15px;
             }
             
             .number-btn {
-                min-height: 70px;
-                font-size: 1.5rem;
+                min-height: 90px;
+                min-width: 90px;
+                font-size: 2.2rem;
+                padding: 30px;
             }
             
             .popup-course-grid {
                 grid-template-columns: 1fr;
+                gap: 20px;
             }
         }
     </style>
@@ -636,12 +669,12 @@
             issueTicket(course, phoneNumber);
         }
 
-        // 메인 버튼 클릭 (터치 이벤트도 처리)
+        // 메인 버튼 클릭 (010으로 초기화)
         function showPhonePopup() {
             // 터치 피드백
             navigator.vibrate && navigator.vibrate(80);
             
-            currentPhoneNumber = '';
+            currentPhoneNumber = '010';
             updatePhoneDisplay();
             document.getElementById('phonePopup').classList.add('show');
         }
