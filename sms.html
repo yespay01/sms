@@ -242,34 +242,37 @@
             transition: all 0.15s ease;
             min-height: 100px;
             min-width: 100px;
+            /* 터치 최적화 강화 */
             touch-action: manipulation;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            /* 클릭 영역 보장 */
             position: relative;
-            z-index: 10;
+            z-index: 100;
             box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
             will-change: transform;
+            /* 강제 터치 영역 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        .number-btn::before {
-            content: '';
-            position: absolute;
-            top: -20px;
-            left: -20px;
-            right: -20px;
-            bottom: -20px;
-            z-index: -1;
-        }
-
+        /* 터치 영역 확장 제거하고 직접 처리 */
         .number-btn:hover {
             background: #2980b9;
             transform: translateY(-3px) scale(1.02);
             box-shadow: 0 12px 35px rgba(52, 152, 219, 0.5);
         }
 
-        .number-btn:active {
+        .number-btn:active,
+        .number-btn.touching {
             transform: translateY(0) scale(0.98);
             transition: all 0.1s ease;
+            background: #1f618d;
         }
 
         .delete-btn {
@@ -744,18 +747,18 @@
             </div>
 
             <div class="number-pad">
-                <button class="number-btn" onclick="addNumber('1')">1</button>
-                <button class="number-btn" onclick="addNumber('2')">2</button>
-                <button class="number-btn" onclick="addNumber('3')">3</button>
-                <button class="number-btn" onclick="addNumber('4')">4</button>
-                <button class="number-btn" onclick="addNumber('5')">5</button>
-                <button class="number-btn" onclick="addNumber('6')">6</button>
-                <button class="number-btn" onclick="addNumber('7')">7</button>
-                <button class="number-btn" onclick="addNumber('8')">8</button>
-                <button class="number-btn" onclick="addNumber('9')">9</button>
-                <button class="number-btn delete-btn" onclick="deleteNumber()">←</button>
-                <button class="number-btn" onclick="addNumber('0')">0</button>
-                <button class="number-btn clear-btn" onclick="clearPhone()">전체삭제</button>
+                <button class="number-btn" onclick="addNumber('1')" data-number="1">1</button>
+                <button class="number-btn" onclick="addNumber('2')" data-number="2">2</button>
+                <button class="number-btn" onclick="addNumber('3')" data-number="3">3</button>
+                <button class="number-btn" onclick="addNumber('4')" data-number="4">4</button>
+                <button class="number-btn" onclick="addNumber('5')" data-number="5">5</button>
+                <button class="number-btn" onclick="addNumber('6')" data-number="6">6</button>
+                <button class="number-btn" onclick="addNumber('7')" data-number="7">7</button>
+                <button class="number-btn" onclick="addNumber('8')" data-number="8">8</button>
+                <button class="number-btn" onclick="addNumber('9')" data-number="9">9</button>
+                <button class="number-btn delete-btn" onclick="deleteNumber()" data-action="delete">←</button>
+                <button class="number-btn" onclick="addNumber('0')" data-number="0">0</button>
+                <button class="number-btn clear-btn" onclick="clearPhone()" data-action="clear">전체삭제</button>
             </div>
             
             <button class="popup-close-btn" onclick="closePhonePopup()">취소</button>
@@ -1325,27 +1328,55 @@
 
         // ================= 터치 이벤트 처리 =================
 
-        // 터치 이벤트 설정
+        // 터치 이벤트 설정 (개선)
         function setupTouchEvents() {
-            document.querySelectorAll('button').forEach(button => {
-                button.addEventListener('touchstart', function(e) {
-                    e.preventDefault();
-                    this.classList.add('touching');
-                }, { passive: false });
+            // 모든 버튼에 개별적으로 이벤트 설정
+            const buttons = document.querySelectorAll('button');
+            
+            buttons.forEach((button, index) => {
+                // 기존 이벤트 제거
+                button.removeEventListener('touchstart', handleTouchStart);
+                button.removeEventListener('touchend', handleTouchEnd);
+                button.removeEventListener('touchcancel', handleTouchCancel);
                 
-                button.addEventListener('touchend', function(e) {
-                    e.preventDefault();
-                    this.classList.remove('touching');
-                    
-                    if (this.onclick) {
-                        this.onclick();
-                    }
-                }, { passive: false });
+                // 새 이벤트 추가
+                button.addEventListener('touchstart', handleTouchStart, { passive: false });
+                button.addEventListener('touchend', handleTouchEnd, { passive: false });
+                button.addEventListener('touchcancel', handleTouchCancel, { passive: false });
                 
-                button.addEventListener('touchcancel', function(e) {
-                    this.classList.remove('touching');
-                });
+                // 클릭 이벤트도 강화
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('버튼 클릭:', this.textContent);
+                }, { passive: false });
             });
+            
+            console.log('✅ 터치 이벤트 설정 완료:', buttons.length, '개 버튼');
+        }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.add('touching');
+            console.log('터치 시작:', this.textContent);
+        }
+
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.remove('touching');
+            
+            // onclick 함수 강제 실행
+            if (this.onclick) {
+                console.log('터치 종료 - onclick 실행:', this.textContent);
+                this.onclick();
+            }
+        }
+
+        function handleTouchCancel(e) {
+            this.classList.remove('touching');
+            console.log('터치 취소:', this.textContent);
         }
 
         // ================= 초기화 =================
@@ -1368,12 +1399,31 @@
         function initialize() {
             console.log('🚀 키오스크 초기화 (알림톡 + 터치 최적화)');
             
-            // 터치 이벤트 설정
-            setupTouchEvents();
-            
             // 시간 표시
             updateTime();
             setInterval(updateTime, 1000);
+            
+            // 터치 이벤트 설정 (지연 실행)
+            setTimeout(() => {
+                setupTouchEvents();
+                
+                // 4, 5, 6번 버튼 특별 처리
+                const problematicButtons = document.querySelectorAll('[data-number="4"], [data-number="5"], [data-number="6"]');
+                problematicButtons.forEach(button => {
+                    console.log('🔧 문제 버튼 특별 처리:', button.textContent);
+                    
+                    // 추가 이벤트 리스너
+                    button.addEventListener('pointerdown', function(e) {
+                        console.log('포인터 다운:', this.textContent);
+                        if (this.onclick) this.onclick();
+                    });
+                    
+                    button.addEventListener('mousedown', function(e) {
+                        console.log('마우스 다운:', this.textContent);
+                        if (this.onclick) this.onclick();
+                    });
+                });
+            }, 500);
             
             // Firebase 리스너 설정
             setTimeout(() => {
