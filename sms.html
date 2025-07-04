@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>키오스크 - 알림톡 대기표 (발송 설정 포함)</title>
+    <title>키오스크 - 솔라피 알림톡 대기표</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -470,26 +470,6 @@
             transform: none;
         }
 
-        /* 설정 상태 표시 */
-        .config-status {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-left: 10px;
-        }
-        
-        .config-status.enabled {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .config-status.disabled {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
         /* 템플릿 미리보기 스타일 */
         .template-preview {
             display: grid;
@@ -521,7 +501,7 @@
             color: #2d3436;
             border: 1px solid #e9ecef;
         }
-        
+
         /* 테스트 결과 스타일 */
         .test-result {
             margin-top: 15px;
@@ -535,6 +515,12 @@
             background: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
+        }
+        
+        .test-result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f1aeb5;
         }
         
         .test-result.info {
@@ -674,7 +660,7 @@
     <div id="adminModal" class="admin-modal">
         <div class="admin-content">
             <div class="admin-header">
-                <h2>⚙️ 알림톡 발송 설정</h2>
+                <h2>⚙️ 솔라피 알림톡 설정</h2>
                 <button class="close-admin" onclick="hideAdminModal()">×</button>
             </div>
             
@@ -840,6 +826,7 @@
                 
                 <div class="test-result" id="diagnosticResult"></div>
             </div>
+            
             <!-- 테스트 및 저장 -->
             <div class="setting-section">
                 <div class="setting-title">🔧 테스트 및 저장</div>
@@ -865,6 +852,7 @@
     </div>
 
     <script>
+        // 전역 변수들
         let phoneNumber = '';
         let currentNumbers = { CH: 0, EN: 0, HSK: 0, TO: 0 };
         let courses = [
@@ -874,151 +862,78 @@
             { code: 'TO', name: 'TOEIC 집중반' }
         ];
 
-        // 솔라피 알림톡 설정 (기본값)
+        // 솔라피 알림톡 설정
         let smsSettings = {
-            // 솔라피 API 설정
             solapiApiKey: 'NCSRVLD2FFGTEK7B',
             solapiSecret: 'IYLPMGODFSDJA3Y88QZDHBQYG6XYCNV8',
             senderNumber: '',
             kakaoChannelId: '',
-            
-            // 알림톡 템플릿 코드들
             templates: {
-                issue: '',      // 발급완료 템플릿
-                ready: '',      // 곧 호출예정 템플릿  
-                call: ''        // 호출알림 템플릿
+                issue: '',
+                ready: '',
+                call: ''
             },
-            
-            // 메시지 템플릿들
             messageTemplates: {
                 issue: '[순번대기표 발급완료]\n대기번호: #ticketNumber\n과정: #courseName\n발급시간: #issueTime\n현재 대기: #waitingCount명\n예상 대기시간: 약 #estimatedTime분\n호출 시 다시 알려드립니다.',
                 ready: '[곧 호출예정]\n대기번호: #ticketNumber\n과정: #courseName\n앞으로 #waitingCount명 남았습니다.\n준비해주세요!',
                 call: '[호출알림]\n대기번호: #ticketNumber\n#counterNumber번 창구로 와주세요!\n과정: #courseName\n호출시간: #callTime'
             },
-            
-            // 발송 옵션
             autoSend: false,
             testMode: false,
             saveLog: true,
-            
-            // 알림 타입별 활성화
             notifications: {
-                issue: true,    // 발급완료 알림
-                ready: false,   // 곧 호출예정 알림 (선택사항)
-                call: true      // 호출알림
+                issue: true,
+                ready: false,
+                call: true
             }
         };
 
-        // 초기화
-        function initialize() {
-            console.log('🎫 알림톡 키오스크 초기화 시작');
-            
-            // Firebase에서 설정 불러오기
-            loadSettings();
-            
-            // 키오스크 글로벌 설정 불러오기
-            loadGlobalSettings();
-            
-            // 과정 버튼 생성
-            renderCourseButtons();
-            
-            // 상태 표시 업데이트
-            updateStatusDisplay();
-            
-            console.log('✅ 알림톡 키오스크 초기화 완료');
-        }
-
-        // Firebase에서 설정 불러오기
-        function loadSettings() {
-            if (!window.firebaseDB) return;
-            
-            const settingsRef = window.firebaseRef(window.firebaseDB, 'kioskSettings');
-            window.firebaseOnValue(settingsRef, (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    smsSettings = { ...smsSettings, ...data };
-                    console.log('📥 알림톡 설정 불러오기 완료:', smsSettings);
-                    updateStatusDisplay();
-                }
-            });
-        }
-
-        // 키오스크 글로벌 설정 불러오기
-        function loadGlobalSettings() {
-            if (!window.firebaseDB) return;
-            
-            const globalRef = window.firebaseRef(window.firebaseDB, 'kioskGlobalSettings');
-            window.firebaseOnValue(globalRef, (snapshot) => {
-                const data = snapshot.val();
-                if (data && data.courses) {
-                    courses = data.courses;
-                    console.log('📚 과정 설정 불러오기 완료:', courses);
-                    renderCourseButtons();
-                }
-            });
-        }
-
-        // 과정 버튼 동적 생성
-        function renderCourseButtons() {
-            const courseGrid = document.getElementById('courseGrid');
-            courseGrid.innerHTML = '';
-            
-            courses.forEach(course => {
-                const button = document.createElement('button');
-                button.className = 'course-btn';
-                button.textContent = course.name;
-                button.onclick = () => selectCourse(course);
-                courseGrid.appendChild(button);
-            });
-        }
-
-        // 상태 표시 업데이트
-        function updateStatusDisplay() {
-            const smsStatus = document.getElementById('smsStatus');
-            const firebaseStatus = document.getElementById('firebaseStatus');
-            const autoStatus = document.getElementById('autoStatus');
-            
-            // 솔라피 설정 상태 확인
-            if (smsSettings.solapiApiKey && smsSettings.solapiSecret && smsSettings.senderNumber) {
-                smsStatus.classList.add('active');
-            } else {
-                smsStatus.classList.remove('active');
-            }
-            
-            // Firebase 연결 상태
-            if (window.firebaseDB) {
-                firebaseStatus.classList.add('active');
-            } else {
-                firebaseStatus.classList.remove('active');
-            }
-            
-            // 자동 발송 상태
-            if (smsSettings.autoSend) {
-                autoStatus.classList.add('active');
-            } else {
-                autoStatus.classList.remove('active');
-            }
-        }
-
-        // 팝업 열기
+        // 기본 함수들
         function showPhonePopup() {
             phoneNumber = '';
             updatePhoneDisplay();
             document.getElementById('phonePopup').classList.add('show');
         }
 
-        // 팝업 닫기
         function closePhonePopup() {
             document.getElementById('phonePopup').classList.remove('show');
+        }
+
+        function showCoursePopup() {
+            const formatted = '010-' + phoneNumber.substring(0, 4) + '-' + phoneNumber.substring(4);
+            document.getElementById('selectedPhone').textContent = formatted;
+            document.getElementById('coursePopup').classList.add('show');
         }
 
         function closeCoursePopup() {
             document.getElementById('coursePopup').classList.remove('show');
         }
 
-        // 번호 추가
+        function showAdminModal() {
+            // 현재 설정값으로 폼 채우기
+            document.getElementById('solapiApiKey').value = smsSettings.solapiApiKey || '';
+            document.getElementById('solapiSecret').value = smsSettings.solapiSecret || '';
+            document.getElementById('senderNumber').value = smsSettings.senderNumber || '';
+            document.getElementById('kakaoChannelId').value = smsSettings.kakaoChannelId || '';
+            
+            document.getElementById('templateIssue').value = smsSettings.templates.issue || '';
+            document.getElementById('templateReady').value = smsSettings.templates.ready || '';
+            document.getElementById('templateCall').value = smsSettings.templates.call || '';
+            
+            document.getElementById('notificationReady').checked = smsSettings.notifications.ready || false;
+            document.getElementById('autoSend').checked = smsSettings.autoSend || false;
+            document.getElementById('testMode').checked = smsSettings.testMode || false;
+            document.getElementById('saveLog').checked = smsSettings.saveLog !== false;
+            
+            document.getElementById('adminModal').style.display = 'block';
+        }
+
+        function hideAdminModal() {
+            document.getElementById('adminModal').style.display = 'none';
+        }
+
+        // 번호 입력 관련 함수들
         function addNum(num) {
-            console.log('번호 추가:', num);
             if (phoneNumber.length < 11) {
                 phoneNumber += num;
                 updatePhoneDisplay();
@@ -1032,23 +947,18 @@
             }
         }
 
-        // 번호 삭제
         function deleteNum() {
-            console.log('번호 삭제');
             if (phoneNumber.length > 0) {
                 phoneNumber = phoneNumber.slice(0, -1);
                 updatePhoneDisplay();
             }
         }
 
-        // 전체 삭제
         function clearNum() {
-            console.log('전체 삭제');
             phoneNumber = '';
             updatePhoneDisplay();
         }
 
-        // 화면 업데이트
         function updatePhoneDisplay() {
             const display = document.getElementById('phoneDisplay');
             
@@ -1063,14 +973,7 @@
             }
         }
 
-        // 과정 선택 팝업
-        function showCoursePopup() {
-            const formatted = '010-' + phoneNumber.substring(0, 4) + '-' + phoneNumber.substring(4);
-            document.getElementById('selectedPhone').textContent = formatted;
-            document.getElementById('coursePopup').classList.add('show');
-        }
-
-        // 과정 선택
+        // 과정 선택 및 대기표 발급
         function selectCourse(course) {
             console.log('과정 선택:', course.name);
             
@@ -1103,7 +1006,21 @@
                 closeCoursePopup();
             });
         }
-        
+
+        // 과정 버튼 동적 생성
+        function renderCourseButtons() {
+            const courseGrid = document.getElementById('courseGrid');
+            courseGrid.innerHTML = '';
+            
+            courses.forEach(course => {
+                const button = document.createElement('button');
+                button.className = 'course-btn';
+                button.textContent = course.name;
+                button.onclick = () => selectCourse(course);
+                courseGrid.appendChild(button);
+            });
+        }
+
         // 현재 대기 인원 수 가져오기
         async function getCurrentWaitingCount() {
             if (!window.firebaseDB) return 0;
@@ -1121,20 +1038,12 @@
                 console.error('대기 인원 수 조회 실패:', error);
                 return 0;
             }
-        }Settings.autoSend) {
-                sendSMS(ticketData);
-            }
-            
-            // 성공 메시지
-            showSuccess(ticketNumber, course.name);
-            closeCoursePopup();
         }
 
         // 대기열에 추가
         function addToWaitingQueue(ticketData) {
             if (!window.firebaseDB) return;
             
-            // 카운터 시스템 데이터 가져오기
             const systemRef = window.firebaseRef(window.firebaseDB, 'counterSystem');
             window.firebaseGet(systemRef).then((snapshot) => {
                 let systemData = snapshot.val();
@@ -1168,7 +1077,7 @@
             });
         }
 
-        // 솔라피 알림톡 발송 (수정된 버전)
+        // 솔라피 알림톡 발송
         async function sendSolapi(ticketData, notificationType = 'issue') {
             if (!smsSettings.solapiApiKey || !smsSettings.solapiSecret || !smsSettings.senderNumber) {
                 console.log('⚠️ 솔라피 설정이 완료되지 않았습니다.');
@@ -1176,7 +1085,6 @@
             }
             
             try {
-                // 메시지 템플릿 선택
                 const templateCode = smsSettings.templates[notificationType];
                 const messageTemplate = smsSettings.messageTemplates[notificationType];
                 
@@ -1184,10 +1092,8 @@
                     throw new Error(`템플릿 설정이 없습니다: ${notificationType}`);
                 }
                 
-                // 예상 대기시간 계산 (평균 5분으로 가정)
                 const estimatedTime = Math.max(5, (ticketData.waitingCount || 0) * 5);
                 
-                // 메시지 내용 생성
                 const message = messageTemplate
                     .replace(/#ticketNumber/g, ticketData.number)
                     .replace(/#courseName/g, ticketData.course)
@@ -1197,7 +1103,6 @@
                     .replace(/#counterNumber/g, ticketData.counterNumber || '')
                     .replace(/#callTime/g, ticketData.callTime || '');
                 
-                // 테스트 모드 처리
                 if (smsSettings.testMode) {
                     console.log('🧪 테스트 모드 - 실제 발송 없이 로그만 기록');
                     console.log('📋 테스트 데이터:', {
@@ -1215,11 +1120,6 @@
                     };
                 }
                 
-                // 솔라피 인증 헤더 생성
-                const timestamp = new Date().toISOString();
-                const salt = Math.random().toString(36).substring(2, 15);
-                
-                // 솔라피 API 요청 데이터 (간단한 SMS 방식으로 먼저 테스트)
                 const solapiData = {
                     message: {
                         to: ticketData.phoneNumber,
@@ -1230,7 +1130,6 @@
                 
                 console.log('📱 솔라피 발송 시도:', solapiData);
                 
-                // 솔라피 API 호출 (Basic Auth 방식으로 변경)
                 const credentials = btoa(`${smsSettings.solapiApiKey}:${smsSettings.solapiSecret}`);
                 
                 const response = await fetch('https://api.solapi.com/messages/v4/send', {
@@ -1264,10 +1163,190 @@
                 return { success: false, error: error.message };
             }
         }
-        
+
+        // 솔라피 연결 테스트
+        async function testSolapiConnection() {
+            if (!smsSettings.solapiApiKey || !smsSettings.solapiSecret) {
+                return { success: false, error: 'API credentials not set' };
+            }
+            
+            try {
+                const credentials = btoa(`${smsSettings.solapiApiKey}:${smsSettings.solapiSecret}`);
+                
+                const response = await fetch('https://api.solapi.com/accounts/v4/profile', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Basic ${credentials}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    return { success: true, profile: result };
+                } else {
+                    return { success: false, error: result.errorMessage || result.message };
+                }
+                
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        // 통합 알림톡 발송 함수
+        async function sendSMS(ticketData, notificationType = 'issue') {
+            if (!smsSettings.notifications[notificationType]) {
+                console.log(`📵 ${notificationType} 알림이 비활성화되어 있습니다.`);
+                return;
+            }
+            
+            const result = await sendSolapi(ticketData, notificationType);
+            
+            if (smsSettings.saveLog) {
+                saveLog({
+                    ...ticketData,
+                    notificationType,
+                    smsResult: result,
+                    sendTime: new Date().toISOString(),
+                    status: result.success ? 'success' : 'failed'
+                });
+            }
+            
+            return result;
+        }
+
+        // 로그 저장
+        function saveLog(logData) {
+            if (!window.firebaseDB) return;
+            
+            const logRef = window.firebaseRef(window.firebaseDB, `smsLogs/${new Date().toISOString().split('T')[0]}`);
+            const timestamp = new Date().toISOString();
+            
+            window.firebaseGet(logRef).then((snapshot) => {
+                let logs = snapshot.val() || {};
+                logs[timestamp] = logData;
+                return window.firebaseSet(logRef, logs);
+            }).then(() => {
+                console.log('📝 로그 저장 완료');
+            }).catch(error => {
+                console.error('❌ 로그 저장 실패:', error);
+            });
+        }
+
+        // 설정 저장
+        function saveSettings() {
+            const newSettings = {
+                solapiApiKey: document.getElementById('solapiApiKey').value.trim(),
+                solapiSecret: document.getElementById('solapiSecret').value.trim(),
+                senderNumber: document.getElementById('senderNumber').value.trim(),
+                kakaoChannelId: document.getElementById('kakaoChannelId').value.trim(),
+                
+                templates: {
+                    issue: document.getElementById('templateIssue').value.trim(),
+                    ready: document.getElementById('templateReady').value.trim(),
+                    call: document.getElementById('templateCall').value.trim()
+                },
+                
+                messageTemplates: smsSettings.messageTemplates,
+                
+                notifications: {
+                    issue: true,
+                    ready: document.getElementById('notificationReady').checked,
+                    call: true
+                },
+                
+                autoSend: document.getElementById('autoSend').checked,
+                testMode: document.getElementById('testMode').checked,
+                saveLog: document.getElementById('saveLog').checked
+            };
+            
+            if (newSettings.autoSend && (!newSettings.solapiApiKey || !newSettings.solapiSecret || !newSettings.senderNumber)) {
+                alert('자동 발송을 활성화하려면 솔라피 API 키, 시크릿 키, 발신번호를 모두 입력해야 합니다.');
+                return;
+            }
+            
+            smsSettings = { ...smsSettings, ...newSettings };
+            
+            if (window.firebaseDB) {
+                const settingsRef = window.firebaseRef(window.firebaseDB, 'kioskSettings');
+                window.firebaseSet(settingsRef, smsSettings).then(() => {
+                    console.log('✅ 솔라피 설정 저장 완료');
+                    updateStatusDisplay();
+                    hideAdminModal();
+                    showMessage('솔라피 설정이 저장되었습니다!', 'success');
+                }).catch(error => {
+                    console.error('❌ 설정 저장 실패:', error);
+                    showMessage('설정 저장에 실패했습니다.', 'error');
+                });
+            }
+        }
+
+        // 테스트 메시지 발송
+        async function sendTestMessage() {
+            const testNumber = document.getElementById('testNumber').value.trim();
+            
+            if (!testNumber) {
+                showTestResult('테스트 번호를 입력해주세요.', 'error');
+                return;
+            }
+            
+            if (!smsSettings.solapiApiKey || !smsSettings.solapiSecret) {
+                showTestResult('솔라피 API 키와 시크릿 키를 설정해주세요.', 'error');
+                return;
+            }
+            
+            const testBtn = document.querySelector('.test-btn');
+            testBtn.disabled = true;
+            testBtn.textContent = '테스트 중...';
+            
+            try {
+                showTestResult('1단계: 솔라피 연결 테스트 중...', 'info');
+                
+                const connectionTest = await testSolapiConnection();
+                
+                if (!connectionTest.success) {
+                    showTestResult(`연결 실패: ${connectionTest.error}`, 'error');
+                    return;
+                }
+                
+                showTestResult('1단계: 솔라피 연결 성공! 2단계: 메시지 발송 테스트 중...', 'success');
+                
+                const testData = {
+                    number: 'TEST001',
+                    course: '테스트 과정',
+                    phoneNumber: testNumber,
+                    time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+                    timestamp: new Date().toISOString(),
+                    waitingCount: 3
+                };
+                
+                if (!smsSettings.senderNumber) {
+                    showTestResult('발신번호를 설정해주세요. (솔라피에서 등록한 번호)', 'error');
+                    return;
+                }
+                
+                const result = await sendSolapi(testData, 'issue');
+                
+                if (result.success) {
+                    if (result.testMode) {
+                        showTestResult('테스트 모드 - 메시지 생성 성공!\n실제 발송하려면 테스트 모드를 끄세요.', 'success');
+                    } else {
+                        showTestResult('테스트 메시지 발송 성공!', 'success');
+                    }
+                } else {
+                    showTestResult(`테스트 발송 실패: ${result.error}`, 'error');
+                }
+                
+            } catch (error) {
+                showTestResult(`테스트 발송 오류: ${error.message}`, 'error');
+            } finally {
+                testBtn.disabled = false;
+                testBtn.textContent = '테스트 발송';
+            }
+        }
+
         // 솔라피 연결 진단 함수들
         async function checkSolapiConnection() {
-            const diagnosticResult = document.getElementById('diagnosticResult');
             showDiagnosticResult('솔라피 연결 상태 확인 중...', 'info');
             
             const result = await testSolapiConnection();
@@ -1278,7 +1357,7 @@
                 showDiagnosticResult(`❌ 솔라피 연결 실패: ${result.error}`, 'error');
             }
         }
-        
+
         async function checkSolapiProfile() {
             showDiagnosticResult('솔라피 계정 정보 조회 중...', 'info');
             
@@ -1294,7 +1373,7 @@
                 showDiagnosticResult(`❌ 계정 정보 조회 실패: ${result.error}`, 'error');
             }
         }
-        
+
         async function checkSenderNumbers() {
             showDiagnosticResult('발신번호 목록 조회 중...', 'info');
             
@@ -1333,7 +1412,7 @@
                 showDiagnosticResult(`❌ 발신번호 조회 오류: ${error.message}`, 'error');
             }
         }
-        
+
         async function checkTemplates() {
             showDiagnosticResult('알림톡 템플릿 조회 중...', 'info');
             
@@ -1372,232 +1451,14 @@
                 showDiagnosticResult(`❌ 템플릿 조회 오류: ${error.message}`, 'error');
             }
         }
-        
-        // 진단 결과 표시
-        function showDiagnosticResult(message, type) {
-            const diagnosticResult = document.getElementById('diagnosticResult');
-            diagnosticResult.innerHTML = message.replace(/\n/g, '<br>');
-            diagnosticResult.className = `test-result ${type}`;
-            diagnosticResult.style.display = 'block';
-            
-            // info가 아닌 경우만 자동 숨김
-            if (type !== 'info') {
-                setTimeout(() => {
-                    diagnosticResult.style.display = 'none';
-                }, 10000);
-            }
-        } else {
-                    console.error('❌ 솔라피 연결 실패:', result);
-                    return { success: false, error: result.errorMessage || result.message };
-                }
-                
-            } catch (error) {
-                console.error('❌ 솔라피 연결 오류:', error);
-                return { success: false, error: error.message };
-            }
-        }
-        
-        // 통합 알림톡 발송 함수
-        async function sendSMS(ticketData, notificationType = 'issue') {
-            if (!smsSettings.notifications[notificationType]) {
-                console.log(`📵 ${notificationType} 알림이 비활성화되어 있습니다.`);
-                return;
-            }
-            
-            const result = await sendSolapi(ticketData, notificationType);
-            
-            // 로그 저장
-            if (smsSettings.saveLog) {
-                saveLog({
-                    ...ticketData,
-                    notificationType,
-                    smsResult: result,
-                    sendTime: new Date().toISOString(),
-                    status: result.success ? 'success' : 'failed'
-                });
-            }
-            
-            return result;
-        }
 
-        // 로그 저장
-        function saveLog(logData) {
-            if (!window.firebaseDB) return;
-            
-            const logRef = window.firebaseRef(window.firebaseDB, `smsLogs/${new Date().toISOString().split('T')[0]}`);
-            const timestamp = new Date().toISOString();
-            
-            window.firebaseGet(logRef).then((snapshot) => {
-                let logs = snapshot.val() || {};
-                logs[timestamp] = logData;
-                return window.firebaseSet(logRef, logs);
-            }).then(() => {
-                console.log('📝 로그 저장 완료');
-            }).catch(error => {
-                console.error('❌ 로그 저장 실패:', error);
-            });
-        }
-
-        // 관리자 모달 열기
-        function showAdminModal() {
-            // 현재 설정값으로 폼 채우기
-            document.getElementById('solapiApiKey').value = smsSettings.solapiApiKey || '';
-            document.getElementById('solapiSecret').value = smsSettings.solapiSecret || '';
-            document.getElementById('senderNumber').value = smsSettings.senderNumber || '';
-            document.getElementById('kakaoChannelId').value = smsSettings.kakaoChannelId || '';
-            
-            document.getElementById('templateIssue').value = smsSettings.templates.issue || '';
-            document.getElementById('templateReady').value = smsSettings.templates.ready || '';
-            document.getElementById('templateCall').value = smsSettings.templates.call || '';
-            
-            document.getElementById('notificationReady').checked = smsSettings.notifications.ready || false;
-            document.getElementById('autoSend').checked = smsSettings.autoSend || false;
-            document.getElementById('testMode').checked = smsSettings.testMode || false;
-            document.getElementById('saveLog').checked = smsSettings.saveLog !== false;
-            
-            document.getElementById('adminModal').style.display = 'block';
-        }
-
-        // 관리자 모달 닫기
-        function hideAdminModal() {
-            document.getElementById('adminModal').style.display = 'none';
-        }
-
-        // 설정 저장
-        function saveSettings() {
-            // 폼에서 값 가져오기
-            const newSettings = {
-                solapiApiKey: document.getElementById('solapiApiKey').value.trim(),
-                solapiSecret: document.getElementById('solapiSecret').value.trim(),
-                senderNumber: document.getElementById('senderNumber').value.trim(),
-                kakaoChannelId: document.getElementById('kakaoChannelId').value.trim(),
-                
-                templates: {
-                    issue: document.getElementById('templateIssue').value.trim(),
-                    ready: document.getElementById('templateReady').value.trim(),
-                    call: document.getElementById('templateCall').value.trim()
-                },
-                
-                messageTemplates: smsSettings.messageTemplates, // 기본 템플릿 유지
-                
-                notifications: {
-                    issue: true, // 항상 활성화
-                    ready: document.getElementById('notificationReady').checked,
-                    call: true // 항상 활성화
-                },
-                
-                autoSend: document.getElementById('autoSend').checked,
-                testMode: document.getElementById('testMode').checked,
-                saveLog: document.getElementById('saveLog').checked
-            };
-            
-            // 유효성 검사
-            if (newSettings.autoSend && (!newSettings.solapiApiKey || !newSettings.solapiSecret || !newSettings.senderNumber)) {
-                alert('자동 발송을 활성화하려면 솔라피 API 키, 시크릿 키, 발신번호를 모두 입력해야 합니다.');
-                return;
-            }
-            
-            // 설정 업데이트
-            smsSettings = { ...smsSettings, ...newSettings };
-            
-            // Firebase에 저장
-            if (window.firebaseDB) {
-                const settingsRef = window.firebaseRef(window.firebaseDB, 'kioskSettings');
-                window.firebaseSet(settingsRef, smsSettings).then(() => {
-                    console.log('✅ 솔라피 설정 저장 완료');
-                    updateStatusDisplay();
-                    hideAdminModal();
-                    showMessage('솔라피 설정이 저장되었습니다!', 'success');
-                }).catch(error => {
-                    console.error('❌ 설정 저장 실패:', error);
-                    showMessage('설정 저장에 실패했습니다.', 'error');
-                });
-            }
-        }
-
-        // 테스트 메시지 발송 (개선된 버전)
-        async function sendTestMessage() {
-            const testNumber = document.getElementById('testNumber').value.trim();
-            const testResult = document.getElementById('testResult');
-            
-            if (!testNumber) {
-                showTestResult('테스트 번호를 입력해주세요.', 'error');
-                return;
-            }
-            
-            if (!smsSettings.solapiApiKey || !smsSettings.solapiSecret) {
-                showTestResult('솔라피 API 키와 시크릿 키를 설정해주세요.', 'error');
-                return;
-            }
-            
-            // 테스트 버튼 비활성화
-            const testBtn = document.querySelector('.test-btn');
-            testBtn.disabled = true;
-            testBtn.textContent = '테스트 중...';
-            
-            try {
-                // 1단계: 솔라피 연결 테스트
-                showTestResult('1단계: 솔라피 연결 테스트 중...', 'info');
-                
-                const connectionTest = await testSolapiConnection();
-                
-                if (!connectionTest.success) {
-                    showTestResult(`연결 실패: ${connectionTest.error}`, 'error');
-                    return;
-                }
-                
-                showTestResult('1단계: 솔라피 연결 성공! 2단계: 메시지 발송 테스트 중...', 'success');
-                
-                // 2단계: 실제 메시지 발송 테스트
-                const testData = {
-                    number: 'TEST001',
-                    course: '테스트 과정',
-                    phoneNumber: testNumber,
-                    time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
-                    timestamp: new Date().toISOString(),
-                    waitingCount: 3
-                };
-                
-                // 발신번호가 설정되어 있는지 확인
-                if (!smsSettings.senderNumber) {
-                    showTestResult('발신번호를 설정해주세요. (솔라피에서 등록한 번호)', 'error');
-                    return;
-                }
-                
-                const result = await sendSolapi(testData, 'issue');
-                
-                if (result.success) {
-                    if (result.testMode) {
-                        showTestResult('테스트 모드 - 메시지 생성 성공!\n실제 발송하려면 테스트 모드를 끄세요.', 'success');
-                    } else {
-                        showTestResult('테스트 메시지 발송 성공!', 'success');
-                    }
-                    console.log('✅ 솔라피 테스트 발송 성공:', result);
-                } else {
-                    showTestResult(`테스트 발송 실패: ${result.error}`, 'error');
-                    if (result.responseData) {
-                        console.error('❌ 솔라피 응답 상세:', result.responseData);
-                    }
-                }
-                
-            } catch (error) {
-                showTestResult(`테스트 발송 오류: ${error.message}`, 'error');
-                console.error('❌ 솔라피 테스트 발송 오류:', error);
-            } finally {
-                // 테스트 버튼 다시 활성화
-                testBtn.disabled = false;
-                testBtn.textContent = '테스트 발송';
-            }
-        }
-        
-        // 테스트 결과 표시 (개선된 버전)
+        // 결과 표시 함수들
         function showTestResult(message, type) {
             const testResult = document.getElementById('testResult');
             testResult.innerHTML = message.replace(/\n/g, '<br>');
             testResult.className = `test-result ${type}`;
             testResult.style.display = 'block';
             
-            // success나 error가 아닌 경우 자동 숨김 안함
             if (type === 'success' || type === 'error') {
                 setTimeout(() => {
                     testResult.style.display = 'none';
@@ -1605,7 +1466,19 @@
             }
         }
 
-        // 성공 메시지
+        function showDiagnosticResult(message, type) {
+            const diagnosticResult = document.getElementById('diagnosticResult');
+            diagnosticResult.innerHTML = message.replace(/\n/g, '<br>');
+            diagnosticResult.className = `test-result ${type}`;
+            diagnosticResult.style.display = 'block';
+            
+            if (type !== 'info') {
+                setTimeout(() => {
+                    diagnosticResult.style.display = 'none';
+                }, 10000);
+            }
+        }
+
         function showSuccess(ticketNumber, courseName) {
             const successEl = document.getElementById('successMsg');
             const textEl = document.getElementById('successText');
@@ -1628,7 +1501,6 @@
             }, 4000);
         }
 
-        // 일반 메시지 표시
         function showMessage(message, type = 'info') {
             const messageEl = document.createElement('div');
             messageEl.style.cssText = `
@@ -1655,11 +1527,93 @@
             }, 3000);
         }
 
+        // 상태 표시 업데이트
+        function updateStatusDisplay() {
+            const smsStatus = document.getElementById('smsStatus');
+            const firebaseStatus = document.getElementById('firebaseStatus');
+            const autoStatus = document.getElementById('autoStatus');
+            
+            if (smsSettings.solapiApiKey && smsSettings.solapiSecret && smsSettings.senderNumber) {
+                smsStatus.classList.add('active');
+            } else {
+                smsStatus.classList.remove('active');
+            }
+            
+            if (window.firebaseDB) {
+                firebaseStatus.classList.add('active');
+            } else {
+                firebaseStatus.classList.remove('active');
+            }
+            
+            if (smsSettings.autoSend) {
+                autoStatus.classList.add('active');
+            } else {
+                autoStatus.classList.remove('active');
+            }
+        }
+
+        // Firebase 설정 관련 함수들
+        function loadSettings() {
+            if (!window.firebaseDB) return;
+            
+            const settingsRef = window.firebaseRef(window.firebaseDB, 'kioskSettings');
+            window.firebaseOnValue(settingsRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    smsSettings = { ...smsSettings, ...data };
+                    console.log('📥 알림톡 설정 불러오기 완료:', smsSettings);
+                    updateStatusDisplay();
+                }
+            });
+        }
+
+        function loadGlobalSettings() {
+            if (!window.firebaseDB) return;
+            
+            const globalRef = window.firebaseRef(window.firebaseDB, 'kioskGlobalSettings');
+            window.firebaseOnValue(globalRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data && data.courses) {
+                    courses = data.courses;
+                    console.log('📚 과정 설정 불러오기 완료:', courses);
+                    renderCourseButtons();
+                }
+            });
+        }
+
+        // 초기화 함수
+        function initialize() {
+            console.log('🎫 솔라피 알림톡 키오스크 초기화 시작');
+            
+            // Firebase에서 설정 불러오기
+            loadSettings();
+            
+            // 키오스크 글로벌 설정 불러오기
+            loadGlobalSettings();
+            
+            // 과정 버튼 생성
+            renderCourseButtons();
+            
+            // 상태 표시 업데이트
+            updateStatusDisplay();
+            
+            console.log('✅ 솔라피 알림톡 키오스크 초기화 완료');
+        }
+
         // 모달 외부 클릭 시 닫기
         window.onclick = function(event) {
             const adminModal = document.getElementById('adminModal');
+            const phonePopup = document.getElementById('phonePopup');
+            const coursePopup = document.getElementById('coursePopup');
+            
             if (event.target === adminModal) {
                 hideAdminModal();
+            }
+            if (event.target === phonePopup) {
+                closePhonePopup();
+            }
+            if (event.target === coursePopup) {
+                closeCoursePopup();
             }
         }
 
@@ -1670,7 +1624,7 @@
             initialize();
         }
 
-        console.log('🎫 알림톡 키오스크 시스템 로드 완료');
+        console.log('🎫 솔라피 알림톡 키오스크 시스템 로드 완료');
     </script>
 </body>
 </html>
