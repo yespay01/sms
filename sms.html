@@ -11,867 +11,220 @@
             font-family: 'Malgun Gothic', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            overflow-x: hidden;
+            padding: 20px;
         }
         
         .container {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            padding: 30px;
-            max-width: 1200px;
+            max-width: 800px;
             margin: 0 auto;
-        }
-        
-        .header {
             text-align: center;
-            margin-bottom: 40px;
-            position: relative;
         }
         
         .header h1 {
             color: white;
-            font-size: 3.5rem;
-            font-weight: 900;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            margin-bottom: 20px;
+            font-size: 3rem;
+            margin-bottom: 30px;
         }
         
-        .settings-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 60px;
-            height: 60px;
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            color: white;
-            backdrop-filter: blur(5px);
-            touch-action: manipulation;
-        }
-        
-        .settings-button:hover {
-            background: rgba(255,255,255,0.3);
-            transform: scale(1.1);
-        }
-        
-        .status-bar {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 40px;
-            text-align: center;
-            color: white;
-        }
-        
-        .current-time {
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-        
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .main-issue-btn {
-            background: linear-gradient(135deg, #00b894, #00cec9);
+        .main-btn {
+            background: #00b894;
             color: white;
             border: none;
-            border-radius: 25px;
-            padding: 60px 100px;
-            font-size: 3rem;
-            font-weight: 900;
+            padding: 40px 60px;
+            border-radius: 20px;
+            font-size: 2rem;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 20px 60px rgba(0,184,148,0.3);
-            text-align: center;
-            min-height: 250px;
-            min-width: 500px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            touch-action: manipulation;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            position: relative;
-            z-index: 10;
+            margin-bottom: 30px;
+        }
+        
+        .main-btn:active {
+            background: #00a085;
         }
 
-        .main-issue-btn::before {
-            content: '';
-            position: absolute;
-            top: -15px;
-            left: -15px;
-            right: -15px;
-            bottom: -15px;
-            z-index: -1;
-        }
-
-        .main-issue-btn:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 25px 70px rgba(0,184,148,0.4);
-            background: linear-gradient(135deg, #00a085, #00b8a8);
-        }
-
-        .main-issue-btn:active {
-            transform: translateY(-4px);
-        }
-
-        .main-btn-icon {
-            font-size: 4rem;
-            margin-bottom: 15px;
-        }
-
-        .main-btn-text {
-            font-size: 3rem;
-            font-weight: 900;
-            margin-bottom: 10px;
-        }
-
-        .main-btn-desc {
-            font-size: 1.2rem;
-            font-weight: 400;
-            opacity: 0.9;
-        }
-
-        /* 핸드폰 번호 입력 팝업 */
-        .phone-popup {
+        /* 팝업 */
+        .popup {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
+            background: rgba(0,0,0,0.8);
             z-index: 1000;
-            backdrop-filter: blur(10px);
         }
-
-        .phone-popup.show {
+        
+        .popup.show {
             display: flex;
-        }
-
-        .phone-popup-content {
-            background: white;
-            border-radius: 25px;
-            padding: 50px;
-            max-width: 700px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
-            animation: popupSlideIn 0.3s ease-out;
-        }
-
-        @keyframes popupSlideIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9) translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-        }
-
-        .popup-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 30px;
-        }
-
-        .phone-display {
-            font-size: 2.8rem;
-            font-weight: 700;
-            color: #3498db;
-            margin-bottom: 40px;
-            padding: 25px;
-            background: #f8f9fa;
-            border-radius: 20px;
-            border: 4px solid #ecf0f1;
-            min-height: 100px;
-            display: flex;
-            align-items: center;
             justify-content: center;
-            letter-spacing: 2px;
-            font-family: 'Courier New', monospace;
+            align-items: center;
         }
-
-        .phone-display .fixed {
-            color: #7f8c8d;
-            font-weight: 600;
+        
+        .popup-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
         }
-
-        .phone-display .input {
-            color: #3498db;
-            font-weight: 900;
+        
+        .popup h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #333;
         }
-
+        
+        .phone-display {
+            font-size: 2rem;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-family: monospace;
+        }
+        
         .number-pad {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 30px;
-            max-width: 500px;
-            margin: 0 auto 40px auto;
-            padding: 20px;
-            /* 문제 해결을 위한 강제 설정 */
-            position: relative;
-            z-index: 9999;
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
+            gap: 15px;
+            margin-bottom: 20px;
         }
-
-        .number-btn {
+        
+        .num-btn {
             background: #3498db;
             color: white;
             border: none;
-            padding: 35px;
-            border-radius: 20px;
-            font-size: 2.5rem;
-            font-weight: 700;
+            padding: 20px;
+            font-size: 1.5rem;
+            border-radius: 10px;
             cursor: pointer;
-            min-height: 100px;
-            min-width: 100px;
-            touch-action: manipulation;
-            user-select: none;
-            -webkit-tap-highlight-color: rgba(52, 152, 219, 0.3);
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            /* 문제 해결 강화 */
-            position: relative;
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
-            transition: none;
-            /* 4, 5, 6번 특별 처리 */
-            pointer-events: auto;
+            min-height: 60px;
         }
-
-        /* 4, 5, 6번 버튼 특별 스타일 */
-        .number-btn[data-number="4"],
-        .number-btn[data-number="5"], 
-        .number-btn[data-number="6"] {
-            z-index: 99999 !important;
-            background: #e74c3c !important;
-            border: 3px solid #fff !important;
-            box-shadow: 0 8px 20px rgba(231, 76, 60, 0.5) !important;
-        }
-
-        /* 호버 효과 완전 제거 */
-        .number-btn:hover {
-            background: #3498db;
-            transform: none;
-            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
-        }
-
-        /* 활성화 시만 피드백 */
-        .number-btn:active,
-        .number-btn.touching {
+        
+        .num-btn:active {
             background: #2980b9;
-            transform: scale(0.95);
         }
-
+        
         .delete-btn {
-            background: #e74c3c !important;
+            background: #e74c3c;
         }
-
+        
         .clear-btn {
-            background: #f39c12 !important;
-            font-size: 1.4rem !important;
+            background: #f39c12;
+            font-size: 1rem;
         }
-
-        /* 호버 효과 모두 제거 */
-        .delete-btn:hover {
-            background: #e74c3c !important;
-        }
-
-        .clear-btn:hover {
-            background: #f39c12 !important;
-        }
-
-        .popup-close-btn {
+        
+        .close-btn {
             background: #95a5a6;
             color: white;
             border: none;
-            border-radius: 25px;
-            padding: 15px 40px;
-            font-size: 1.2rem;
-            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .popup-close-btn:hover {
-            background: #7f8c8d;
-            transform: translateY(-2px);
-        }
-
-        /* 과정 선택 팝업 */
-        .course-popup {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1001;
-            backdrop-filter: blur(10px);
-        }
-
-        .course-popup.show {
-            display: flex;
-        }
-
-        .course-popup-content {
-            background: white;
-            border-radius: 25px;
-            padding: 50px;
-            max-width: 900px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            text-align: center;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
-            animation: popupSlideIn 0.3s ease-out;
-        }
-
-        .popup-phone {
-            font-size: 2rem;
-            color: #3498db;
-            font-weight: 700;
-            margin-bottom: 30px;
-            padding: 15px 30px;
-            background: #f8f9fa;
-            border-radius: 15px;
-            display: inline-block;
-        }
-
-        .popup-course-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-
-        .popup-course-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 20px;
-            padding: 40px 30px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-            min-height: 150px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            touch-action: manipulation;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            position: relative;
-            z-index: 10;
         }
         
-        .popup-course-btn::before {
-            content: '';
-            position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-            z-index: -1;
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
         }
-
-        .popup-course-btn:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        
+        .course-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 30px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2rem;
         }
-
-        .popup-course-btn:active {
-            transform: translateY(-2px);
+        
+        .course-btn:active {
+            background: #5a6fd8;
         }
-
-        .popup-course-name {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .popup-course-desc {
-            font-size: 1rem;
-            opacity: 0.9;
-        }
-
-        /* 성공 메시지 */
-        .success-message {
+        
+        .success {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, #00b894, #00cec9);
+            background: #00b894;
             color: white;
-            padding: 40px 60px;
-            border-radius: 25px;
-            font-size: 2rem;
-            font-weight: 700;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            z-index: 2000;
-            text-align: center;
-            opacity: 0;
-            transition: all 0.3s ease;
-        }
-        
-        .success-message.show { 
-            opacity: 1; 
-        }
-        
-        .success-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            animation: bounce 0.6s ease-in-out;
-        }
-        
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-8px); }
-            60% { transform: translateY(-4px); }
-        }
-
-        /* 알림톡 설정 패널 */
-        .settings-panel {
-            position: fixed;
-            top: 0;
-            right: -600px;
-            width: 600px;
-            height: 100%;
-            background: white;
-            transition: right 0.3s ease;
-            z-index: 3000;
-            overflow-y: auto;
-            box-shadow: -5px 0 25px rgba(0,0,0,0.3);
-        }
-        
-        .settings-panel.open {
-            right: 0;
-        }
-        
-        .settings-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 25px;
-            font-size: 1.8rem;
-            font-weight: 700;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .close-settings {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            font-size: 1.8rem;
-            cursor: pointer;
-            padding: 8px 12px;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-        }
-        
-        .close-settings:hover {
-            background: rgba(255,255,255,0.3);
-        }
-        
-        .settings-content {
             padding: 30px;
-        }
-        
-        .setting-group {
-            background: #f8f9fa;
             border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 25px;
-            border: 2px solid #e9ecef;
+            font-size: 1.5rem;
+            z-index: 2000;
+            display: none;
         }
         
-        .setting-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .setting-label {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #34495e;
-            margin-bottom: 8px;
+        .success.show {
             display: block;
-        }
-        
-        .setting-input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            margin-bottom: 15px;
-        }
-        
-        .setting-input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        .setting-input.template-code {
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-        }
-        
-        .test-btn {
-            background: #f39c12;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-right: 10px;
-        }
-        
-        .test-btn:hover {
-            background: #e67e22;
-            transform: translateY(-1px);
-        }
-        
-        .save-btn {
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-        }
-        
-        .save-btn:hover {
-            background: #229954;
-            transform: translateY(-2px);
-        }
-        
-        .api-status {
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            font-weight: 600;
-            text-align: center;
-        }
-        
-        .api-status.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .api-status.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .api-status.testing {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-        
-        .template-info {
-            background: #e3f2fd;
-            border: 1px solid #bbdefb;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            font-size: 0.9rem;
-            color: #1565c0;
-        }
-        
-        .current-settings {
-            background: white;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .current-settings h4 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-        }
-        
-        .setting-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid #f8f9fa;
-        }
-        
-        .setting-item:last-child {
-            border-bottom: none;
-        }
-        
-        .setting-item .label {
-            font-weight: 600;
-            color: #7f8c8d;
-        }
-        
-        .setting-item .value {
-            font-family: 'Courier New', monospace;
-            color: #2c3e50;
-            font-size: 0.9rem;
-        }
-
-        /* 터치 중 스타일 */
-        .touching {
-            transform: scale(0.95) !important;
-            opacity: 0.8 !important;
-            transition: all 0.1s ease !important;
-        }
-
-        @media (max-width: 768px) {
-            .main-issue-btn {
-                padding: 50px 80px;
-                font-size: 2.5rem;
-                min-height: 220px;
-                min-width: 400px;
-            }
-            
-            .main-btn-icon {
-                font-size: 3rem;
-            }
-            
-            .main-btn-text {
-                font-size: 2.5rem;
-            }
-            
-            .phone-popup-content,
-            .course-popup-content {
-                padding: 40px 25px;
-            }
-            
-            .popup-title {
-                font-size: 2.2rem;
-            }
-            
-            .phone-display {
-                font-size: 2.3rem;
-                padding: 20px;
-            }
-            
-            .number-pad {
-                max-width: 400px;
-                gap: 25px;
-                padding: 15px;
-            }
-            
-            .number-btn {
-                min-height: 90px;
-                min-width: 90px;
-                font-size: 2.2rem;
-                padding: 30px;
-            }
-            
-            .popup-course-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-
-            .settings-panel {
-                width: 100%;
-                right: -100%;
-            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <button class="settings-button" onclick="toggleSettings()" title="알림톡 설정">⚙️</button>
-            <h1>📱 알림톡 대기표 시스템</h1>
+            <h1>📱 알림톡 대기표</h1>
         </div>
-
-        <div class="status-bar">
-            <div class="current-time" id="currentTime"></div>
-        </div>
-
-        <div class="main-content">
-            <button class="main-issue-btn" onclick="showPhonePopup()">
-                <div class="main-btn-icon">📱</div>
-                <div class="main-btn-text">대기표 발급</div>
-                <div class="main-btn-desc">핸드폰 번호로 알림톡 발송</div>
-            </button>
-        </div>
+        
+        <button class="main-btn" onclick="showPhonePopup()">
+            대기표 발급하기
+        </button>
     </div>
 
-    <!-- 핸드폰 번호 입력 팝업 -->
-    <div class="phone-popup" id="phonePopup">
-        <div class="phone-popup-content">
-            <div class="popup-title">📱 핸드폰 번호 입력</div>
+    <!-- 핸드폰 번호 팝업 -->
+    <div class="popup" id="phonePopup">
+        <div class="popup-content">
+            <h2>핸드폰 번호 입력</h2>
+            <div class="phone-display" id="phoneDisplay">010-</div>
             
-            <div class="phone-display" id="phoneDisplay">
-                <span class="fixed">010-</span>
-            </div>
-
             <div class="number-pad">
-                <div class="number-btn" data-number="1">1</div>
-                <div class="number-btn" data-number="2">2</div>
-                <div class="number-btn" data-number="3">3</div>
-                <div class="number-btn" data-number="4" id="btn-4">4</div>
-                <div class="number-btn" data-number="5" id="btn-5">5</div>
-                <div class="number-btn" data-number="6" id="btn-6">6</div>
-                <div class="number-btn" data-number="7">7</div>
-                <div class="number-btn" data-number="8">8</div>
-                <div class="number-btn" data-number="9">9</div>
-                <div class="number-btn delete-btn" data-action="delete">←</div>
-                <div class="number-btn" data-number="0">0</div>
-                <div class="number-btn clear-btn" data-action="clear">전체삭제</div>
+                <button class="num-btn" onclick="addNum('1')">1</button>
+                <button class="num-btn" onclick="addNum('2')">2</button>
+                <button class="num-btn" onclick="addNum('3')">3</button>
+                <button class="num-btn" onclick="addNum('4')">4</button>
+                <button class="num-btn" onclick="addNum('5')">5</button>
+                <button class="num-btn" onclick="addNum('6')">6</button>
+                <button class="num-btn" onclick="addNum('7')">7</button>
+                <button class="num-btn" onclick="addNum('8')">8</button>
+                <button class="num-btn" onclick="addNum('9')">9</button>
+                <button class="num-btn delete-btn" onclick="deleteNum()">←</button>
+                <button class="num-btn" onclick="addNum('0')">0</button>
+                <button class="num-btn clear-btn" onclick="clearNum()">전체삭제</button>
             </div>
             
-            <button class="popup-close-btn" onclick="closePhonePopup()">취소</button>
+            <button class="close-btn" onclick="closePhonePopup()">취소</button>
         </div>
     </div>
 
     <!-- 과정 선택 팝업 -->
-    <div class="course-popup" id="coursePopup">
-        <div class="course-popup-content">
-            <div class="popup-title">📚 상담 과정 선택</div>
-            <div class="popup-phone" id="popupPhone">010-1234-5678</div>
+    <div class="popup" id="coursePopup">
+        <div class="popup-content">
+            <h2>과정 선택</h2>
+            <div class="phone-display" id="selectedPhone">010-1234-5678</div>
             
-            <div class="popup-course-grid" id="popupCourseGrid">
-                <!-- 과정 버튼들이 여기에 생성됩니다 -->
+            <div class="course-grid">
+                <button class="course-btn" onclick="selectCourse('중국어 과정')">중국어 과정</button>
+                <button class="course-btn" onclick="selectCourse('영어 과정')">영어 과정</button>
+                <button class="course-btn" onclick="selectCourse('HSK 시험반')">HSK 시험반</button>
+                <button class="course-btn" onclick="selectCourse('TOEIC 집중반')">TOEIC 집중반</button>
             </div>
             
-            <button class="popup-close-btn" onclick="closeCoursePopup()">돌아가기</button>
+            <button class="close-btn" onclick="closeCoursePopup()">돌아가기</button>
         </div>
     </div>
 
     <!-- 성공 메시지 -->
-    <div class="success-message" id="successMessage">
-        <div class="success-icon">📱</div>
-        <div id="successMessageText">알림톡 대기표 발급 완료!</div>
-    </div>
-
-    <!-- 알림톡 설정 패널 -->
-    <div class="settings-panel" id="settingsPanel">
-        <div class="settings-header">
-            ⚙️ 알림톡 설정
-            <button class="close-settings" onclick="toggleSettings()">×</button>
-        </div>
-        <div class="settings-content">
-            <!-- 현재 설정 표시 -->
-            <div class="current-settings">
-                <h4>📋 현재 설정</h4>
-                <div class="setting-item">
-                    <span class="label">발신번호:</span>
-                    <span class="value" id="currentSender">설정 안됨</span>
-                </div>
-                <div class="setting-item">
-                    <span class="label">발급완료 템플릿:</span>
-                    <span class="value" id="currentIssue">설정 안됨</span>
-                </div>
-                <div class="setting-item">
-                    <span class="label">곧호출 템플릿:</span>
-                    <span class="value" id="currentReady">설정 안됨</span>
-                </div>
-                <div class="setting-item">
-                    <span class="label">호출알림 템플릿:</span>
-                    <span class="value" id="currentCall">설정 안됨</span>
-                </div>
-            </div>
-
-            <!-- API 상태 -->
-            <div class="api-status" id="apiStatus" style="display: none;">
-                API 테스트 결과가 여기에 표시됩니다.
-            </div>
-
-            <!-- 발신번호 설정 -->
-            <div class="setting-group">
-                <div class="setting-title">📞 발신번호 설정</div>
-                <label class="setting-label">발신번호 (솔라피에 등록된 번호)</label>
-                <input type="text" class="setting-input" id="senderNumber" 
-                       placeholder="02-1234-5678 또는 010-1234-5678" maxlength="13">
-                <button class="test-btn" onclick="testSenderNumber()">발신번호 확인</button>
-            </div>
-
-            <!-- 템플릿 코드 설정 -->
-            <div class="setting-group">
-                <div class="setting-title">📋 알림톡 템플릿 코드</div>
-                
-                <div class="template-info">
-                    💡 솔라피 대시보드 → 알림톡 → 템플릿 관리에서 승인받은 템플릿 코드를 입력하세요.
-                </div>
-
-                <label class="setting-label">1️⃣ 발급완료 템플릿 코드</label>
-                <input type="text" class="setting-input template-code" id="issueTemplate" 
-                       placeholder="예: KKO_ISSUE_001">
-                
-                <label class="setting-label">2️⃣ 곧호출예정 템플릿 코드</label>
-                <input type="text" class="setting-input template-code" id="readyTemplate" 
-                       placeholder="예: KKO_READY_002">
-                
-                <label class="setting-label">3️⃣ 호출알림 템플릿 코드</label>
-                <input type="text" class="setting-input template-code" id="callTemplate" 
-                       placeholder="예: KKO_CALL_003">
-
-                <button class="test-btn" onclick="testTemplates()">템플릿 테스트</button>
-            </div>
-
-            <!-- 저장 버튼 -->
-            <button class="save-btn" onclick="saveAlimtalkSettings()">
-                💾 설정 저장
-            </button>
-        </div>
+    <div class="success" id="successMsg">
+        <div id="successText">대기표 발급 완료!</div>
     </div>
 
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCNhcSqZgtSS63QTmjWtiMxgy5g8soOzho",
@@ -889,565 +242,145 @@
         window.firebaseDB = database;
         window.firebaseRef = ref;
         window.firebaseSet = set;
-        window.firebaseOnValue = onValue;
-
-        console.log('🔥 Firebase 초기화 완료: alimtalk-waiting-ticket (Kiosk)');
     </script>
 
     <script>
-        // 전역 변수
-        let courses = [
-            { code: 'CH', name: '중국어 과정', englishName: 'Chinese Course' },
-            { code: 'EN', name: '영어 과정', englishName: 'English Course' },
-            { code: 'HSK', name: 'HSK 시험반', englishName: 'HSK Test Prep' },
-            { code: 'TO', name: 'TOEIC 집중반', englishName: 'TOEIC Course' }
-        ];
+        let phoneNumber = '';
+        let currentNumbers = { CH: 0, EN: 0, HSK: 0, TO: 0 };
 
-        let currentPhoneNumber = '010';
-        let currentNumbers = {};
-        let systemData = {
-            currentCall: { number: '-', counter: 0, course: '-' },
-            waiting: [],
-            counters: [],
-            totalToday: 0,
-            lastDate: new Date().toISOString().split('T')[0],
-            currentNumbers: {}
-        };
-
-        // 알림톡 설정
-        let alimtalkSettings = {
-            senderNumber: '',
-            templateCodes: {
-                issue: '',
-                ready: '',
-                call: ''
-            },
-            apiKey: 'NCSRVLD2FFGTEK7B',
-            secretKey: 'IYLPMGODFSDJA3Y88QZDHBQYG6XYCNV8'
-        };
-
-        // ================= 기본 기능들 =================
-
-        // 메인 버튼 클릭
+        // 팝업 열기
         function showPhonePopup() {
-            navigator.vibrate && navigator.vibrate(80);
-            currentPhoneNumber = '010';
+            phoneNumber = '';
             updatePhoneDisplay();
             document.getElementById('phonePopup').classList.add('show');
         }
 
-        // 핸드폰 번호 팝업 닫기
+        // 팝업 닫기
         function closePhonePopup() {
             document.getElementById('phonePopup').classList.remove('show');
-            currentPhoneNumber = '010';
         }
 
-        // addNumber 함수를 전역에서 접근 가능하게
-        window.addNumber = function(num) {
-            console.log(`🔢 addNumber 호출됨: ${num}`);
-            let inputNumbers = currentPhoneNumber.replace(/[^0-9]/g, '').substring(3);
-            
-            if (inputNumbers.length < 8) {
-                inputNumbers += num;
-                currentPhoneNumber = '010' + inputNumbers;
-                updatePhoneDisplay();
-                navigator.vibrate && navigator.vibrate(50);
-                
-                // 8자리 완성되면 과정 선택으로
-                if (inputNumbers.length === 8) {
-                    setTimeout(() => {
-                        closePhonePopup();
-                        showCoursePopup('010' + inputNumbers);
-                    }, 300);
-                }
-            }
-        };
-
-        // 번호 추가 (기존)
-        function addNumber(num) {
-            window.addNumber(num);
-        }
-
-        // 번호 삭제
-        function deleteNumber() {
-            let inputNumbers = currentPhoneNumber.replace(/[^0-9]/g, '').substring(3);
-            if (inputNumbers.length > 0) {
-                inputNumbers = inputNumbers.slice(0, -1);
-                currentPhoneNumber = '010' + inputNumbers;
-                updatePhoneDisplay();
-                navigator.vibrate && navigator.vibrate(30);
-            }
-        }
-
-        // 번호 전체 삭제
-        function clearPhone() {
-            currentPhoneNumber = '010';
-            updatePhoneDisplay();
-            navigator.vibrate && navigator.vibrate([50, 50, 50]);
-        }
-
-        // 핸드폰 번호 화면 업데이트
-        function updatePhoneDisplay() {
-            const display = document.getElementById('phoneDisplay');
-            let numbersOnly = currentPhoneNumber.replace(/[^0-9]/g, '');
-            
-            if (!numbersOnly.startsWith('010')) {
-                numbersOnly = '010' + numbersOnly;
-            }
-            
-            let formatted = '';
-            
-            if (numbersOnly.length <= 3) {
-                formatted = '<span class="fixed">010-</span>';
-            } else if (numbersOnly.length <= 7) {
-                formatted = '<span class="fixed">010-</span><span class="input">' + numbersOnly.substring(3) + '</span>';
-            } else {
-                formatted = '<span class="fixed">010-</span><span class="input">' + 
-                           numbersOnly.substring(3, 7) + '-' + 
-                           numbersOnly.substring(7) + '</span>';
-            }
-            
-            display.innerHTML = formatted;
-        }
-
-        // 과정 선택 팝업 표시
-        function showCoursePopup(phoneNumber) {
-            const popup = document.getElementById('coursePopup');
-            const popupPhone = document.getElementById('popupPhone');
-            const popupGrid = document.getElementById('popupCourseGrid');
-            
-            // 전화번호 표시
-            const formatted = phoneNumber.substring(0, 3) + '-' + 
-                           phoneNumber.substring(3, 7) + '-' + 
-                           phoneNumber.substring(7);
-            popupPhone.textContent = formatted;
-            
-            // 과정 버튼 생성
-            popupGrid.innerHTML = '';
-            courses.forEach(course => {
-                const button = document.createElement('button');
-                button.className = 'popup-course-btn';
-                button.onclick = () => selectCourse(course, phoneNumber);
-                
-                button.innerHTML = 
-                    `<div class="popup-course-name">${course.name}</div>` +
-                    `<div class="popup-course-desc">${course.englishName}</div>`;
-                
-                popupGrid.appendChild(button);
-            });
-            
-            popup.classList.add('show');
-        }
-
-        // 과정 선택 팝업 닫기
         function closeCoursePopup() {
             document.getElementById('coursePopup').classList.remove('show');
         }
 
-        // 과정 선택 및 대기표 발급
-        function selectCourse(course, phoneNumber) {
-            navigator.vibrate && navigator.vibrate(100);
-            closeCoursePopup();
-            issueTicket(course, phoneNumber);
-        }
-
-        // ================= 대기표 발급 =================
-
-        // 대기표 발급
-        function issueTicket(course, phoneNumber) {
-            try {
-                const today = new Date().toISOString().split('T')[0];
+        // 번호 추가
+        function addNum(num) {
+            console.log('번호 추가:', num);
+            if (phoneNumber.length < 11) {
+                phoneNumber += num;
+                updatePhoneDisplay();
                 
-                // 날짜가 바뀌었으면 번호 초기화
-                if (systemData.lastDate !== today) {
-                    currentNumbers = {};
-                    systemData.lastDate = today;
-                    systemData.totalToday = 0;
+                if (phoneNumber.length === 11) {
+                    setTimeout(() => {
+                        closePhonePopup();
+                        showCoursePopup();
+                    }, 300);
                 }
-                
-                // 과정별 번호 생성
-                if (!currentNumbers[course.code]) {
-                    currentNumbers[course.code] = 0;
-                }
-                currentNumbers[course.code]++;
-                
-                // 대기번호 생성
-                const ticketNumber = course.code + currentNumbers[course.code].toString().padStart(3, '0');
-                
-                // 대기표 정보
-                const ticketInfo = {
-                    number: ticketNumber,
-                    course: course.name,
-                    courseCode: course.code,
-                    phoneNumber: phoneNumber,
-                    time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
-                    timestamp: new Date().toISOString()
-                };
-                
-                // 시스템 데이터에 추가
-                if (!systemData.waiting) {
-                    systemData.waiting = [];
-                }
-                systemData.waiting.push(ticketInfo);
-                systemData.totalToday = (systemData.totalToday || 0) + 1;
-                systemData.currentNumbers = currentNumbers;
-                
-                // Firebase에 저장하고 알림톡 발송
-                saveToFirebase().then(() => {
-                    sendAlimtalk(phoneNumber, ticketNumber, course.name);
-                }).catch((error) => {
-                    console.error('❌ 저장 실패:', error);
-                    alert('대기표 발급에 실패했습니다.');
-                });
-                
-            } catch (error) {
-                console.error('❌ 발급 오류:', error);
-                alert('오류가 발생했습니다.');
             }
         }
 
-        // ================= 알림톡 발송 =================
-
-        // 알림톡 발송
-        async function sendAlimtalk(phoneNumber, ticketNumber, courseName) {
-            if (!alimtalkSettings.senderNumber || !alimtalkSettings.templateCodes.issue) {
-                console.log('⚠️ 알림톡 설정 미완료 - SMS 시뮬레이션');
-                showSuccessMessage(ticketNumber, phoneNumber, courseName, 'SMS');
-                return;
+        // 번호 삭제
+        function deleteNum() {
+            console.log('번호 삭제');
+            if (phoneNumber.length > 0) {
+                phoneNumber = phoneNumber.slice(0, -1);
+                updatePhoneDisplay();
             }
+        }
+
+        // 전체 삭제
+        function clearNum() {
+            console.log('전체 삭제');
+            phoneNumber = '';
+            updatePhoneDisplay();
+        }
+
+        // 화면 업데이트
+        function updatePhoneDisplay() {
+            const display = document.getElementById('phoneDisplay');
             
-            const currentTime = new Date().toLocaleString('ko-KR');
-            const waitingCount = systemData.waiting ? systemData.waiting.length : 0;
-            const estimatedTime = Math.max(5, waitingCount * 3);
+            if (phoneNumber.length === 0) {
+                display.textContent = '010-';
+            } else if (phoneNumber.length <= 3) {
+                display.textContent = '010-' + phoneNumber;
+            } else if (phoneNumber.length <= 7) {
+                display.textContent = '010-' + phoneNumber.substring(0, 4) + '-' + phoneNumber.substring(4);
+            } else {
+                display.textContent = '010-' + phoneNumber.substring(0, 4) + '-' + phoneNumber.substring(4, 8);
+            }
+        }
+
+        // 과정 선택 팝업
+        function showCoursePopup() {
+            const formatted = '010-' + phoneNumber.substring(0, 4) + '-' + phoneNumber.substring(4);
+            document.getElementById('selectedPhone').textContent = formatted;
+            document.getElementById('coursePopup').classList.add('show');
+        }
+
+        // 과정 선택
+        function selectCourse(courseName) {
+            console.log('과정 선택:', courseName);
             
-            const messageData = {
-                message: {
-                    to: phoneNumber,
-                    from: alimtalkSettings.senderNumber,
-                    kakaoOptions: {
-                        pfId: 'your_plus_friend_id',
-                        templateId: alimtalkSettings.templateCodes.issue,
-                        variables: {
-                            ticketNumber: ticketNumber,
-                            courseName: courseName,
-                            issueTime: currentTime,
-                            waitingCount: waitingCount.toString(),
-                            estimatedTime: estimatedTime.toString()
-                        }
-                    }
-                }
+            // 과정 코드 매핑
+            const courseCode = {
+                '중국어 과정': 'CH',
+                '영어 과정': 'EN', 
+                'HSK 시험반': 'HSK',
+                'TOEIC 집중반': 'TO'
+            }[courseName];
+            
+            // 번호 생성
+            currentNumbers[courseCode]++;
+            const ticketNumber = courseCode + currentNumbers[courseCode].toString().padStart(3, '0');
+            
+            // Firebase 저장
+            const ticketData = {
+                number: ticketNumber,
+                course: courseName,
+                phoneNumber: '010' + phoneNumber,
+                time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+                timestamp: new Date().toISOString()
             };
             
-            try {
-                console.log('📱 알림톡 발송 시도:', phoneNumber, ticketNumber);
-                
-                // 솔라피 API 호출 (임시로 성공 처리)
-                const success = true; // 실제 API 연동 시 수정
-                
-                if (success) {
-                    console.log('✅ 알림톡 발송 성공');
-                    showSuccessMessage(ticketNumber, phoneNumber, courseName, '알림톡');
-                } else {
-                    console.log('❌ 알림톡 발송 실패 - SMS 폴백');
-                    showSuccessMessage(ticketNumber, phoneNumber, courseName, 'SMS');
-                }
-                
-            } catch (error) {
-                console.error('❌ 알림톡 API 오류:', error);
-                showSuccessMessage(ticketNumber, phoneNumber, courseName, 'SMS');
+            // 시스템에 추가
+            if (!window.systemData) {
+                window.systemData = { waiting: [], totalToday: 0 };
             }
+            
+            window.systemData.waiting.push(ticketData);
+            window.systemData.totalToday++;
+            
+            // Firebase 저장
+            if (window.firebaseDB) {
+                const systemRef = window.firebaseRef(window.firebaseDB, 'counterSystem');
+                window.firebaseSet(systemRef, window.systemData);
+            }
+            
+            // 성공 메시지
+            showSuccess(ticketNumber, courseName);
+            closeCoursePopup();
         }
 
-        // 성공 메시지 표시
-        function showSuccessMessage(ticketNumber, phoneNumber, courseName, sendType = '알림톡') {
-            const successEl = document.getElementById('successMessage');
-            const messageEl = document.getElementById('successMessageText');
+        // 성공 메시지
+        function showSuccess(ticketNumber, courseName) {
+            const successEl = document.getElementById('successMsg');
+            const textEl = document.getElementById('successText');
             
-            const maskedPhone = phoneNumber.substring(0, 3) + '****' + phoneNumber.substring(7);
-            const formattedPhone = maskedPhone.substring(0, 3) + '-' + 
-                                 maskedPhone.substring(3, 7) + '-' + 
-                                 maskedPhone.substring(7);
-            
-            const sendIcon = sendType === '알림톡' ? '📱' : '📲';
-            
-            messageEl.innerHTML = 
-                `<div style="font-size: 3rem; margin-bottom: 15px; color: #FFD700;">${ticketNumber}</div>` +
-                `<div style="font-size: 1.8rem; margin-bottom: 10px;">${sendIcon} ${sendType} 대기표 발급 완료!</div>` +
-                `<div style="font-size: 1.3rem; margin-bottom: 8px; opacity: 0.9;">${courseName}</div>` +
-                `<div style="font-size: 1.1rem; margin-bottom: 10px; opacity: 0.8;">${formattedPhone}</div>` +
-                `<div style="font-size: 1rem; opacity: 0.9; color: #FFD700;">${sendIcon} ${sendType} 발송 완료</div>`;
+            textEl.innerHTML = `
+                <div style="font-size: 2rem; margin-bottom: 10px;">${ticketNumber}</div>
+                <div>📱 알림톡 대기표 발급 완료!</div>
+                <div style="font-size: 1rem; margin-top: 10px;">${courseName}</div>
+            `;
             
             successEl.classList.add('show');
+            
             setTimeout(() => {
                 successEl.classList.remove('show');
-            }, 4000);
+            }, 3000);
         }
 
-        // ================= 설정 관리 =================
-
-        // 설정 패널 토글
-        function toggleSettings() {
-            const panel = document.getElementById('settingsPanel');
-            panel.classList.toggle('open');
-            
-            if (panel.classList.contains('open')) {
-                loadAlimtalkSettings();
-            }
-        }
-
-        // 알림톡 설정 로드
-        function loadAlimtalkSettings() {
-            if (!window.firebaseDB) return;
-            
-            const settingsRef = window.firebaseRef(window.firebaseDB, 'alimtalkSettings');
-            window.firebaseOnValue(settingsRef, (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    alimtalkSettings = { ...alimtalkSettings, ...data };
-                    
-                    document.getElementById('senderNumber').value = alimtalkSettings.senderNumber || '';
-                    document.getElementById('issueTemplate').value = alimtalkSettings.templateCodes?.issue || '';
-                    document.getElementById('readyTemplate').value = alimtalkSettings.templateCodes?.ready || '';
-                    document.getElementById('callTemplate').value = alimtalkSettings.templateCodes?.call || '';
-                    
-                    updateCurrentSettingsDisplay();
-                }
-            });
-        }
-
-        // 현재 설정 표시 업데이트
-        function updateCurrentSettingsDisplay() {
-            document.getElementById('currentSender').textContent = 
-                alimtalkSettings.senderNumber || '설정 안됨';
-            document.getElementById('currentIssue').textContent = 
-                alimtalkSettings.templateCodes?.issue || '설정 안됨';
-            document.getElementById('currentReady').textContent = 
-                alimtalkSettings.templateCodes?.ready || '설정 안됨';
-            document.getElementById('currentCall').textContent = 
-                alimtalkSettings.templateCodes?.call || '설정 안됨';
-        }
-
-        // 발신번호 테스트
-        async function testSenderNumber() {
-            const senderNumber = document.getElementById('senderNumber').value.trim();
-            
-            if (!senderNumber) {
-                showApiStatus('error', '발신번호를 입력해주세요.');
-                return;
-            }
-            
-            showApiStatus('testing', '발신번호 확인 중...');
-            
-            // 임시로 성공 처리
-            setTimeout(() => {
-                showApiStatus('success', '✅ 발신번호 확인 완료! 사용 가능합니다.');
-            }, 1000);
-        }
-
-        // 템플릿 테스트
-        async function testTemplates() {
-            const issueTemplate = document.getElementById('issueTemplate').value.trim();
-            const readyTemplate = document.getElementById('readyTemplate').value.trim();
-            const callTemplate = document.getElementById('callTemplate').value.trim();
-            
-            if (!issueTemplate || !readyTemplate || !callTemplate) {
-                showApiStatus('error', '모든 템플릿 코드를 입력해주세요.');
-                return;
-            }
-            
-            showApiStatus('testing', '템플릿 확인 중...');
-            
-            // 임시로 성공 처리
-            setTimeout(() => {
-                showApiStatus('success', '✅ 모든 템플릿 확인 완료! 사용 가능합니다.');
-            }, 1500);
-        }
-
-        // 알림톡 설정 저장
-        async function saveAlimtalkSettings() {
-            const senderNumber = document.getElementById('senderNumber').value.trim();
-            const issueTemplate = document.getElementById('issueTemplate').value.trim();
-            const readyTemplate = document.getElementById('readyTemplate').value.trim();
-            const callTemplate = document.getElementById('callTemplate').value.trim();
-            
-            if (!senderNumber || !issueTemplate || !readyTemplate || !callTemplate) {
-                showApiStatus('error', '모든 필드를 입력해주세요.');
-                return;
-            }
-            
-            alimtalkSettings.senderNumber = senderNumber;
-            alimtalkSettings.templateCodes = {
-                issue: issueTemplate,
-                ready: readyTemplate,
-                call: callTemplate
-            };
-            alimtalkSettings.lastUpdated = new Date().toISOString();
-            
-            try {
-                const settingsRef = window.firebaseRef(window.firebaseDB, 'alimtalkSettings');
-                await window.firebaseSet(settingsRef, alimtalkSettings);
-                
-                updateCurrentSettingsDisplay();
-                showApiStatus('success', '✅ 설정이 저장되었습니다!');
-                console.log('✅ 알림톡 설정 저장 완료');
-            } catch (error) {
-                showApiStatus('error', `❌ 저장 실패: ${error.message}`);
-                console.error('❌ 설정 저장 실패:', error);
-            }
-        }
-
-        // API 상태 표시
-        function showApiStatus(type, message) {
-            const statusEl = document.getElementById('apiStatus');
-            statusEl.className = `api-status ${type}`;
-            statusEl.textContent = message;
-            statusEl.style.display = 'block';
-            
-            if (type !== 'testing') {
-                setTimeout(() => {
-                    statusEl.style.display = 'none';
-                }, 3000);
-            }
-        }
-
-        // ================= Firebase 관리 =================
-
-        // Firebase 저장
-        function saveToFirebase() {
-            if (!window.firebaseDB) {
-                return Promise.reject('Firebase가 초기화되지 않았습니다.');
-            }
-            
-            systemData.lastUpdated = new Date().toISOString();
-            const systemRef = window.firebaseRef(window.firebaseDB, 'counterSystem');
-            
-            return window.firebaseSet(systemRef, systemData).then(() => {
-                console.log('✅ Firebase 저장 완료');
-            });
-        }
-
-        // Firebase 리스너 설정
-        function setupFirebaseListener() {
-            if (!window.firebaseDB) return;
-            
-            const systemRef = window.firebaseRef(window.firebaseDB, 'counterSystem');
-            window.firebaseOnValue(systemRef, (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    systemData = { ...systemData, ...data };
-                    if (data.currentNumbers) {
-                        currentNumbers = data.currentNumbers;
-                    }
-                    console.log('🔄 Firebase 데이터 동기화');
-                }
-            });
-        }
-
-        // ================= 터치 이벤트 처리 =================
-
-        // 터치 이벤트 설정 (4번 버튼 특별 처리)
-        function setupTouchEvents() {
-            console.log('🔧 이벤트 설정 시작');
-            
-            // 4번 버튼 특별 확인
-            const btn4_method1 = document.querySelector('[data-number="4"]');
-            const btn4_method2 = document.getElementById('btn-4');
-            const btn4_method3 = document.querySelector('#btn-4');
-            
-            console.log('4번 버튼 찾기 결과:');
-            console.log('방법1 (data-number):', btn4_method1);
-            console.log('방법2 (getElementById):', btn4_method2);
-            console.log('방법3 (querySelector ID):', btn4_method3);
-            
-            // 모든 버튼 찾기
-            const allButtons = document.querySelectorAll('.number-btn');
-            console.log('🔍 전체 버튼 개수:', allButtons.length);
-            
-            // 각 버튼에 강제 이벤트 설정
-            allButtons.forEach((btn, index) => {
-                const number = btn.getAttribute('data-number');
-                const text = btn.textContent.trim();
-                
-                console.log(`버튼 ${index}: "${text}", data-number="${number}"`);
-                
-                if (number && number >= '0' && number <= '9') {
-                    // 모든 이벤트 제거
-                    btn.onclick = null;
-                    
-                    // 강제 이벤트 설정
-                    btn.addEventListener('click', function(e) {
-                        console.log(`✨ ${number} 클릭됨!`);
-                        window.addNumber(number);
-                    });
-                    
-                    btn.addEventListener('touchend', function(e) {
-                        e.preventDefault();
-                        console.log(`✨ ${number} 터치됨!`);
-                        window.addNumber(number);
-                    });
-                    
-                    // 4, 5, 6번 추가 이벤트
-                    if (number === '4' || number === '5' || number === '6') {
-                        console.log(`🚨 ${number}번 추가 이벤트 설정!`);
-                        
-                        btn.addEventListener('mousedown', function(e) {
-                            console.log(`🖱️ ${number} 마우스!`);
-                            window.addNumber(number);
-                        });
-                        
-                        btn.addEventListener('pointerdown', function(e) {
-                            console.log(`👆 ${number} 포인터!`);
-                            window.addNumber(number);
-                        });
-                        
-                        // 인라인 이벤트도 설정
-                        btn.setAttribute('onclick', `console.log('인라인 ${number}!'); window.addNumber('${number}');`);
-                    }
-                }
-            });
-            
-            console.log('✅ 이벤트 설정 완료');
-        }
-
-        // ================= 초기화 =================
-
-        // 시간 업데이트
-        function updateTime() {
-            const timeEl = document.getElementById('currentTime');
-            const now = new Date();
-            timeEl.textContent = now.toLocaleString('ko-KR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-        }
-
-        // 초기화
-        function initialize() {
-            console.log('🚀 키오스크 초기화 (단순화된 터치)');
-            
-            // 시간 표시
-            updateTime();
-            setInterval(updateTime, 1000);
-            
-            // 터치 이벤트 설정 (DOM 로드 후)
-            setTimeout(() => {
-                setupTouchEvents();
-            }, 100);
-            
-            // Firebase 리스너 설정
-            setTimeout(() => {
-                setupFirebaseListener();
-            }, 1000);
-            
-            console.log('✅ 키오스크 준비 완료 (호버 효과 제거)');
-        }
-
-        // 페이지 로드
-        document.addEventListener('DOMContentLoaded', initialize);
+        console.log('✅ 간단 키오스크 로드 완료');
     </script>
 </body>
 </html>
