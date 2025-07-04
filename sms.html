@@ -1,5 +1,1229 @@
-// Firebase Functions를 통한 알림톡 발송
-        async function sendSolapi(ticketData, notificationType = 'issue') {
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대기번호 발급 키오스크 - Firebase Functions 연결</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+        
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 배경 애니메이션 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
+            animation: float 25s ease-in-out infinite;
+            z-index: 0;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(180deg); }
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+            padding: 50px;
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .header {
+            margin-bottom: 40px;
+        }
+        
+        .title {
+            font-size: 3rem;
+            font-weight: 900;
+            color: #667eea;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .admin-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .admin-btn {
+            background: rgba(102, 126, 234, 0.8);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-btn:hover {
+            background: rgba(102, 126, 234, 1);
+            transform: translateY(-2px);
+        }
+        
+        .course-selection {
+            margin-bottom: 40px;
+        }
+        
+        .course-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .course-btn {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 3px solid #dee2e6;
+            border-radius: 20px;
+            padding: 30px 20px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .course-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+        
+        .course-btn.selected {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+            color: white;
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+        }
+        
+        .course-btn.selected::before {
+            content: '✓';
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.2rem;
+        }
+        
+        .course-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .course-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .course-desc {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            font-weight: 500;
+        }
+        
+        .phone-section {
+            display: none;
+            margin-bottom: 40px;
+            animation: slideInUp 0.5s ease-out;
+        }
+        
+        .phone-section.show {
+            display: block;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .phone-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .phone-input-group {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .phone-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            font-size: 1.5rem;
+            border: 3px solid #dee2e6;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .phone-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+            transform: scale(1.02);
+        }
+        
+        .phone-help {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            padding: 20px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            min-width: 200px;
+        }
+        
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .issue-btn {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: white;
+            box-shadow: 0 8px 25px rgba(0, 184, 148, 0.3);
+        }
+        
+        .issue-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 184, 148, 0.4);
+        }
+        
+        .back-btn {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.3);
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(108, 92, 231, 0.4);
+        }
+        
+        .loading {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            backdrop-filter: blur(10px);
+        }
+        
+        .loading.show {
+            display: flex;
+        }
+        
+        .spinner {
+            width: 80px;
+            height: 80px;
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 30px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .loading-sub {
+            font-size: 1rem;
+            color: #666;
+        }
+        
+        .status-indicator {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+        
+        .status-indicator.online { border-left: 4px solid #00b894; color: #00b894; }
+        .status-indicator.offline { border-left: 4px solid #e74c3c; color: #e74c3c; }
+        .status-indicator.firebase { border-left: 4px solid #ff6b35; color: #ff6b35; }
+        
+        .result-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .result-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .result-content {
+            background: white;
+            border-radius: 30px;
+            padding: 50px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        
+        .result-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+        
+        .result-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .ticket-number {
+            font-size: 4rem;
+            font-weight: 900;
+            color: #667eea;
+            margin: 20px 0;
+            text-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .result-info {
+            font-size: 1.1rem;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .close-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .error-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .error-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .error-content {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .error-icon {
+            font-size: 4rem;
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+        
+        .error-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+        
+        .error-message {
+            font-size: 1rem;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 25px;
+        }
+        
+        .error-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .error-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+        
+        /* 설정 모달 */
+        .settings-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .settings-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .settings-content {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f2f6;
+        }
+        
+        .settings-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .close-settings {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .close-settings:hover {
+            background: #c0392b;
+        }
+        
+        .setting-group {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .setting-label {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .course-input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr 100px;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        
+        .course-input {
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        
+        .course-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .remove-course-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .remove-course-btn:hover {
+            background: #c0392b;
+        }
+        
+        .add-course-btn {
+            background: #00b894;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        .add-course-btn:hover {
+            background: #00a085;
+        }
+        
+        .save-settings-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .save-settings-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 25px;
+                margin: 10px;
+            }
+            
+            .title {
+                font-size: 2.2rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .course-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .course-btn {
+                padding: 25px 15px;
+            }
+            
+            .course-icon {
+                font-size: 2.5rem;
+            }
+            
+            .course-name {
+                font-size: 1.2rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .admin-controls {
+                position: static;
+                margin-bottom: 20px;
+                justify-content: center;
+            }
+            
+            .course-input-group {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 15px;
+            }
+            
+            .title {
+                font-size: 1.8rem;
+            }
+            
+            .phone-input {
+                font-size: 1.2rem;
+                padding: 15px;
+            }
+            
+            .result-content {
+                padding: 30px 20px;
+            }
+            
+            .ticket-number {
+                font-size: 3rem;
+            }
+        }
+    </style>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+        import { getDatabase, ref, set, push, onValue, remove, off } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+
+        // 🔥 Firebase 설정 (alimtalk-waiting-ticket)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCNhcSqZgtSS63QTmjWtiMxgy5g8soOzho",
+            authDomain: "alimtalk-waiting-ticket.firebaseapp.com",
+            databaseURL: "https://alimtalk-waiting-ticket-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "alimtalk-waiting-ticket",
+            storageBucket: "alimtalk-waiting-ticket.firebasestorage.app",
+            messagingSenderId: "313045604729",
+            appId: "1:313045604729:web:2599fe60cad2b573bc37a8"
+        };
+
+        // Firebase 초기화
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // 전역 변수로 설정
+        window.firebaseDB = database;
+        window.firebaseRef = ref;
+        window.firebaseSet = set;
+        window.firebasePush = push;
+        window.firebaseOnValue = onValue;
+        window.firebaseRemove = remove;
+        window.firebaseOff = off;
+
+        // Firebase 연결 상태 확인
+        const connectedRef = ref(database, '.info/connected');
+        onValue(connectedRef, (snapshot) => {
+            const connected = snapshot.val();
+            const statusEl = document.getElementById('statusIndicator');
+            if (statusEl) {
+                if (connected) {
+                    statusEl.innerHTML = '🔥 Firebase 연결됨';
+                    statusEl.className = 'status-indicator firebase';
+                } else {
+                    statusEl.innerHTML = '❌ 연결 끊김';
+                    statusEl.className = 'status-indicator offline';
+                }
+            }
+        });
+
+        console.log('🔥 Firebase Functions 연결 키오스크 시작');
+    </script>
+</head>
+<body>
+    <div class="status-indicator" id="statusIndicator">🔄 Firebase 연결 중...</div>
+    
+    <div class="container">
+        <div class="admin-controls">
+            <button class="admin-btn" onclick="showSettings()">⚙️ 과정설정</button>
+            <button class="admin-btn" onclick="showStats()">📊 통계</button>
+        </div>
+        
+        <div class="header">
+            <h1 class="title">🎫 대기번호 발급</h1>
+            <p class="subtitle">상담받을 과정을 선택해 주세요</p>
+        </div>
+
+        <div class="course-selection" id="courseSelection">
+            <h2 class="course-title">📚 상담 과정</h2>
+            <div class="course-grid" id="courseGrid">
+                <!-- 과정들이 동적으로 생성됩니다 -->
+            </div>
+        </div>
+
+        <div class="phone-section" id="phoneSection">
+            <h2 class="phone-title">📱 휴대폰 번호 입력</h2>
+            <div class="phone-input-group">
+                <input type="tel" 
+                       class="phone-input" 
+                       id="phoneInput" 
+                       placeholder="010-0000-0000"
+                       maxlength="13">
+                <div class="phone-help">
+                    알림톡 발송을 위해 휴대폰 번호를 입력해 주세요.<br>
+                    호출 시 카카오톡으로 알림을 받을 수 있습니다.
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="action-btn back-btn" id="backBtn" onclick="goBack()" style="display: none;">
+                ← 뒤로가기
+            </button>
+            <button class="action-btn issue-btn" id="issueBtn" onclick="issueTicket()" disabled>
+                🎫 번호표 발급
+            </button>
+        </div>
+    </div>
+
+    <!-- 로딩 모달 -->
+    <div class="loading" id="loadingModal">
+        <div class="spinner"></div>
+        <div class="loading-text">번호표 발급 중...</div>
+        <div class="loading-sub">알림톡 발송까지 잠시만 기다려 주세요</div>
+    </div>
+
+    <!-- 성공 결과 모달 -->
+    <div class="result-modal" id="resultModal">
+        <div class="result-content">
+            <div class="result-icon">🎉</div>
+            <h2 class="result-title">번호표 발급 완료!</h2>
+            <div class="ticket-number" id="resultTicketNumber">CH001</div>
+            <div class="result-info" id="resultInfo">
+                <strong>중국어 과정</strong><br>
+                현재 대기: <span id="resultWaiting">0</span>명<br>
+                예상 대기시간: 약 <span id="resultTime">5</span>분<br><br>
+                📱 알림톡이 발송되었습니다!<br>
+                호출 시 카카오톡으로 안내해 드립니다.
+            </div>
+            <button class="close-btn" onclick="closeResult()">확인</button>
+        </div>
+    </div>
+
+    <!-- 에러 모달 -->
+    <div class="error-modal" id="errorModal">
+        <div class="error-content">
+            <div class="error-icon">⚠️</div>
+            <h2 class="error-title">오류 발생</h2>
+            <div class="error-message" id="errorMessage">
+                시스템 오류가 발생했습니다.<br>
+                잠시 후 다시 시도해 주세요.
+            </div>
+            <button class="error-btn" onclick="closeError()">확인</button>
+        </div>
+    </div>
+
+    <!-- 설정 모달 -->
+    <div class="settings-modal" id="settingsModal">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h2 class="settings-title">⚙️ 과정 설정</h2>
+                <button class="close-settings" onclick="hideSettings()">×</button>
+            </div>
+            
+            <div class="setting-group">
+                <div class="setting-label">상담 과정 관리</div>
+                <div id="courseInputs">
+                    <!-- 과정 입력 필드들이 여기에 생성됩니다 -->
+                </div>
+                <button class="add-course-btn" onclick="addCourseInput()">+ 과정 추가</button>
+            </div>
+            
+            <button class="save-settings-btn" onclick="saveSettings()">설정 저장</button>
+        </div>
+    </div>
+
+    <script>
+        // 전역 변수
+        let selectedCourse = null;
+        let courses = [
+            { code: 'CH', name: '중국어 과정', englishName: 'Chinese Course', icon: '🇨🇳' },
+            { code: 'EN', name: '영어 과정', englishName: 'English Course', icon: '🇺🇸' },
+            { code: 'HSK', name: 'HSK 시험반', englishName: 'HSK Test Prep', icon: '📚' },
+            { code: 'TO', name: 'TOEIC 집중반', englishName: 'TOEIC Course', icon: '📝' }
+        ];
+
+        let kioskData = {
+            currentNumbers: {}, // 과정별 현재 번호
+            lastDate: new Date().toISOString().split('T')[0], // 마지막 업데이트 날짜
+            totalToday: 0 // 오늘 총 발급 수
+        };
+
+        // Firebase Functions URL
+        const FUNCTIONS_URL = 'https://asia-northeast1-alimtalk-waiting-ticket.cloudfunctions.net';
+
+        // 초기화
+        function initialize() {
+            console.log('🚀 키오스크 시스템 초기화 (Firebase Functions 연결)');
+            
+            // Firebase 리스너 설정
+            setupFirebaseListeners();
+            
+            // 과정 렌더링
+            renderCourses();
+            
+            // 전화번호 입력 이벤트
+            setupPhoneInput();
+            
+            console.log('✅ 키오스크 시스템 초기화 완료');
+        }
+
+        // Firebase 리스너 설정
+        function setupFirebaseListeners() {
+            if (!window.firebaseDB) {
+                console.error('Firebase가 초기화되지 않았습니다.');
+                return;
+            }
+
+            // 키오스크 데이터 구독
+            const kioskRef = window.firebaseRef(window.firebaseDB, 'kioskGlobalSettings');
+            window.firebaseOnValue(kioskRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    console.log('🔥 키오스크 설정 수신:', data);
+                    
+                    if (data.courses) {
+                        courses = data.courses;
+                        renderCourses();
+                    }
+                    
+                    if (data.currentNumbers) {
+                        kioskData.currentNumbers = data.currentNumbers;
+                    }
+                    
+                    if (data.totalToday !== undefined) {
+                        kioskData.totalToday = data.totalToday;
+                    }
+                    
+                    if (data.lastDate) {
+                        kioskData.lastDate = data.lastDate;
+                        checkDateReset();
+                    }
+                } else {
+                    console.log('📭 키오스크 설정 없음 - 기본값 사용');
+                    saveKioskSettings();
+                }
+            });
+        }
+
+        // 날짜 변경 확인 및 리셋
+        function checkDateReset() {
+            const today = new Date().toISOString().split('T')[0];
+            if (kioskData.lastDate !== today) {
+                console.log('📅 날짜 변경 감지 - 번호 초기화');
+                kioskData.currentNumbers = {};
+                kioskData.totalToday = 0;
+                kioskData.lastDate = today;
+                saveKioskSettings();
+            }
+        }
+
+        // 키오스크 설정 저장
+        function saveKioskSettings() {
+            if (!window.firebaseDB) return;
+            
+            const kioskRef = window.firebaseRef(window.firebaseDB, 'kioskGlobalSettings');
+            const data = {
+                courses: courses,
+                currentNumbers: kioskData.currentNumbers,
+                totalToday: kioskData.totalToday,
+                lastDate: kioskData.lastDate,
+                lastUpdated: new Date().toISOString()
+            };
+            
+            window.firebaseSet(kioskRef, data).then(() => {
+                console.log('✅ 키오스크 설정 저장 완료');
+            }).catch((error) => {
+                console.error('❌ 키오스크 설정 저장 실패:', error);
+            });
+        }
+
+        // 과정 렌더링
+        function renderCourses() {
+            const container = document.getElementById('courseGrid');
+            container.innerHTML = '';
+            
+            courses.forEach(course => {
+                const button = document.createElement('button');
+                button.className = 'course-btn';
+                button.onclick = () => selectCourse(course);
+                
+                button.innerHTML = `
+                    <span class="course-icon">${course.icon}</span>
+                    <div class="course-name">${course.name}</div>
+                    <div class="course-desc">${course.englishName || course.code}</div>
+                `;
+                
+                container.appendChild(button);
+            });
+        }
+
+        // 과정 선택
+        function selectCourse(course) {
+            selectedCourse = course;
+            
+            // 모든 버튼에서 selected 클래스 제거
+            document.querySelectorAll('.course-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // 선택된 버튼에 selected 클래스 추가
+            event.target.closest('.course-btn').classList.add('selected');
+            
+            // 전화번호 입력 섹션 표시
+            document.getElementById('phoneSection').classList.add('show');
+            document.getElementById('backBtn').style.display = 'block';
+            
+            // 스크롤 이동
+            document.getElementById('phoneSection').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+            
+            console.log('📚 과정 선택:', course.name);
+        }
+
+        // 전화번호 입력 설정
+        function setupPhoneInput() {
+            const phoneInput = document.getElementById('phoneInput');
+            const issueBtn = document.getElementById('issueBtn');
+            
+            phoneInput.addEventListener('input', function(e) {
+                // 숫자만 입력 허용
+                let value = e.target.value.replace(/[^0-9]/g, '');
+                
+                // 010으로 시작하지 않으면 010 추가
+                if (value.length > 0 && !value.startsWith('010')) {
+                    if (value.startsWith('0')) {
+                        value = '010' + value.substring(1);
+                    } else {
+                        value = '010' + value;
+                    }
+                }
+                
+                // 하이픈 자동 추가
+                if (value.length >= 3) {
+                    value = value.substring(0, 3) + '-' + value.substring(3);
+                }
+                if (value.length >= 8) {
+                    value = value.substring(0, 8) + '-' + value.substring(8);
+                }
+                
+                // 최대 13자 (010-0000-0000)
+                if (value.length > 13) {
+                    value = value.substring(0, 13);
+                }
+                
+                e.target.value = value;
+                
+                // 발급 버튼 활성화/비활성화
+                const isValid = value.length === 13 && value.match(/^010-\d{4}-\d{4}$/);
+                issueBtn.disabled = !isValid;
+            });
+            
+            // 엔터키로 발급
+            phoneInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !issueBtn.disabled) {
+                    issueTicket();
+                }
+            });
+        }
+
+        // 뒤로가기
+        function goBack() {
+            selectedCourse = null;
+            
+            // 모든 버튼에서 selected 클래스 제거
+            document.querySelectorAll('.course-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // 전화번호 섹션 숨기기
+            document.getElementById('phoneSection').classList.remove('show');
+            document.getElementById('backBtn').style.display = 'none';
+            
+            // 입력 초기화
+            document.getElementById('phoneInput').value = '';
+            document.getElementById('issueBtn').disabled = true;
+            
+            // 상단으로 스크롤
+            document.getElementById('courseSelection').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+        }
+
+        // 번호표 발급
+        async function issueTicket() {
+            if (!selectedCourse) {
+                showError('과정을 선택해 주세요.');
+                return;
+            }
+            
+            const phoneNumber = document.getElementById('phoneInput').value;
+            if (!phoneNumber || phoneNumber.length !== 13) {
+                showError('올바른 전화번호를 입력해 주세요.');
+                return;
+            }
+            
+            showLoading(true);
+            
+            try {
+                // 새 번호 생성
+                const ticketNumber = generateTicketNumber(selectedCourse.code);
+                
+                // 대기열에 추가할 데이터
+                const ticketData = {
+                    number: ticketNumber,
+                    course: selectedCourse.name,
+                    phoneNumber: phoneNumber.replace(/-/g, ''), // 하이픈 제거
+                    time: new Date().toLocaleTimeString('ko-KR', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    }),
+                    timestamp: new Date().toISOString(),
+                    courseCode: selectedCourse.code
+                };
+                
+                console.log('🎫 번호표 발급 시도:', ticketData);
+                
+                // Firebase에 대기열 추가
+                await addToWaitingQueue(ticketData);
+                
+                // 대기 인원 계산
+                const waitingCount = await getWaitingCount(selectedCourse.code);
+                
+                // 알림톡 발송 (Firebase Functions)
+                const alimtalkResult = await sendAlimtalk({
+                    ...ticketData,
+                    waitingCount: waitingCount
+                }, 'issue');
+                
+                console.log('📱 알림톡 발송 결과:', alimtalkResult);
+                
+                // 키오스크 데이터 업데이트
+                kioskData.totalToday++;
+                saveKioskSettings();
+                
+                // 성공 결과 표시
+                showResult({
+                    ticketNumber: ticketNumber,
+                    courseName: selectedCourse.name,
+                    waitingCount: waitingCount,
+                    alimtalkSuccess: alimtalkResult.success
+                });
+                
+            } catch (error) {
+                console.error('❌ 번호표 발급 실패:', error);
+                showError('번호표 발급 중 오류가 발생했습니다.<br>잠시 후 다시 시도해 주세요.');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // 번호 생성
+        function generateTicketNumber(courseCode) {
+            checkDateReset();
+            
+            if (!kioskData.currentNumbers[courseCode]) {
+                kioskData.currentNumbers[courseCode] = 0;
+            }
+            
+            kioskData.currentNumbers[courseCode]++;
+            const number = kioskData.currentNumbers[courseCode].toString().padStart(3, '0');
+            
+            return `${courseCode}${number}`;
+        }
+
+        // 대기열에 추가
+        async function addToWaitingQueue(ticketData) {
+            if (!window.firebaseDB) throw new Error('Firebase 연결 없음');
+            
+            // 카운터 시스템에 추가
+            const systemRef = window.firebaseRef(window.firebaseDB, 'counterSystem');
+            const snapshot = await new Promise((resolve, reject) => {
+                window.firebaseOnValue(systemRef, resolve, { onlyOnce: true });
+                setTimeout(() => reject(new Error('Timeout')), 5000);
+            });
+            
+            const systemData = snapshot.val() || {
+                waiting: [],
+                totalToday: 0
+            };
+            
+            // 대기열에 추가
+            systemData.waiting = systemData.waiting || [];
+            systemData.waiting.push(ticketData);
+            systemData.totalToday = (systemData.totalToday || 0) + 1;
+            systemData.lastUpdated = new Date().toISOString();
+            
+            // Firebase에 저장
+            await window.firebaseSet(systemRef, systemData);
+            
+            console.log('✅ 대기열 추가 완료:', ticketData.number);
+        }
+
+        // 대기 인원 계산
+        async function getWaitingCount(courseCode) {
+            try {
+                if (!window.firebaseDB) return 0;
+                
+                const systemRef = window.firebaseRef(window.firebaseDB, 'counterSystem/waiting');
+                const snapshot = await new Promise((resolve, reject) => {
+                    window.firebaseOnValue(systemRef, resolve, { onlyOnce: true });
+                    setTimeout(() => reject(new Error('Timeout')), 3000);
+                });
+                
+                const waiting = snapshot.val() || [];
+                const courseWaiting = waiting.filter(item => 
+                    item.number && item.number.startsWith(courseCode)
+                );
+                
+                return courseWaiting.length;
+            } catch (error) {
+                console.error('❌ 대기 인원 계산 실패:', error);
+                return 0;
+            }
+        }
+
+        // Firebase Functions를 통한 알림톡 발송
+        async function sendAlimtalk(ticketData, notificationType = 'issue') {
             try {
                 console.log('🚀 Firebase Functions 알림톡 발송 시도:', {
                     number: ticketData.number,
@@ -10,9 +1234,9 @@
 
                 const estimatedTime = Math.max(5, (ticketData.waitingCount || 0) * 5);
                 
-                // Firebase Functions 호출 데이터
+                // Firebase Functions 호출 데이터 (솔라피 표준 형식)
                 const functionData = {
-                    phoneNumber: ticketData.phoneNumber,
+                    phoneNumber: ticketData.phoneNumber, // 하이픈 제거된 상태
                     ticketNumber: ticketData.number,
                     courseName: ticketData.course,
                     waitingCount: ticketData.waitingCount || 0,
@@ -28,7 +1252,7 @@
                 console.log('📱 Firebase Functions 호출 데이터:', functionData);
                 
                 // Firebase Functions 호출
-                const response = await fetch('https://asia-northeast1-alimtalk-waiting-ticket.cloudfunctions.net/sendAlimtalk', {
+                const response = await fetch(`${FUNCTIONS_URL}/sendAlimtalk`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -58,3 +1282,234 @@
                 return { success: false, error: error.message };
             }
         }
+
+        // 로딩 표시
+        function showLoading(show) {
+            const loadingModal = document.getElementById('loadingModal');
+            if (show) {
+                loadingModal.classList.add('show');
+            } else {
+                loadingModal.classList.remove('show');
+            }
+        }
+
+        // 성공 결과 표시
+        function showResult(data) {
+            document.getElementById('resultTicketNumber').textContent = data.ticketNumber;
+            document.getElementById('resultWaiting').textContent = data.waitingCount;
+            document.getElementById('resultTime').textContent = Math.max(5, data.waitingCount * 5);
+            
+            // 알림톡 상태에 따른 메시지
+            const resultInfo = document.getElementById('resultInfo');
+            const alimtalkStatus = data.alimtalkSuccess ? 
+                '📱 알림톡이 발송되었습니다!<br>호출 시 카카오톡으로 안내해 드립니다.' :
+                '⚠️ 알림톡 발송에 실패했지만<br>번호표는 정상 발급되었습니다.';
+            
+            resultInfo.innerHTML = `
+                <strong>${data.courseName}</strong><br>
+                현재 대기: <span>${data.waitingCount}</span>명<br>
+                예상 대기시간: 약 <span>${Math.max(5, data.waitingCount * 5)}</span>분<br><br>
+                ${alimtalkStatus}
+            `;
+            
+            document.getElementById('resultModal').classList.add('show');
+        }
+
+        // 결과 닫기
+        function closeResult() {
+            document.getElementById('resultModal').classList.remove('show');
+            
+            // 초기 상태로 복원
+            setTimeout(() => {
+                goBack();
+            }, 300);
+        }
+
+        // 에러 표시
+        function showError(message) {
+            document.getElementById('errorMessage').innerHTML = message;
+            document.getElementById('errorModal').classList.add('show');
+        }
+
+        // 에러 닫기
+        function closeError() {
+            document.getElementById('errorModal').classList.remove('show');
+        }
+
+        // 설정 모달 표시
+        function showSettings() {
+            renderCourseInputs();
+            document.getElementById('settingsModal').classList.add('show');
+        }
+
+        // 설정 모달 숨기기
+        function hideSettings() {
+            document.getElementById('settingsModal').classList.remove('show');
+        }
+
+        // 과정 입력 필드 렌더링
+        function renderCourseInputs() {
+            const container = document.getElementById('courseInputs');
+            container.innerHTML = '';
+            
+            courses.forEach((course, index) => {
+                const div = document.createElement('div');
+                div.className = 'course-input-group';
+                div.innerHTML = `
+                    <input type="text" 
+                           class="course-input" 
+                           placeholder="과정 코드 (예: CH)" 
+                           value="${course.code}"
+                           onchange="updateCourse(${index}, 'code', this.value)">
+                    <input type="text" 
+                           class="course-input" 
+                           placeholder="과정 이름 (예: 중국어 과정)" 
+                           value="${course.name}"
+                           onchange="updateCourse(${index}, 'name', this.value)">
+                    <button class="remove-course-btn" onclick="removeCourse(${index})">삭제</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // 과정 업데이트
+        function updateCourse(index, field, value) {
+            if (courses[index]) {
+                courses[index][field] = value;
+                
+                // 영어 이름 자동 생성
+                if (field === 'name') {
+                    courses[index].englishName = value + ' Course';
+                }
+            }
+        }
+
+        // 과정 제거
+        function removeCourse(index) {
+            if (courses.length > 1) {
+                courses.splice(index, 1);
+                renderCourseInputs();
+            } else {
+                alert('최소 1개의 과정은 필요합니다.');
+            }
+        }
+
+        // 과정 추가
+        function addCourseInput() {
+            const newCourse = {
+                code: '',
+                name: '',
+                englishName: '',
+                icon: '📚'
+            };
+            courses.push(newCourse);
+            renderCourseInputs();
+        }
+
+        // 설정 저장
+        function saveSettings() {
+            // 유효성 검사
+            const isValid = courses.every(course => 
+                course.code.trim() !== '' && course.name.trim() !== ''
+            );
+            
+            if (!isValid) {
+                alert('모든 과정의 코드와 이름을 입력해 주세요.');
+                return;
+            }
+            
+            // 중복 코드 검사
+            const codes = courses.map(c => c.code.trim().toUpperCase());
+            const uniqueCodes = [...new Set(codes)];
+            if (codes.length !== uniqueCodes.length) {
+                alert('과정 코드가 중복됩니다.');
+                return;
+            }
+            
+            // 코드 정리 및 아이콘 설정
+            courses.forEach(course => {
+                course.code = course.code.trim().toUpperCase();
+                course.name = course.name.trim();
+                course.englishName = course.englishName || (course.name + ' Course');
+                if (!course.icon) course.icon = '📚';
+            });
+            
+            // Firebase에 저장
+            saveKioskSettings();
+            
+            // 화면 업데이트
+            renderCourses();
+            hideSettings();
+            
+            // 성공 메시지
+            setTimeout(() => {
+                alert('설정이 저장되었습니다!');
+            }, 300);
+        }
+
+        // 통계 표시
+        function showStats() {
+            const totalToday = kioskData.totalToday || 0;
+            const courseCounts = {};
+            
+            // 과정별 발급 수 계산
+            Object.keys(kioskData.currentNumbers || {}).forEach(code => {
+                const course = courses.find(c => c.code === code);
+                if (course) {
+                    courseCounts[course.name] = kioskData.currentNumbers[code];
+                }
+            });
+            
+            let statsText = `📊 오늘의 통계\n\n`;
+            statsText += `전체 발급: ${totalToday}개\n\n`;
+            statsText += `과정별 현황:\n`;
+            
+            if (Object.keys(courseCounts).length === 0) {
+                statsText += '아직 발급된 번호가 없습니다.';
+            } else {
+                Object.entries(courseCounts).forEach(([name, count]) => {
+                    statsText += `• ${name}: ${count}개\n`;
+                });
+            }
+            
+            alert(statsText);
+        }
+
+        // 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            const resultModal = document.getElementById('resultModal');
+            const errorModal = document.getElementById('errorModal');
+            const settingsModal = document.getElementById('settingsModal');
+            
+            if (event.target === resultModal) {
+                closeResult();
+            }
+            if (event.target === errorModal) {
+                closeError();
+            }
+            if (event.target === settingsModal) {
+                hideSettings();
+            }
+        }
+
+        // 페이지 로드 시 초기화
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initialize);
+        } else {
+            initialize();
+        }
+
+        // 키보드 단축키
+        document.addEventListener('keydown', function(e) {
+            // ESC키로 모달 닫기
+            if (e.key === 'Escape') {
+                closeResult();
+                closeError();
+                hideSettings();
+            }
+        });
+
+        console.log('🎫 키오스크 시스템 로딩 완료 (Firebase Functions 연결)');
+    </script>
+</body>
+</html>
