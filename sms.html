@@ -761,9 +761,9 @@
                 <div class="number-btn" data-number="1">1</div>
                 <div class="number-btn" data-number="2">2</div>
                 <div class="number-btn" data-number="3">3</div>
-                <div class="number-btn" data-number="4">4</div>
-                <div class="number-btn" data-number="5">5</div>
-                <div class="number-btn" data-number="6">6</div>
+                <div class="number-btn" data-number="4" id="btn-4">4</div>
+                <div class="number-btn" data-number="5" id="btn-5">5</div>
+                <div class="number-btn" data-number="6" id="btn-6">6</div>
                 <div class="number-btn" data-number="7">7</div>
                 <div class="number-btn" data-number="8">8</div>
                 <div class="number-btn" data-number="9">9</div>
@@ -942,8 +942,9 @@
             currentPhoneNumber = '010';
         }
 
-        // 번호 추가 (010 고정, 뒤 8자리만 입력)
-        function addNumber(num) {
+        // addNumber 함수를 전역에서 접근 가능하게
+        window.addNumber = function(num) {
+            console.log(`🔢 addNumber 호출됨: ${num}`);
             let inputNumbers = currentPhoneNumber.replace(/[^0-9]/g, '').substring(3);
             
             if (inputNumbers.length < 8) {
@@ -960,6 +961,11 @@
                     }, 300);
                 }
             }
+        };
+
+        // 번호 추가 (기존)
+        function addNumber(num) {
+            window.addNumber(num);
         }
 
         // 번호 삭제
@@ -1339,89 +1345,66 @@
 
         // ================= 터치 이벤트 처리 =================
 
-        // 터치 이벤트 설정 (강력한 디버깅)
+        // 터치 이벤트 설정 (4번 버튼 특별 처리)
         function setupTouchEvents() {
             console.log('🔧 이벤트 설정 시작');
+            
+            // 4번 버튼 특별 확인
+            const btn4_method1 = document.querySelector('[data-number="4"]');
+            const btn4_method2 = document.getElementById('btn-4');
+            const btn4_method3 = document.querySelector('#btn-4');
+            
+            console.log('4번 버튼 찾기 결과:');
+            console.log('방법1 (data-number):', btn4_method1);
+            console.log('방법2 (getElementById):', btn4_method2);
+            console.log('방법3 (querySelector ID):', btn4_method3);
             
             // 모든 버튼 찾기
             const allButtons = document.querySelectorAll('.number-btn');
             console.log('🔍 전체 버튼 개수:', allButtons.length);
             
-            // 각 버튼 확인
+            // 각 버튼에 강제 이벤트 설정
             allButtons.forEach((btn, index) => {
                 const number = btn.getAttribute('data-number');
-                const action = btn.getAttribute('data-action');
-                console.log(`버튼 ${index}: data-number="${number}", data-action="${action}", 텍스트="${btn.textContent}"`);
-            });
-            
-            // 숫자 버튼들 (0-9) - 더 강력한 방법
-            for (let i = 0; i <= 9; i++) {
-                // 방법 1: data-number로 찾기
-                let btn = document.querySelector(`[data-number="${i}"]`);
+                const text = btn.textContent.trim();
                 
-                // 방법 2: 텍스트로 찾기 (백업)
-                if (!btn) {
-                    const allBtns = document.querySelectorAll('.number-btn');
-                    btn = Array.from(allBtns).find(b => b.textContent.trim() === i.toString());
-                }
+                console.log(`버튼 ${index}: "${text}", data-number="${number}"`);
                 
-                if (btn) {
-                    console.log(`✅ ${i}번 버튼 찾음:`, btn);
-                    
-                    // 기존 이벤트 완전 제거
+                if (number && number >= '0' && number <= '9') {
+                    // 모든 이벤트 제거
                     btn.onclick = null;
-                    btn.removeEventListener('click', btn.clickHandler);
-                    btn.removeEventListener('touchend', btn.touchHandler);
                     
-                    // 새 이벤트 핸들러 생성
-                    btn.clickHandler = function() {
-                        console.log(`🔢 ${i} 클릭! (방법1)`);
-                        addNumber(i.toString());
-                    };
+                    // 강제 이벤트 설정
+                    btn.addEventListener('click', function(e) {
+                        console.log(`✨ ${number} 클릭됨!`);
+                        window.addNumber(number);
+                    });
                     
-                    btn.touchHandler = function(e) {
+                    btn.addEventListener('touchend', function(e) {
                         e.preventDefault();
-                        console.log(`👆 ${i} 터치! (방법1)`);
-                        addNumber(i.toString());
-                    };
+                        console.log(`✨ ${number} 터치됨!`);
+                        window.addNumber(number);
+                    });
                     
-                    // 이벤트 등록
-                    btn.addEventListener('click', btn.clickHandler);
-                    btn.addEventListener('touchend', btn.touchHandler);
-                    
-                    // 강제 onclick도 설정
-                    btn.onclick = function() {
-                        console.log(`🔢 ${i} onclick! (방법2)`);
-                        addNumber(i.toString());
-                    };
-                    
-                    // 4, 5, 6번 추가 처리
-                    if (i === 4 || i === 5 || i === 6) {
-                        console.log(`🚨 ${i}번 특별 처리!`);
+                    // 4, 5, 6번 추가 이벤트
+                    if (number === '4' || number === '5' || number === '6') {
+                        console.log(`🚨 ${number}번 추가 이벤트 설정!`);
                         
-                        // 모든 가능한 이벤트 추가
-                        btn.addEventListener('mousedown', function() {
-                            console.log(`🖱️ ${i} 마우스다운!`);
-                            addNumber(i.toString());
+                        btn.addEventListener('mousedown', function(e) {
+                            console.log(`🖱️ ${number} 마우스!`);
+                            window.addNumber(number);
                         });
                         
-                        btn.addEventListener('pointerdown', function() {
-                            console.log(`👆 ${i} 포인터다운!`);
-                            addNumber(i.toString());
+                        btn.addEventListener('pointerdown', function(e) {
+                            console.log(`👆 ${number} 포인터!`);
+                            window.addNumber(number);
                         });
                         
-                        btn.addEventListener('touchstart', function() {
-                            console.log(`👆 ${i} 터치스타트!`);
-                        });
-                        
-                        // 인라인으로도 설정
-                        btn.setAttribute('onclick', `console.log('인라인 ${i} 클릭!'); addNumber('${i}');`);
+                        // 인라인 이벤트도 설정
+                        btn.setAttribute('onclick', `console.log('인라인 ${number}!'); window.addNumber('${number}');`);
                     }
-                    
-                } else {
-                    console.error(`❌ ${i}번 버튼 못 찾음!`);
                 }
-            }
+            });
             
             console.log('✅ 이벤트 설정 완료');
         }
