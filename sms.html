@@ -718,11 +718,11 @@
                         <h4>📝 발급완료 알림</h4>
                         <div class="template-content">
                             [순번대기표 발급완료]<br>
-                            대기번호: #ticketNumber<br>
-                            과정: #courseName<br>
-                            발급시간: #issueTime<br>
-                            현재 대기: #waitingCount명<br>
-                            예상 대기시간: 약 #estimatedTime분<br>
+                            대기번호: #{ticketNumber}<br>
+                            과정: #{courseName}<br>
+                            발급시간: #{issueTime}<br>
+                            현재 대기: #{waitingCount}명<br>
+                            예상 대기시간: 약 #{estimatedTime}분<br>
                             호출 시 다시 알려드립니다.
                         </div>
                     </div>
@@ -731,9 +731,9 @@
                         <h4>⏰ 곧 호출예정 알림</h4>
                         <div class="template-content">
                             [곧 호출예정]<br>
-                            대기번호: #ticketNumber<br>
-                            과정: #courseName<br>
-                            앞으로 #waitingCount명 남았습니다.<br>
+                            대기번호: #{ticketNumber}<br>
+                            과정: #{courseName}<br>
+                            앞으로 #{waitingCount}명 남았습니다.<br>
                             준비해주세요!
                         </div>
                     </div>
@@ -742,10 +742,10 @@
                         <h4>📢 호출알림</h4>
                         <div class="template-content">
                             [호출알림]<br>
-                            대기번호: #ticketNumber<br>
-                            #counterNumber번 창구로 와주세요!<br>
-                            과정: #courseName<br>
-                            호출시간: #callTime
+                            대기번호: #{ticketNumber}<br>
+                            #{counterNumber}번 창구로 와주세요!<br>
+                            과정: #{courseName}<br>
+                            호출시간: #{callTime}
                         </div>
                     </div>
                 </div>
@@ -862,7 +862,7 @@
             { code: 'TO', name: 'TOEIC 집중반' }
         ];
 
-        // 솔라피 알림톡 설정
+        // 메시지 템플릿 미리보기 (솔라피 형식으로 수정)
         let smsSettings = {
             solapiApiKey: 'NCSRVLD2FFGTEK7B',
             solapiSecret: 'IYLPMGODFSDJA3Y88QZDHBQYG6XYCNV8',
@@ -874,9 +874,9 @@
                 call: ''
             },
             messageTemplates: {
-                issue: '[순번대기표 발급완료]\n대기번호: #ticketNumber\n과정: #courseName\n발급시간: #issueTime\n현재 대기: #waitingCount명\n예상 대기시간: 약 #estimatedTime분\n호출 시 다시 알려드립니다.',
-                ready: '[곧 호출예정]\n대기번호: #ticketNumber\n과정: #courseName\n앞으로 #waitingCount명 남았습니다.\n준비해주세요!',
-                call: '[호출알림]\n대기번호: #ticketNumber\n#counterNumber번 창구로 와주세요!\n과정: #courseName\n호출시간: #callTime'
+                issue: '[순번대기표 발급완료]\n대기번호: #{ticketNumber}\n과정: #{courseName}\n발급시간: #{issueTime}\n현재 대기: #{waitingCount}명\n예상 대기시간: 약 #{estimatedTime}분\n호출 시 다시 알려드립니다.',
+                ready: '[곧 호출예정]\n대기번호: #{ticketNumber}\n과정: #{courseName}\n앞으로 #{waitingCount}명 남았습니다.\n준비해주세요!',
+                call: '[호출알림]\n대기번호: #{ticketNumber}\n#{counterNumber}번 창구로 와주세요!\n과정: #{courseName}\n호출시간: #{callTime}'
             },
             autoSend: false,
             testMode: false,
@@ -1111,7 +1111,7 @@
             };
         }
 
-        // 솔라피 알림톡 발송 (수정된 버전)
+        // 솔라피 알림톡 발송 (올바른 구조로 수정)
         async function sendSolapi(ticketData, notificationType = 'issue') {
             if (!smsSettings.solapiApiKey || !smsSettings.solapiSecret || !smsSettings.senderNumber) {
                 console.log('⚠️ 솔라피 설정이 완료되지 않았습니다.');
@@ -1120,50 +1120,62 @@
             
             try {
                 const templateCode = smsSettings.templates[notificationType];
-                const messageTemplate = smsSettings.messageTemplates[notificationType];
                 
-                if (!templateCode || !messageTemplate) {
+                if (!templateCode) {
                     throw new Error(`템플릿 설정이 없습니다: ${notificationType}`);
                 }
                 
                 const estimatedTime = Math.max(5, (ticketData.waitingCount || 0) * 5);
                 
-                const message = messageTemplate
-                    .replace(/#ticketNumber/g, ticketData.number)
-                    .replace(/#courseName/g, ticketData.course)
-                    .replace(/#issueTime/g, ticketData.time)
-                    .replace(/#waitingCount/g, ticketData.waitingCount || 0)
-                    .replace(/#estimatedTime/g, estimatedTime)
-                    .replace(/#counterNumber/g, ticketData.counterNumber || '')
-                    .replace(/#callTime/g, ticketData.callTime || '');
+                // 변수 객체 생성 (솔라피 형식: #{변수명})
+                const variables = {};
+                
+                if (notificationType === 'issue') {
+                    variables['#{ticketNumber}'] = ticketData.number;
+                    variables['#{courseName}'] = ticketData.course;
+                    variables['#{issueTime}'] = ticketData.time;
+                    variables['#{waitingCount}'] = String(ticketData.waitingCount || 0);
+                    variables['#{estimatedTime}'] = String(estimatedTime);
+                } else if (notificationType === 'ready') {
+                    variables['#{ticketNumber}'] = ticketData.number;
+                    variables['#{courseName}'] = ticketData.course;
+                    variables['#{waitingCount}'] = String(ticketData.waitingCount || 0);
+                } else if (notificationType === 'call') {
+                    variables['#{ticketNumber}'] = ticketData.number;
+                    variables['#{counterNumber}'] = String(ticketData.counterNumber || '');
+                    variables['#{courseName}'] = ticketData.course;
+                    variables['#{callTime}'] = ticketData.callTime || '';
+                }
                 
                 if (smsSettings.testMode) {
                     console.log('🧪 테스트 모드 - 실제 발송 없이 로그만 기록');
                     console.log('📋 테스트 데이터:', {
                         type: notificationType,
-                        to: ticketData.phoneNumber,
-                        from: smsSettings.senderNumber,
-                        message: message,
-                        templateCode: templateCode
+                        to: ticketData.phoneNumber.replace(/^010/, '010'),
+                        from: smsSettings.senderNumber.replace(/-/g, ''),
+                        templateCode: templateCode,
+                        variables: variables
                     });
                     return { 
                         success: true, 
                         messageId: 'TEST_' + Date.now(),
                         testMode: true,
-                        message: message
+                        variables: variables
                     };
                 }
                 
-                // 솔라피 API 요청 데이터
+                // 솔라피 알림톡 발송 데이터 (올바른 구조)
                 const solapiData = {
-                    message: {
-                        to: ticketData.phoneNumber,
-                        from: smsSettings.senderNumber,
-                        text: message
+                    to: ticketData.phoneNumber.replace(/^010/, '010').replace(/-/g, ''), // 01012345678 형식
+                    from: smsSettings.senderNumber.replace(/-/g, ''), // 하이픈 제거
+                    kakaoOptions: {
+                        pfId: smsSettings.kakaoChannelId,
+                        templateId: templateCode,
+                        variables: variables
                     }
                 };
                 
-                console.log('📱 솔라피 발송 시도:', solapiData);
+                console.log('📱 솔라피 알림톡 발송 시도:', solapiData);
                 
                 // HMAC-SHA256 인증 헤더 생성
                 const headers = await generateSolapiAuthHeader(smsSettings.solapiApiKey, smsSettings.solapiSecret);
@@ -1179,10 +1191,10 @@
                 console.log('📨 솔라피 응답:', result);
                 
                 if (response.ok) {
-                    console.log('✅ 솔라피 발송 성공:', result);
+                    console.log('✅ 솔라피 알림톡 발송 성공:', result);
                     return { success: true, ...result };
                 } else {
-                    console.error('❌ 솔라피 발송 실패:', result);
+                    console.error('❌ 솔라피 알림톡 발송 실패:', result);
                     return { 
                         success: false, 
                         error: result.errorMessage || result.message || 'Unknown error',
@@ -1192,7 +1204,7 @@
                 }
                 
             } catch (error) {
-                console.error('❌ 솔라피 발송 오류:', error);
+                console.error('❌ 솔라피 알림톡 발송 오류:', error);
                 return { success: false, error: error.message };
             }
         }
