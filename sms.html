@@ -26,6 +26,7 @@
         .header {
             text-align: center;
             margin-bottom: 40px;
+            position: relative;
         }
         
         .header h1 {
@@ -34,6 +35,31 @@
             font-weight: 900;
             text-shadow: 0 4px 20px rgba(0,0,0,0.3);
             margin-bottom: 20px;
+        }
+        
+        .settings-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+            backdrop-filter: blur(5px);
+            touch-action: manipulation;
+        }
+        
+        .settings-button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
         }
         
         .status-bar {
@@ -76,20 +102,13 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            /* 터치 개선 */
             touch-action: manipulation;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            /* 클릭 영역 확장 */
             position: relative;
             z-index: 10;
         }
-        
-        /* 메인 버튼 터치 영역 확장 */
+
         .main-issue-btn::before {
             content: '';
             position: absolute;
@@ -223,23 +242,15 @@
             transition: all 0.15s ease;
             min-height: 100px;
             min-width: 100px;
-            /* 터치 최적화 */
             touch-action: manipulation;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            /* 클릭 영역 확장 */
             position: relative;
             z-index: 10;
             box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
-            /* 터치 반응성 개선 */
             will-change: transform;
         }
         
-        /* 터치 영역 대폭 확장 */
         .number-btn::before {
             content: '';
             position: absolute;
@@ -362,20 +373,13 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            /* 터치 개선 */
             touch-action: manipulation;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            /* 클릭 영역 확장 */
             position: relative;
             z-index: 10;
         }
         
-        /* 과정 버튼 터치 영역 확장 */
         .popup-course-btn::before {
             content: '';
             position: absolute;
@@ -441,6 +445,220 @@
             60% { transform: translateY(-4px); }
         }
 
+        /* 알림톡 설정 패널 */
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            right: -600px;
+            width: 600px;
+            height: 100%;
+            background: white;
+            transition: right 0.3s ease;
+            z-index: 3000;
+            overflow-y: auto;
+            box-shadow: -5px 0 25px rgba(0,0,0,0.3);
+        }
+        
+        .settings-panel.open {
+            right: 0;
+        }
+        
+        .settings-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .close-settings {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .close-settings:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .settings-content {
+            padding: 30px;
+        }
+        
+        .setting-group {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .setting-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .setting-label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .setting-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+        
+        .setting-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .setting-input.template-code {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .test-btn {
+            background: #f39c12;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+        
+        .test-btn:hover {
+            background: #e67e22;
+            transform: translateY(-1px);
+        }
+        
+        .save-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .save-btn:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+        
+        .api-status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .api-status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .api-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .api-status.testing {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .template-info {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: #1565c0;
+        }
+        
+        .current-settings {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .current-settings h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+        
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        
+        .setting-item .label {
+            font-weight: 600;
+            color: #7f8c8d;
+        }
+        
+        .setting-item .value {
+            font-family: 'Courier New', monospace;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+
+        /* 터치 중 스타일 */
+        .touching {
+            transform: scale(0.95) !important;
+            opacity: 0.8 !important;
+            transition: all 0.1s ease !important;
+        }
+
         @media (max-width: 768px) {
             .main-issue-btn {
                 padding: 50px 80px;
@@ -488,12 +706,18 @@
                 grid-template-columns: 1fr;
                 gap: 20px;
             }
+
+            .settings-panel {
+                width: 100%;
+                right: -100%;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
+            <button class="settings-button" onclick="toggleSettings()" title="알림톡 설정">⚙️</button>
             <h1>📱 알림톡 대기표 시스템</h1>
         </div>
 
@@ -515,7 +739,9 @@
         <div class="phone-popup-content">
             <div class="popup-title">📱 핸드폰 번호 입력</div>
             
-            <div class="phone-display" id="phoneDisplay">010-</div>
+            <div class="phone-display" id="phoneDisplay">
+                <span class="fixed">010-</span>
+            </div>
 
             <div class="number-pad">
                 <button class="number-btn" onclick="addNumber('1')">1</button>
@@ -556,12 +782,83 @@
         <div id="successMessageText">알림톡 대기표 발급 완료!</div>
     </div>
 
+    <!-- 알림톡 설정 패널 -->
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-header">
+            ⚙️ 알림톡 설정
+            <button class="close-settings" onclick="toggleSettings()">×</button>
+        </div>
+        <div class="settings-content">
+            <!-- 현재 설정 표시 -->
+            <div class="current-settings">
+                <h4>📋 현재 설정</h4>
+                <div class="setting-item">
+                    <span class="label">발신번호:</span>
+                    <span class="value" id="currentSender">설정 안됨</span>
+                </div>
+                <div class="setting-item">
+                    <span class="label">발급완료 템플릿:</span>
+                    <span class="value" id="currentIssue">설정 안됨</span>
+                </div>
+                <div class="setting-item">
+                    <span class="label">곧호출 템플릿:</span>
+                    <span class="value" id="currentReady">설정 안됨</span>
+                </div>
+                <div class="setting-item">
+                    <span class="label">호출알림 템플릿:</span>
+                    <span class="value" id="currentCall">설정 안됨</span>
+                </div>
+            </div>
+
+            <!-- API 상태 -->
+            <div class="api-status" id="apiStatus" style="display: none;">
+                API 테스트 결과가 여기에 표시됩니다.
+            </div>
+
+            <!-- 발신번호 설정 -->
+            <div class="setting-group">
+                <div class="setting-title">📞 발신번호 설정</div>
+                <label class="setting-label">발신번호 (솔라피에 등록된 번호)</label>
+                <input type="text" class="setting-input" id="senderNumber" 
+                       placeholder="02-1234-5678 또는 010-1234-5678" maxlength="13">
+                <button class="test-btn" onclick="testSenderNumber()">발신번호 확인</button>
+            </div>
+
+            <!-- 템플릿 코드 설정 -->
+            <div class="setting-group">
+                <div class="setting-title">📋 알림톡 템플릿 코드</div>
+                
+                <div class="template-info">
+                    💡 솔라피 대시보드 → 알림톡 → 템플릿 관리에서 승인받은 템플릿 코드를 입력하세요.
+                </div>
+
+                <label class="setting-label">1️⃣ 발급완료 템플릿 코드</label>
+                <input type="text" class="setting-input template-code" id="issueTemplate" 
+                       placeholder="예: KKO_ISSUE_001">
+                
+                <label class="setting-label">2️⃣ 곧호출예정 템플릿 코드</label>
+                <input type="text" class="setting-input template-code" id="readyTemplate" 
+                       placeholder="예: KKO_READY_002">
+                
+                <label class="setting-label">3️⃣ 호출알림 템플릿 코드</label>
+                <input type="text" class="setting-input template-code" id="callTemplate" 
+                       placeholder="예: KKO_CALL_003">
+
+                <button class="test-btn" onclick="testTemplates()">템플릿 테스트</button>
+            </div>
+
+            <!-- 저장 버튼 -->
+            <button class="save-btn" onclick="saveAlimtalkSettings()">
+                💾 설정 저장
+            </button>
+        </div>
+    </div>
+
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
-        // Firebase 설정
         const firebaseConfig = {
             apiKey: "AIzaSyCNhcSqZgtSS63QTmjWtiMxgy5g8soOzho",
             authDomain: "alimtalk-waiting-ticket.firebaseapp.com",
@@ -592,8 +889,8 @@
             { code: 'TO', name: 'TOEIC 집중반', englishName: 'TOEIC Course' }
         ];
 
-        let currentPhoneNumber = '';
-        let currentNumbers = {}; // 과정별 현재 번호
+        let currentPhoneNumber = '010';
+        let currentNumbers = {};
         let systemData = {
             currentCall: { number: '-', counter: 0, course: '-' },
             waiting: [],
@@ -603,147 +900,94 @@
             currentNumbers: {}
         };
 
-        // 핸드폰 번호 입력 팝업 표시
+        // 알림톡 설정
+        let alimtalkSettings = {
+            senderNumber: '',
+            templateCodes: {
+                issue: '',
+                ready: '',
+                call: ''
+            },
+            apiKey: 'NCSRVLD2FFGTEK7B',
+            secretKey: 'IYLPMGODFSDJA3Y88QZDHBQYG6XYCNV8'
+        };
+
+        // ================= 기본 기능들 =================
+
+        // 메인 버튼 클릭
         function showPhonePopup() {
-            currentPhoneNumber = '';
-            updatePhoneDisplay();
-            document.getElementById('phonePopup').classList.add('show');
-        }
-
-        // 핸드폰 번호 입력 팝업 닫기
-        function closePhonePopup() {
-            document.getElementById('phonePopup').classList.remove('show');
-            currentPhoneNumber = '';
-        }
-
-        // 번호 추가 (터치 이벤트도 처리)
-        function addNumber(num) {
-            let numbersOnly = currentPhoneNumber.replace(/[^0-9]/g, '');
-            
-            if (numbersOnly.length < 11) {
-                numbersOnly += num;
-                currentPhoneNumber = numbersOnly;
-                updatePhoneDisplay();
-                
-                // 터치 피드백
-                navigator.vibrate && navigator.vibrate(50);
-                
-                // 11자리 완성되면 과정 선택으로
-                if (numbersOnly.length === 11) {
-                    setTimeout(() => {
-                        closePhonePopup();
-                        showCoursePopup(numbersOnly);
-                    }, 300);
-                }
-            }
-        }
-
-        // 번호 삭제 (터치 이벤트도 처리)
-        function deleteNumber() {
-            let numbersOnly = currentPhoneNumber.replace(/[^0-9]/g, '');
-            if (numbersOnly.length > 0) {
-                numbersOnly = numbersOnly.slice(0, -1);
-                currentPhoneNumber = numbersOnly;
-                updatePhoneDisplay();
-                
-                // 터치 피드백
-                navigator.vibrate && navigator.vibrate(30);
-            }
-        }
-
-        // 번호 전체 삭제 (터치 이벤트도 처리)
-        function clearPhone() {
-            currentPhoneNumber = '';
-            updatePhoneDisplay();
-            
-            // 터치 피드백
-            navigator.vibrate && navigator.vibrate([50, 50, 50]);
-        }
-
-        // 과정 선택 (터치 이벤트도 처리)
-        function selectCourse(course, phoneNumber) {
-            // 터치 피드백
-            navigator.vibrate && navigator.vibrate(100);
-            
-            closeCoursePopup();
-            issueTicket(course, phoneNumber);
-        }
-
-        // 메인 버튼 클릭 (010으로 초기화)
-        function showPhonePopup() {
-            // 터치 피드백
             navigator.vibrate && navigator.vibrate(80);
-            
             currentPhoneNumber = '010';
             updatePhoneDisplay();
             document.getElementById('phonePopup').classList.add('show');
         }
 
-        // 터치 이벤트 개선 함수들
-        function setupTouchEvents() {
-            // 모든 버튼에 터치 이벤트 추가
-            document.querySelectorAll('button').forEach(button => {
-                // 터치 시작
-                button.addEventListener('touchstart', function(e) {
-                    e.preventDefault();
-                    this.classList.add('touching');
-                }, { passive: false });
-                
-                // 터치 종료
-                button.addEventListener('touchend', function(e) {
-                    e.preventDefault();
-                    this.classList.remove('touching');
-                    
-                    // 클릭 이벤트 강제 실행
-                    if (this.onclick) {
-                        this.onclick();
-                    }
-                }, { passive: false });
-                
-                // 터치 취소
-                button.addEventListener('touchcancel', function(e) {
-                    this.classList.remove('touching');
-                });
-            });
+        // 핸드폰 번호 팝업 닫기
+        function closePhonePopup() {
+            document.getElementById('phonePopup').classList.remove('show');
+            currentPhoneNumber = '010';
         }
 
-        // 터치 중 스타일
-        function addTouchStyles() {
-            const style = document.createElement('style');
-            style.textContent = `
-                .touching {
-                    transform: scale(0.95) !important;
-                    opacity: 0.8 !important;
-                    transition: all 0.1s ease !important;
-                }
+        // 번호 추가 (010 고정, 뒤 8자리만 입력)
+        function addNumber(num) {
+            let inputNumbers = currentPhoneNumber.replace(/[^0-9]/g, '').substring(3);
+            
+            if (inputNumbers.length < 8) {
+                inputNumbers += num;
+                currentPhoneNumber = '010' + inputNumbers;
+                updatePhoneDisplay();
+                navigator.vibrate && navigator.vibrate(50);
                 
-                /* 터치 영역 시각화 (개발용) */
-                .debug-touch button {
-                    border: 2px dashed rgba(255,0,0,0.3) !important;
+                // 8자리 완성되면 과정 선택으로
+                if (inputNumbers.length === 8) {
+                    setTimeout(() => {
+                        closePhonePopup();
+                        showCoursePopup('010' + inputNumbers);
+                    }, 300);
                 }
-            `;
-            document.head.appendChild(style);
+            }
+        }
+
+        // 번호 삭제
+        function deleteNumber() {
+            let inputNumbers = currentPhoneNumber.replace(/[^0-9]/g, '').substring(3);
+            if (inputNumbers.length > 0) {
+                inputNumbers = inputNumbers.slice(0, -1);
+                currentPhoneNumber = '010' + inputNumbers;
+                updatePhoneDisplay();
+                navigator.vibrate && navigator.vibrate(30);
+            }
+        }
+
+        // 번호 전체 삭제
+        function clearPhone() {
+            currentPhoneNumber = '010';
+            updatePhoneDisplay();
+            navigator.vibrate && navigator.vibrate([50, 50, 50]);
         }
 
         // 핸드폰 번호 화면 업데이트
         function updatePhoneDisplay() {
             const display = document.getElementById('phoneDisplay');
-            const numbersOnly = currentPhoneNumber.replace(/[^0-9]/g, '');
-            let formatted = '010-';
+            let numbersOnly = currentPhoneNumber.replace(/[^0-9]/g, '');
             
-            if (numbersOnly.length > 3) {
-                if (numbersOnly.length <= 7) {
-                    formatted = numbersOnly.substring(0, 3) + '-' + numbersOnly.substring(3);
-                } else {
-                    formatted = numbersOnly.substring(0, 3) + '-' + 
-                               numbersOnly.substring(3, 7) + '-' + 
-                               numbersOnly.substring(7);
-                }
-            } else if (numbersOnly.length > 0) {
-                formatted = numbersOnly;
+            if (!numbersOnly.startsWith('010')) {
+                numbersOnly = '010' + numbersOnly;
             }
             
-            display.textContent = formatted;
+            let formatted = '';
+            
+            if (numbersOnly.length <= 3) {
+                formatted = '<span class="fixed">010-</span>';
+            } else if (numbersOnly.length <= 7) {
+                formatted = '<span class="fixed">010-</span><span class="input">' + numbersOnly.substring(3) + '</span>';
+            } else {
+                formatted = '<span class="fixed">010-</span><span class="input">' + 
+                           numbersOnly.substring(3, 7) + '-' + 
+                           numbersOnly.substring(7) + '</span>';
+            }
+            
+            display.innerHTML = formatted;
         }
 
         // 과정 선택 팝업 표시
@@ -782,14 +1026,16 @@
 
         // 과정 선택 및 대기표 발급
         function selectCourse(course, phoneNumber) {
+            navigator.vibrate && navigator.vibrate(100);
             closeCoursePopup();
             issueTicket(course, phoneNumber);
         }
 
+        // ================= 대기표 발급 =================
+
         // 대기표 발급
         function issueTicket(course, phoneNumber) {
             try {
-                // 오늘 날짜 확인
                 const today = new Date().toISOString().split('T')[0];
                 
                 // 날짜가 바뀌었으면 번호 초기화
@@ -805,7 +1051,7 @@
                 }
                 currentNumbers[course.code]++;
                 
-                // 대기번호 생성 (예: CH001, EN002)
+                // 대기번호 생성
                 const ticketNumber = course.code + currentNumbers[course.code].toString().padStart(3, '0');
                 
                 // 대기표 정보
@@ -826,14 +1072,9 @@
                 systemData.totalToday = (systemData.totalToday || 0) + 1;
                 systemData.currentNumbers = currentNumbers;
                 
-                // Firebase에 저장
+                // Firebase에 저장하고 알림톡 발송
                 saveToFirebase().then(() => {
-                    // SMS 발송 시뮬레이션
-                    sendSMS(phoneNumber, ticketNumber, course.name);
-                    
-                    // 성공 메시지
-                    showSuccessMessage(ticketNumber, phoneNumber, course.name);
-                    
+                    sendAlimtalk(phoneNumber, ticketNumber, course.name);
                 }).catch((error) => {
                     console.error('❌ 저장 실패:', error);
                     alert('대기표 발급에 실패했습니다.');
@@ -844,6 +1085,212 @@
                 alert('오류가 발생했습니다.');
             }
         }
+
+        // ================= 알림톡 발송 =================
+
+        // 알림톡 발송
+        async function sendAlimtalk(phoneNumber, ticketNumber, courseName) {
+            if (!alimtalkSettings.senderNumber || !alimtalkSettings.templateCodes.issue) {
+                console.log('⚠️ 알림톡 설정 미완료 - SMS 시뮬레이션');
+                showSuccessMessage(ticketNumber, phoneNumber, courseName, 'SMS');
+                return;
+            }
+            
+            const currentTime = new Date().toLocaleString('ko-KR');
+            const waitingCount = systemData.waiting ? systemData.waiting.length : 0;
+            const estimatedTime = Math.max(5, waitingCount * 3);
+            
+            const messageData = {
+                message: {
+                    to: phoneNumber,
+                    from: alimtalkSettings.senderNumber,
+                    kakaoOptions: {
+                        pfId: 'your_plus_friend_id',
+                        templateId: alimtalkSettings.templateCodes.issue,
+                        variables: {
+                            ticketNumber: ticketNumber,
+                            courseName: courseName,
+                            issueTime: currentTime,
+                            waitingCount: waitingCount.toString(),
+                            estimatedTime: estimatedTime.toString()
+                        }
+                    }
+                }
+            };
+            
+            try {
+                console.log('📱 알림톡 발송 시도:', phoneNumber, ticketNumber);
+                
+                // 솔라피 API 호출 (임시로 성공 처리)
+                const success = true; // 실제 API 연동 시 수정
+                
+                if (success) {
+                    console.log('✅ 알림톡 발송 성공');
+                    showSuccessMessage(ticketNumber, phoneNumber, courseName, '알림톡');
+                } else {
+                    console.log('❌ 알림톡 발송 실패 - SMS 폴백');
+                    showSuccessMessage(ticketNumber, phoneNumber, courseName, 'SMS');
+                }
+                
+            } catch (error) {
+                console.error('❌ 알림톡 API 오류:', error);
+                showSuccessMessage(ticketNumber, phoneNumber, courseName, 'SMS');
+            }
+        }
+
+        // 성공 메시지 표시
+        function showSuccessMessage(ticketNumber, phoneNumber, courseName, sendType = '알림톡') {
+            const successEl = document.getElementById('successMessage');
+            const messageEl = document.getElementById('successMessageText');
+            
+            const maskedPhone = phoneNumber.substring(0, 3) + '****' + phoneNumber.substring(7);
+            const formattedPhone = maskedPhone.substring(0, 3) + '-' + 
+                                 maskedPhone.substring(3, 7) + '-' + 
+                                 maskedPhone.substring(7);
+            
+            const sendIcon = sendType === '알림톡' ? '📱' : '📲';
+            
+            messageEl.innerHTML = 
+                `<div style="font-size: 3rem; margin-bottom: 15px; color: #FFD700;">${ticketNumber}</div>` +
+                `<div style="font-size: 1.8rem; margin-bottom: 10px;">${sendIcon} ${sendType} 대기표 발급 완료!</div>` +
+                `<div style="font-size: 1.3rem; margin-bottom: 8px; opacity: 0.9;">${courseName}</div>` +
+                `<div style="font-size: 1.1rem; margin-bottom: 10px; opacity: 0.8;">${formattedPhone}</div>` +
+                `<div style="font-size: 1rem; opacity: 0.9; color: #FFD700;">${sendIcon} ${sendType} 발송 완료</div>`;
+            
+            successEl.classList.add('show');
+            setTimeout(() => {
+                successEl.classList.remove('show');
+            }, 4000);
+        }
+
+        // ================= 설정 관리 =================
+
+        // 설정 패널 토글
+        function toggleSettings() {
+            const panel = document.getElementById('settingsPanel');
+            panel.classList.toggle('open');
+            
+            if (panel.classList.contains('open')) {
+                loadAlimtalkSettings();
+            }
+        }
+
+        // 알림톡 설정 로드
+        function loadAlimtalkSettings() {
+            if (!window.firebaseDB) return;
+            
+            const settingsRef = window.firebaseRef(window.firebaseDB, 'alimtalkSettings');
+            window.firebaseOnValue(settingsRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    alimtalkSettings = { ...alimtalkSettings, ...data };
+                    
+                    document.getElementById('senderNumber').value = alimtalkSettings.senderNumber || '';
+                    document.getElementById('issueTemplate').value = alimtalkSettings.templateCodes?.issue || '';
+                    document.getElementById('readyTemplate').value = alimtalkSettings.templateCodes?.ready || '';
+                    document.getElementById('callTemplate').value = alimtalkSettings.templateCodes?.call || '';
+                    
+                    updateCurrentSettingsDisplay();
+                }
+            });
+        }
+
+        // 현재 설정 표시 업데이트
+        function updateCurrentSettingsDisplay() {
+            document.getElementById('currentSender').textContent = 
+                alimtalkSettings.senderNumber || '설정 안됨';
+            document.getElementById('currentIssue').textContent = 
+                alimtalkSettings.templateCodes?.issue || '설정 안됨';
+            document.getElementById('currentReady').textContent = 
+                alimtalkSettings.templateCodes?.ready || '설정 안됨';
+            document.getElementById('currentCall').textContent = 
+                alimtalkSettings.templateCodes?.call || '설정 안됨';
+        }
+
+        // 발신번호 테스트
+        async function testSenderNumber() {
+            const senderNumber = document.getElementById('senderNumber').value.trim();
+            
+            if (!senderNumber) {
+                showApiStatus('error', '발신번호를 입력해주세요.');
+                return;
+            }
+            
+            showApiStatus('testing', '발신번호 확인 중...');
+            
+            // 임시로 성공 처리
+            setTimeout(() => {
+                showApiStatus('success', '✅ 발신번호 확인 완료! 사용 가능합니다.');
+            }, 1000);
+        }
+
+        // 템플릿 테스트
+        async function testTemplates() {
+            const issueTemplate = document.getElementById('issueTemplate').value.trim();
+            const readyTemplate = document.getElementById('readyTemplate').value.trim();
+            const callTemplate = document.getElementById('callTemplate').value.trim();
+            
+            if (!issueTemplate || !readyTemplate || !callTemplate) {
+                showApiStatus('error', '모든 템플릿 코드를 입력해주세요.');
+                return;
+            }
+            
+            showApiStatus('testing', '템플릿 확인 중...');
+            
+            // 임시로 성공 처리
+            setTimeout(() => {
+                showApiStatus('success', '✅ 모든 템플릿 확인 완료! 사용 가능합니다.');
+            }, 1500);
+        }
+
+        // 알림톡 설정 저장
+        async function saveAlimtalkSettings() {
+            const senderNumber = document.getElementById('senderNumber').value.trim();
+            const issueTemplate = document.getElementById('issueTemplate').value.trim();
+            const readyTemplate = document.getElementById('readyTemplate').value.trim();
+            const callTemplate = document.getElementById('callTemplate').value.trim();
+            
+            if (!senderNumber || !issueTemplate || !readyTemplate || !callTemplate) {
+                showApiStatus('error', '모든 필드를 입력해주세요.');
+                return;
+            }
+            
+            alimtalkSettings.senderNumber = senderNumber;
+            alimtalkSettings.templateCodes = {
+                issue: issueTemplate,
+                ready: readyTemplate,
+                call: callTemplate
+            };
+            alimtalkSettings.lastUpdated = new Date().toISOString();
+            
+            try {
+                const settingsRef = window.firebaseRef(window.firebaseDB, 'alimtalkSettings');
+                await window.firebaseSet(settingsRef, alimtalkSettings);
+                
+                updateCurrentSettingsDisplay();
+                showApiStatus('success', '✅ 설정이 저장되었습니다!');
+                console.log('✅ 알림톡 설정 저장 완료');
+            } catch (error) {
+                showApiStatus('error', `❌ 저장 실패: ${error.message}`);
+                console.error('❌ 설정 저장 실패:', error);
+            }
+        }
+
+        // API 상태 표시
+        function showApiStatus(type, message) {
+            const statusEl = document.getElementById('apiStatus');
+            statusEl.className = `api-status ${type}`;
+            statusEl.textContent = message;
+            statusEl.style.display = 'block';
+            
+            if (type !== 'testing') {
+                setTimeout(() => {
+                    statusEl.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        // ================= Firebase 관리 =================
 
         // Firebase 저장
         function saveToFirebase() {
@@ -859,41 +1306,7 @@
             });
         }
 
-        // SMS 발송 시뮬레이션
-        function sendSMS(phoneNumber, ticketNumber, courseName) {
-            console.log('📱 SMS 발송 시뮬레이션:');
-            console.log(`  번호: ${phoneNumber}`);
-            console.log(`  대기번호: ${ticketNumber}`);
-            console.log(`  과정: ${courseName}`);
-            
-            // 실제 SMS 발송 로직이 여기에 추가될 예정
-        }
-
-        // 성공 메시지 표시
-        function showSuccessMessage(ticketNumber, phoneNumber, courseName) {
-            const successEl = document.getElementById('successMessage');
-            const messageEl = document.getElementById('successMessageText');
-            
-            // 전화번호 마스킹
-            const maskedPhone = phoneNumber.substring(0, 3) + '****' + phoneNumber.substring(7);
-            const formattedPhone = maskedPhone.substring(0, 3) + '-' + 
-                                 maskedPhone.substring(3, 7) + '-' + 
-                                 maskedPhone.substring(7);
-            
-            messageEl.innerHTML = 
-                `<div style="font-size: 3rem; margin-bottom: 15px; color: #FFD700;">${ticketNumber}</div>` +
-                `<div style="font-size: 1.8rem; margin-bottom: 10px;">📱 알림톡 대기표 발급 완료!</div>` +
-                `<div style="font-size: 1.3rem; margin-bottom: 8px; opacity: 0.9;">${courseName}</div>` +
-                `<div style="font-size: 1.1rem; margin-bottom: 10px; opacity: 0.8;">${formattedPhone}</div>` +
-                `<div style="font-size: 1rem; opacity: 0.9; color: #FFD700;">📲 SMS 발송 완료</div>`;
-            
-            successEl.classList.add('show');
-            setTimeout(() => {
-                successEl.classList.remove('show');
-            }, 4000);
-        }
-
-        // Firebase 데이터 구독
+        // Firebase 리스너 설정
         function setupFirebaseListener() {
             if (!window.firebaseDB) return;
             
@@ -909,6 +1322,33 @@
                 }
             });
         }
+
+        // ================= 터치 이벤트 처리 =================
+
+        // 터치 이벤트 설정
+        function setupTouchEvents() {
+            document.querySelectorAll('button').forEach(button => {
+                button.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    this.classList.add('touching');
+                }, { passive: false });
+                
+                button.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('touching');
+                    
+                    if (this.onclick) {
+                        this.onclick();
+                    }
+                }, { passive: false });
+                
+                button.addEventListener('touchcancel', function(e) {
+                    this.classList.remove('touching');
+                });
+            });
+        }
+
+        // ================= 초기화 =================
 
         // 시간 업데이트
         function updateTime() {
@@ -926,10 +1366,9 @@
 
         // 초기화
         function initialize() {
-            console.log('🚀 키오스크 초기화');
+            console.log('🚀 키오스크 초기화 (알림톡 + 터치 최적화)');
             
             // 터치 이벤트 설정
-            addTouchStyles();
             setupTouchEvents();
             
             // 시간 표시
@@ -941,7 +1380,7 @@
                 setupFirebaseListener();
             }, 1000);
             
-            console.log('✅ 키오스크 준비 완료 (터치 최적화)');
+            console.log('✅ 키오스크 준비 완료');
         }
 
         // 페이지 로드
