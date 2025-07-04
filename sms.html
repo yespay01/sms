@@ -12,9 +12,6 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             overflow-x: hidden;
-            overflow-y: auto;
-            margin: 0;
-            padding: 0;
         }
         
         .container {
@@ -28,55 +25,30 @@
         
         .header {
             text-align: center;
-            margin-bottom: 50px;
-            position: relative;
+            margin-bottom: 40px;
         }
         
         .header h1 {
             color: white;
-            font-size: 4rem;
+            font-size: 3.5rem;
             font-weight: 900;
             text-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            margin-bottom: 30px;
-        }
-        
-        .settings-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 50px;
-            height: 50px;
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: white;
-            backdrop-filter: blur(5px);
-        }
-        
-        .settings-button:hover {
-            background: rgba(255,255,255,0.3);
-            transform: scale(1.1);
+            margin-bottom: 20px;
         }
         
         .status-bar {
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(20px);
             border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 50px;
+            padding: 20px;
+            margin-bottom: 40px;
             text-align: center;
             color: white;
         }
         
         .current-time {
-            font-size: 2rem;
-            font-weight: 700;
+            font-size: 1.5rem;
+            font-weight: 600;
         }
         
         .main-content {
@@ -87,54 +59,52 @@
             align-items: center;
         }
 
-        /* 메인 발급 버튼 */
         .main-issue-btn {
             background: linear-gradient(135deg, #00b894, #00cec9);
             color: white;
             border: none;
-            border-radius: 30px;
-            padding: 80px 120px;
-            font-size: 3.5rem;
+            border-radius: 25px;
+            padding: 60px 100px;
+            font-size: 3rem;
             font-weight: 900;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 20px 60px rgba(0,184,148,0.3);
             text-align: center;
-            min-height: 300px;
-            min-width: 600px;
+            min-height: 250px;
+            min-width: 500px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: center;
             touch-action: manipulation;
             user-select: none;
         }
 
         .main-issue-btn:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 30px 80px rgba(0,184,148,0.4);
+            transform: translateY(-8px);
+            box-shadow: 0 25px 70px rgba(0,184,148,0.4);
             background: linear-gradient(135deg, #00a085, #00b8a8);
         }
 
         .main-issue-btn:active {
-            transform: translateY(-5px);
+            transform: translateY(-4px);
         }
 
         .main-btn-icon {
-            font-size: 5rem;
-            margin-bottom: 20px;
+            font-size: 4rem;
+            margin-bottom: 15px;
         }
 
         .main-btn-text {
-            font-size: 3.5rem;
+            font-size: 3rem;
             font-weight: 900;
+            margin-bottom: 10px;
         }
 
         .main-btn-desc {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: 400;
             opacity: 0.9;
-            margin-top: 15px;
         }
 
         /* 핸드폰 번호 입력 팝업 */
@@ -148,8 +118,8 @@
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 5000;
-            backdrop-filter: blur(15px);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
         }
 
         .phone-popup.show {
@@ -158,19 +128,19 @@
 
         .phone-popup-content {
             background: white;
-            border-radius: 30px;
-            padding: 60px;
-            max-width: 800px;
+            border-radius: 25px;
+            padding: 50px;
+            max-width: 700px;
             width: 90%;
             text-align: center;
-            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
-            animation: popupSlideIn 0.4s ease-out;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+            animation: popupSlideIn 0.3s ease-out;
         }
 
         @keyframes popupSlideIn {
             from {
                 opacity: 0;
-                transform: scale(0.8) translateY(-50px);
+                transform: scale(0.9) translateY(-30px);
             }
             to {
                 opacity: 1;
@@ -179,66 +149,59 @@
         }
 
         .popup-title {
-            font-size: 2.8rem;
+            font-size: 2.5rem;
             font-weight: 700;
             color: #2c3e50;
             margin-bottom: 30px;
         }
 
         .phone-display {
-            font-size: 3rem;
+            font-size: 2.5rem;
             font-weight: 700;
             color: #3498db;
-            margin-bottom: 40px;
-            padding: 20px 40px;
+            margin-bottom: 30px;
+            padding: 20px;
             background: #f8f9fa;
-            border-radius: 20px;
-            border: 4px solid #ecf0f1;
-            min-height: 100px;
+            border-radius: 15px;
+            border: 3px solid #ecf0f1;
+            min-height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
-            letter-spacing: 3px;
         }
 
-        /* 번호패드 */
         .number-pad {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 25px;
-            max-width: 450px;
-            margin: 0 auto 40px auto;
+            gap: 20px;
+            max-width: 400px;
+            margin: 0 auto 30px auto;
         }
 
         .number-btn {
             background: #3498db;
             color: white;
             border: none;
-            padding: 30px;
-            border-radius: 20px;
-            font-size: 2.5rem;
+            padding: 25px;
+            border-radius: 15px;
+            font-size: 2rem;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
-            min-height: 90px;
-            min-width: 90px;
+            min-height: 80px;
             touch-action: manipulation;
             user-select: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
         }
 
         .number-btn:hover {
             background: #2980b9;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(52, 152, 219, 0.4);
         }
 
         .number-btn:active {
             transform: translateY(0);
-            background: #1f618d;
         }
 
         .delete-btn {
@@ -247,20 +210,19 @@
 
         .clear-btn {
             background: #f39c12 !important;
-            font-size: 1.4rem !important;
+            font-size: 1.2rem !important;
         }
 
         .popup-close-btn {
             background: #95a5a6;
             color: white;
             border: none;
-            border-radius: 50px;
-            padding: 20px 50px;
-            font-size: 1.5rem;
+            border-radius: 25px;
+            padding: 15px 40px;
+            font-size: 1.2rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin: 0 20px;
         }
 
         .popup-close-btn:hover {
@@ -279,8 +241,8 @@
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 6000;
-            backdrop-filter: blur(15px);
+            z-index: 1001;
+            backdrop-filter: blur(10px);
         }
 
         .course-popup.show {
@@ -289,45 +251,45 @@
 
         .course-popup-content {
             background: white;
-            border-radius: 30px;
-            padding: 60px;
-            max-width: 1000px;
+            border-radius: 25px;
+            padding: 50px;
+            max-width: 900px;
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
             text-align: center;
-            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
-            animation: popupSlideIn 0.4s ease-out;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+            animation: popupSlideIn 0.3s ease-out;
         }
 
         .popup-phone {
-            font-size: 2.2rem;
+            font-size: 2rem;
             color: #3498db;
             font-weight: 700;
-            margin-bottom: 40px;
-            padding: 20px 40px;
+            margin-bottom: 30px;
+            padding: 15px 30px;
             background: #f8f9fa;
-            border-radius: 20px;
+            border-radius: 15px;
             display: inline-block;
         }
 
         .popup-course-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
         }
 
         .popup-course-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 25px;
-            padding: 60px 40px;
+            border-radius: 20px;
+            padding: 40px 30px;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
-            min-height: 200px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            min-height: 150px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -336,22 +298,22 @@
         }
 
         .popup-course-btn:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 25px 50px rgba(102, 126, 234, 0.4);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
         }
 
         .popup-course-btn:active {
-            transform: translateY(-4px);
+            transform: translateY(-2px);
         }
 
         .popup-course-name {
-            font-size: 2.2rem;
+            font-size: 1.8rem;
             font-weight: 700;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .popup-course-desc {
-            font-size: 1.3rem;
+            font-size: 1rem;
             opacity: 0.9;
         }
 
@@ -363,155 +325,82 @@
             transform: translate(-50%, -50%);
             background: linear-gradient(135deg, #00b894, #00cec9);
             color: white;
-            padding: 50px 80px;
-            border-radius: 30px;
-            font-size: 2.5rem;
+            padding: 40px 60px;
+            border-radius: 25px;
+            font-size: 2rem;
             font-weight: 700;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            z-index: 10000;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            z-index: 2000;
             text-align: center;
             opacity: 0;
-            transition: all 0.4s ease;
-            border: 2px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
         }
         
         .success-message.show { 
             opacity: 1; 
-            transform: translate(-50%, -50%) scale(1.05);
         }
         
         .success-icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
+            font-size: 3rem;
+            margin-bottom: 15px;
             animation: bounce 0.6s ease-in-out;
         }
         
         @keyframes bounce {
             0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
+            40% { transform: translateY(-8px); }
+            60% { transform: translateY(-4px); }
         }
 
-        /* 설정 패널 */
-        .settings-panel {
-            position: fixed;
-            top: 0;
-            right: -500px;
-            width: 500px;
-            height: 100%;
-            background: white;
-            transition: right 0.3s ease;
-            z-index: 2000;
-            overflow-y: auto;
-            box-shadow: -5px 0 20px rgba(0,0,0,0.2);
-        }
-        
-        .settings-panel.open { 
-            right: 0; 
-        }
-
-        .settings-header {
-            background: #3498db;
-            color: white;
-            padding: 25px;
-            font-size: 1.5rem;
-            font-weight: 600;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .close-settings {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 5px;
-        }
-
-        /* 반응형 디자인 */
         @media (max-width: 768px) {
             .main-issue-btn {
-                padding: 60px 80px;
-                font-size: 2.5rem;
-                min-height: 250px;
-                min-width: 400px;
+                padding: 40px 60px;
+                font-size: 2rem;
+                min-height: 200px;
+                min-width: 350px;
             }
             
             .main-btn-icon {
-                font-size: 3.5rem;
+                font-size: 3rem;
             }
             
             .main-btn-text {
-                font-size: 2.5rem;
+                font-size: 2rem;
             }
             
             .phone-popup-content,
             .course-popup-content {
-                padding: 40px 30px;
+                padding: 30px 20px;
             }
             
             .popup-title {
-                font-size: 2.2rem;
+                font-size: 2rem;
             }
             
             .phone-display {
-                font-size: 2.5rem;
-                padding: 15px 30px;
+                font-size: 2rem;
             }
             
             .number-pad {
-                max-width: 350px;
-                gap: 20px;
+                max-width: 300px;
+                gap: 15px;
             }
             
             .number-btn {
-                min-height: 80px;
-                min-width: 80px;
-                font-size: 2rem;
-                padding: 25px;
+                min-height: 70px;
+                font-size: 1.5rem;
             }
             
             .popup-course-grid {
                 grid-template-columns: 1fr;
-                gap: 25px;
             }
         }
     </style>
-    
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCuvEDDEoMLwLB2miGHCWX1-B5u8gKlGEQ",
-            authDomain: "counter-system-26479.firebaseapp.com",
-            databaseURL: "https://counter-system-26479-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "counter-system-26479",
-            storageBucket: "counter-system-26479.firebasestorage.app",
-            messagingSenderId: "316144964417",
-            appId: "1:316144964417:web:8a95a80f9db622f4ee87c0"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-
-        window.firebaseDB = database;
-        window.firebaseRef = ref;
-        window.firebaseSet = set;
-        window.firebaseOnValue = onValue;
-    </script>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <button class="settings-button" onclick="toggleSettings()" title="설정">⚙️</button>
-            <h1>🎫 대기표 발급 시스템</h1>
+            <h1>📱 알림톡 대기표 시스템</h1>
         </div>
 
         <div class="status-bar">
@@ -519,11 +408,10 @@
         </div>
 
         <div class="main-content">
-            <!-- 메인 발급 버튼 -->
             <button class="main-issue-btn" onclick="showPhonePopup()">
-                <div class="main-btn-icon">🎫</div>
+                <div class="main-btn-icon">📱</div>
                 <div class="main-btn-text">대기표 발급</div>
-                <div class="main-btn-desc">터치하여 시작하세요</div>
+                <div class="main-btn-desc">핸드폰 번호로 알림톡 발송</div>
             </button>
         </div>
     </div>
@@ -535,7 +423,6 @@
             
             <div class="phone-display" id="phoneDisplay">010-</div>
 
-            <!-- 번호패드 -->
             <div class="number-pad">
                 <button class="number-btn" onclick="addNumber('1')">1</button>
                 <button class="number-btn" onclick="addNumber('2')">2</button>
@@ -569,75 +456,84 @@
         </div>
     </div>
 
-    <!-- 발급 성공 메시지 -->
+    <!-- 성공 메시지 -->
     <div class="success-message" id="successMessage">
-        <div class="success-icon">✅</div>
-        <div id="successMessageText">대기표 발급 완료!</div>
+        <div class="success-icon">📱</div>
+        <div id="successMessageText">알림톡 대기표 발급 완료!</div>
     </div>
 
-    <!-- 설정 패널 -->
-    <div class="settings-panel" id="settingsPanel">
-        <div class="settings-header">
-            🔧 알림톡 설정
-            <button class="close-settings" onclick="toggleSettings()">×</button>
-        </div>
-        <div class="settings-content">
-            <div style="padding: 20px;">
-                <h3>설정 준비 중...</h3>
-                <p>SMS 발송 기능이 준비되어 있습니다.</p>
-            </div>
-        </div>
-    </div>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+
+        // Firebase 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyCNhcSqZgtSS63QTmjWtiMxgy5g8soOzho",
+            authDomain: "alimtalk-waiting-ticket.firebaseapp.com",
+            databaseURL: "https://alimtalk-waiting-ticket-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "alimtalk-waiting-ticket",
+            storageBucket: "alimtalk-waiting-ticket.firebasestorage.app",
+            messagingSenderId: "313045604729",
+            appId: "1:313045604729:web:2599fe60cad2b573bc37a8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        window.firebaseDB = database;
+        window.firebaseRef = ref;
+        window.firebaseSet = set;
+        window.firebaseOnValue = onValue;
+
+        console.log('🔥 Firebase 초기화 완료: alimtalk-waiting-ticket (Kiosk)');
+    </script>
 
     <script>
-        console.log('🚀 스크립트 시작');
-
         // 전역 변수
-        var courses = [
+        let courses = [
             { code: 'CH', name: '중국어 과정', englishName: 'Chinese Course' },
             { code: 'EN', name: '영어 과정', englishName: 'English Course' },
             { code: 'HSK', name: 'HSK 시험반', englishName: 'HSK Test Prep' },
             { code: 'TO', name: 'TOEIC 집중반', englishName: 'TOEIC Course' }
         ];
 
-        var currentPhoneNumber = '';
+        let currentPhoneNumber = '';
+        let currentNumbers = {}; // 과정별 현재 번호
+        let systemData = {
+            currentCall: { number: '-', counter: 0, course: '-' },
+            waiting: [],
+            counters: [],
+            totalToday: 0,
+            lastDate: new Date().toISOString().split('T')[0],
+            currentNumbers: {}
+        };
 
         // 핸드폰 번호 입력 팝업 표시
         function showPhonePopup() {
-            console.log('핸드폰 번호 입력 팝업 표시');
-            var popup = document.getElementById('phonePopup');
-            if (popup) {
-                currentPhoneNumber = '';
-                updatePhoneDisplay();
-                popup.classList.add('show');
-            }
+            currentPhoneNumber = '';
+            updatePhoneDisplay();
+            document.getElementById('phonePopup').classList.add('show');
         }
 
         // 핸드폰 번호 입력 팝업 닫기
         function closePhonePopup() {
-            console.log('핸드폰 번호 입력 팝업 닫기');
-            var popup = document.getElementById('phonePopup');
-            if (popup) {
-                popup.classList.remove('show');
-                currentPhoneNumber = '';
-            }
+            document.getElementById('phonePopup').classList.remove('show');
+            currentPhoneNumber = '';
         }
 
         // 번호 추가
         function addNumber(num) {
-            console.log('번호 추가:', num);
-            
-            // 하이픈 제거하고 숫자만 추출
-            var numbersOnly = currentPhoneNumber.replace(/[^0-9]/g, '');
+            let numbersOnly = currentPhoneNumber.replace(/[^0-9]/g, '');
             
             if (numbersOnly.length < 11) {
                 numbersOnly += num;
                 currentPhoneNumber = numbersOnly;
                 updatePhoneDisplay();
                 
-                // 11자리 완성되면 과정 선택 팝업 표시
+                // 11자리 완성되면 과정 선택으로
                 if (numbersOnly.length === 11) {
-                    setTimeout(function() {
+                    setTimeout(() => {
                         closePhonePopup();
                         showCoursePopup(numbersOnly);
                     }, 300);
@@ -647,8 +543,7 @@
 
         // 번호 삭제
         function deleteNumber() {
-            console.log('번호 삭제');
-            var numbersOnly = currentPhoneNumber.replace(/[^0-9]/g, '');
+            let numbersOnly = currentPhoneNumber.replace(/[^0-9]/g, '');
             if (numbersOnly.length > 0) {
                 numbersOnly = numbersOnly.slice(0, -1);
                 currentPhoneNumber = numbersOnly;
@@ -658,18 +553,15 @@
 
         // 번호 전체 삭제
         function clearPhone() {
-            console.log('번호 전체 삭제');
             currentPhoneNumber = '';
             updatePhoneDisplay();
         }
 
-        // 핸드폰 번호 화면 업데이트 (자동 하이픈 추가)
+        // 핸드폰 번호 화면 업데이트
         function updatePhoneDisplay() {
-            var display = document.getElementById('phoneDisplay');
-            if (!display) return;
-            
-            var numbersOnly = currentPhoneNumber.replace(/[^0-9]/g, '');
-            var formatted = '010-';
+            const display = document.getElementById('phoneDisplay');
+            const numbersOnly = currentPhoneNumber.replace(/[^0-9]/g, '');
+            let formatted = '010-';
             
             if (numbersOnly.length > 3) {
                 if (numbersOnly.length <= 7) {
@@ -684,147 +576,204 @@
             }
             
             display.textContent = formatted;
-            console.log('번호 표시 업데이트:', formatted);
         }
 
         // 과정 선택 팝업 표시
         function showCoursePopup(phoneNumber) {
-            console.log('과정 선택 팝업 표시:', phoneNumber);
+            const popup = document.getElementById('coursePopup');
+            const popupPhone = document.getElementById('popupPhone');
+            const popupGrid = document.getElementById('popupCourseGrid');
             
-            var popup = document.getElementById('coursePopup');
-            var popupPhone = document.getElementById('popupPhone');
-            var popupGrid = document.getElementById('popupCourseGrid');
-            
-            if (!popup || !popupPhone || !popupGrid) {
-                console.error('과정 팝업 요소를 찾을 수 없습니다');
-                return;
-            }
-            
-            // 전화번호 표시 (하이픈 포함)
-            var formatted = phoneNumber.substring(0, 3) + '-' + 
+            // 전화번호 표시
+            const formatted = phoneNumber.substring(0, 3) + '-' + 
                            phoneNumber.substring(3, 7) + '-' + 
                            phoneNumber.substring(7);
             popupPhone.textContent = formatted;
             
             // 과정 버튼 생성
             popupGrid.innerHTML = '';
-            for (var i = 0; i < courses.length; i++) {
-                var course = courses[i];
-                var button = document.createElement('button');
+            courses.forEach(course => {
+                const button = document.createElement('button');
                 button.className = 'popup-course-btn';
-                
-                button.onclick = function(courseData, phone) {
-                    return function() {
-                        selectCourse(courseData, phone);
-                    };
-                }(course, phoneNumber);
+                button.onclick = () => selectCourse(course, phoneNumber);
                 
                 button.innerHTML = 
-                    '<div class="popup-course-name">' + course.name + '</div>' +
-                    '<div class="popup-course-desc">' + course.englishName + '</div>';
+                    `<div class="popup-course-name">${course.name}</div>` +
+                    `<div class="popup-course-desc">${course.englishName}</div>`;
                 
                 popupGrid.appendChild(button);
-            }
+            });
             
-            // 팝업 표시
             popup.classList.add('show');
         }
 
         // 과정 선택 팝업 닫기
         function closeCoursePopup() {
-            console.log('과정 선택 팝업 닫기');
-            var popup = document.getElementById('coursePopup');
-            if (popup) {
-                popup.classList.remove('show');
-            }
+            document.getElementById('coursePopup').classList.remove('show');
         }
 
-        // 과정 선택
+        // 과정 선택 및 대기표 발급
         function selectCourse(course, phoneNumber) {
-            console.log('과정 선택:', course.name, phoneNumber);
-            
-            // 팝업 닫기
             closeCoursePopup();
-            
-            // 대기표 발급
             issueTicket(course, phoneNumber);
         }
 
         // 대기표 발급
         function issueTicket(course, phoneNumber) {
-            console.log('대기표 발급:', course.name, phoneNumber);
+            try {
+                // 오늘 날짜 확인
+                const today = new Date().toISOString().split('T')[0];
+                
+                // 날짜가 바뀌었으면 번호 초기화
+                if (systemData.lastDate !== today) {
+                    currentNumbers = {};
+                    systemData.lastDate = today;
+                    systemData.totalToday = 0;
+                }
+                
+                // 과정별 번호 생성
+                if (!currentNumbers[course.code]) {
+                    currentNumbers[course.code] = 0;
+                }
+                currentNumbers[course.code]++;
+                
+                // 대기번호 생성 (예: CH001, EN002)
+                const ticketNumber = course.code + currentNumbers[course.code].toString().padStart(3, '0');
+                
+                // 대기표 정보
+                const ticketInfo = {
+                    number: ticketNumber,
+                    course: course.name,
+                    courseCode: course.code,
+                    phoneNumber: phoneNumber,
+                    time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+                    timestamp: new Date().toISOString()
+                };
+                
+                // 시스템 데이터에 추가
+                if (!systemData.waiting) {
+                    systemData.waiting = [];
+                }
+                systemData.waiting.push(ticketInfo);
+                systemData.totalToday = (systemData.totalToday || 0) + 1;
+                systemData.currentNumbers = currentNumbers;
+                
+                // Firebase에 저장
+                saveToFirebase().then(() => {
+                    // SMS 발송 시뮬레이션
+                    sendSMS(phoneNumber, ticketNumber, course.name);
+                    
+                    // 성공 메시지
+                    showSuccessMessage(ticketNumber, phoneNumber, course.name);
+                    
+                }).catch((error) => {
+                    console.error('❌ 저장 실패:', error);
+                    alert('대기표 발급에 실패했습니다.');
+                });
+                
+            } catch (error) {
+                console.error('❌ 발급 오류:', error);
+                alert('오류가 발생했습니다.');
+            }
+        }
+
+        // Firebase 저장
+        function saveToFirebase() {
+            if (!window.firebaseDB) {
+                return Promise.reject('Firebase가 초기화되지 않았습니다.');
+            }
             
-            // 임시 번호 생성
-            var ticketNumber = course.code + '001';
+            systemData.lastUpdated = new Date().toISOString();
+            const systemRef = window.firebaseRef(window.firebaseDB, 'counterSystem');
             
-            // 성공 메시지 표시
-            showSuccessMessage(ticketNumber, phoneNumber);
+            return window.firebaseSet(systemRef, systemData).then(() => {
+                console.log('✅ Firebase 저장 완료');
+            });
+        }
+
+        // SMS 발송 시뮬레이션
+        function sendSMS(phoneNumber, ticketNumber, courseName) {
+            console.log('📱 SMS 발송 시뮬레이션:');
+            console.log(`  번호: ${phoneNumber}`);
+            console.log(`  대기번호: ${ticketNumber}`);
+            console.log(`  과정: ${courseName}`);
+            
+            // 실제 SMS 발송 로직이 여기에 추가될 예정
         }
 
         // 성공 메시지 표시
-        function showSuccessMessage(ticketNumber, phoneNumber) {
-            var successEl = document.getElementById('successMessage');
-            var messageEl = document.getElementById('successMessageText');
+        function showSuccessMessage(ticketNumber, phoneNumber, courseName) {
+            const successEl = document.getElementById('successMessage');
+            const messageEl = document.getElementById('successMessageText');
             
-            if (successEl && messageEl) {
-                var maskedPhone = phoneNumber.substring(0, 3) + '****' + phoneNumber.substring(7);
-                
-                messageEl.innerHTML = 
-                    '<div style="font-size: 3rem; margin-bottom: 20px;">' + ticketNumber + '</div>' +
-                    '<div style="font-size: 1.8rem; margin-bottom: 15px;">알림톡 대기표 발급 완료!</div>' +
-                    '<div style="font-size: 1.5rem; margin-bottom: 10px;">' + maskedPhone + '</div>' +
-                    '<div style="font-size: 1.2rem; opacity: 0.9; color: #FFD700;">SMS 발송 완료</div>';
-                
-                successEl.classList.add('show');
-                setTimeout(function() {
-                    successEl.classList.remove('show');
-                }, 5000);
-            }
+            // 전화번호 마스킹
+            const maskedPhone = phoneNumber.substring(0, 3) + '****' + phoneNumber.substring(7);
+            const formattedPhone = maskedPhone.substring(0, 3) + '-' + 
+                                 maskedPhone.substring(3, 7) + '-' + 
+                                 maskedPhone.substring(7);
+            
+            messageEl.innerHTML = 
+                `<div style="font-size: 3rem; margin-bottom: 15px; color: #FFD700;">${ticketNumber}</div>` +
+                `<div style="font-size: 1.8rem; margin-bottom: 10px;">📱 알림톡 대기표 발급 완료!</div>` +
+                `<div style="font-size: 1.3rem; margin-bottom: 8px; opacity: 0.9;">${courseName}</div>` +
+                `<div style="font-size: 1.1rem; margin-bottom: 10px; opacity: 0.8;">${formattedPhone}</div>` +
+                `<div style="font-size: 1rem; opacity: 0.9; color: #FFD700;">📲 SMS 발송 완료</div>`;
+            
+            successEl.classList.add('show');
+            setTimeout(() => {
+                successEl.classList.remove('show');
+            }, 4000);
         }
 
-        // 설정 패널 토글
-        function toggleSettings() {
-            console.log('설정 패널 토글');
-            var panel = document.getElementById('settingsPanel');
-            if (panel) {
-                if (panel.classList.contains('open')) {
-                    panel.classList.remove('open');
-                } else {
-                    panel.classList.add('open');
+        // Firebase 데이터 구독
+        function setupFirebaseListener() {
+            if (!window.firebaseDB) return;
+            
+            const systemRef = window.firebaseRef(window.firebaseDB, 'counterSystem');
+            window.firebaseOnValue(systemRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    systemData = { ...systemData, ...data };
+                    if (data.currentNumbers) {
+                        currentNumbers = data.currentNumbers;
+                    }
+                    console.log('🔄 Firebase 데이터 동기화');
                 }
-            }
+            });
         }
 
         // 시간 업데이트
         function updateTime() {
-            var timeEl = document.getElementById('currentTime');
-            if (timeEl) {
-                timeEl.textContent = new Date().toLocaleString('ko-KR');
-            }
+            const timeEl = document.getElementById('currentTime');
+            const now = new Date();
+            timeEl.textContent = now.toLocaleString('ko-KR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
         }
 
         // 초기화
         function initialize() {
-            console.log('🚀 키오스크 초기화 시작');
+            console.log('🚀 키오스크 초기화');
             
-            try {
-                updateTime();
-                setInterval(updateTime, 1000);
-                console.log('✅ 키오스크 초기화 완료');
-                
-            } catch (error) {
-                console.error('❌ 초기화 오류:', error);
-            }
+            // 시간 표시
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            // Firebase 리스너 설정
+            setTimeout(() => {
+                setupFirebaseListener();
+            }, 1000);
+            
+            console.log('✅ 키오스크 준비 완료');
         }
 
-        // 페이지 로드 완료 시 초기화
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initialize);
-        } else {
-            initialize();
-        }
-
-        console.log('✅ 스크립트 로드 완료');
+        // 페이지 로드
+        document.addEventListener('DOMContentLoaded', initialize);
     </script>
 </body>
 </html>
