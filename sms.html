@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>키오스크 - 알림톡 대기표</title>
+    <title>키오스크 - 알림톡 대기표 (발송 설정 포함)</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -12,18 +12,21 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            position: relative;
         }
         
         .container {
             max-width: 800px;
             margin: 0 auto;
             text-align: center;
+            position: relative;
         }
         
         .header h1 {
             color: white;
             font-size: 3rem;
             margin-bottom: 30px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
         
         .main-btn {
@@ -35,10 +38,75 @@
             font-size: 2rem;
             cursor: pointer;
             margin-bottom: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,184,148,0.3);
+        }
+        
+        .main-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0,184,148,0.4);
         }
         
         .main-btn:active {
             background: #00a085;
+            transform: translateY(0);
+        }
+
+        /* 관리자 버튼 */
+        .admin-access {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .admin-access:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        /* 설정 상태 표시 */
+        .settings-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            min-width: 200px;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .status-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #e74c3c;
+        }
+        
+        .status-indicator.active {
+            background: #00b894;
         }
 
         /* 팝업 */
@@ -51,6 +119,7 @@
             height: 100%;
             background: rgba(0,0,0,0.8);
             z-index: 1000;
+            backdrop-filter: blur(5px);
         }
         
         .popup.show {
@@ -66,6 +135,8 @@
             text-align: center;
             max-width: 600px;
             width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
         }
         
         .popup h2 {
@@ -99,14 +170,25 @@
             border-radius: 10px;
             cursor: pointer;
             min-height: 60px;
+            transition: all 0.3s ease;
+        }
+        
+        .num-btn:hover {
+            background: #2980b9;
+            transform: scale(1.05);
         }
         
         .num-btn:active {
             background: #2980b9;
+            transform: scale(0.95);
         }
         
         .delete-btn {
             background: #e74c3c;
+        }
+        
+        .delete-btn:hover {
+            background: #c0392b;
         }
         
         .clear-btn {
@@ -114,13 +196,23 @@
             font-size: 1rem;
         }
         
+        .clear-btn:hover {
+            background: #e67e22;
+        }
+        
         .close-btn {
             background: #95a5a6;
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 12px 25px;
+            border-radius: 25px;
             cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            background: #7f8c8d;
         }
         
         .course-grid {
@@ -135,13 +227,21 @@
             color: white;
             border: none;
             padding: 30px 20px;
-            border-radius: 10px;
+            border-radius: 15px;
             cursor: pointer;
             font-size: 1.2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102,126,234,0.3);
+        }
+        
+        .course-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102,126,234,0.4);
         }
         
         .course-btn:active {
-            background: #5a6fd8;
+            transform: translateY(0);
         }
         
         .success {
@@ -151,19 +251,344 @@
             transform: translate(-50%, -50%);
             background: #00b894;
             color: white;
-            padding: 30px;
-            border-radius: 15px;
+            padding: 40px;
+            border-radius: 20px;
             font-size: 1.5rem;
             z-index: 2000;
             display: none;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,184,148,0.3);
         }
         
         .success.show {
             display: block;
+            animation: successShow 0.5s ease-out;
+        }
+        
+        @keyframes successShow {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        /* 관리자 설정 모달 */
+        .admin-modal {
+            display: none;
+            position: fixed;
+            z-index: 3000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+        }
+        
+        .admin-content {
+            background-color: white;
+            margin: 3% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f1f2f6;
+        }
+        
+        .admin-header h2 {
+            color: #667eea;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        
+        .close-admin {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .close-admin:hover {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
+        
+        .setting-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .setting-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #2d3436;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .setting-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .setting-label {
+            font-weight: 600;
+            color: #2d3436;
+            flex: 1;
+        }
+        
+        .setting-input {
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            min-width: 200px;
+            transition: all 0.3s ease;
+        }
+        
+        .setting-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+        }
+        
+        .setting-toggle {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .setting-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #00b894;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .save-btn {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow: 0 5px 20px rgba(0,184,148,0.3);
+        }
+        
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0,184,148,0.4);
+        }
+        
+        .test-btn {
+            background: #f39c12;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+        
+        .test-btn:hover {
+            background: #e67e22;
+            transform: scale(1.05);
+        }
+        
+        .test-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 설정 상태 표시 */
+        .config-status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .config-status.enabled {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .config-status.disabled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* 테스트 결과 */
+        .test-result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        
+        .test-result.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .test-result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f1aeb5;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .admin-content {
+                margin: 1% auto;
+                padding: 20px;
+            }
+            
+            .setting-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .setting-input {
+                width: 100%;
+                min-width: auto;
+            }
+            
+            .course-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .main-btn {
+                padding: 30px 40px;
+                font-size: 1.8rem;
+            }
         }
     </style>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+        import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCNhcSqZgtSS63QTmjWtiMxgy5g8soOzho",
+            authDomain: "alimtalk-waiting-ticket.firebaseapp.com",
+            databaseURL: "https://alimtalk-waiting-ticket-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "alimtalk-waiting-ticket",
+            storageBucket: "alimtalk-waiting-ticket.firebasestorage.app",
+            messagingSenderId: "313045604729",
+            appId: "1:313045604729:web:2599fe60cad2b573bc37a8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        window.firebaseDB = database;
+        window.firebaseRef = ref;
+        window.firebaseSet = set;
+        window.firebaseGet = get;
+        window.firebaseOnValue = onValue;
+    </script>
 </head>
 <body>
+    <!-- 관리자 버튼 -->
+    <button class="admin-access" onclick="showAdminModal()">⚙️ 관리자 설정</button>
+
+    <!-- 설정 상태 표시 -->
+    <div class="settings-status" id="settingsStatus">
+        <div class="status-item">
+            <span>알림톡 발송</span>
+            <span class="status-indicator" id="smsStatus"></span>
+        </div>
+        <div class="status-item">
+            <span>Firebase 연결</span>
+            <span class="status-indicator" id="firebaseStatus"></span>
+        </div>
+        <div class="status-item">
+            <span>자동 발송</span>
+            <span class="status-indicator" id="autoStatus"></span>
+        </div>
+    </div>
+
     <div class="container">
         <div class="header">
             <h1>📱 알림톡 대기표</h1>
@@ -205,14 +630,107 @@
             <h2>과정 선택</h2>
             <div class="phone-display" id="selectedPhone">010-1234-5678</div>
             
-            <div class="course-grid">
-                <button class="course-btn" onclick="selectCourse('중국어 과정')">중국어 과정</button>
-                <button class="course-btn" onclick="selectCourse('영어 과정')">영어 과정</button>
-                <button class="course-btn" onclick="selectCourse('HSK 시험반')">HSK 시험반</button>
-                <button class="course-btn" onclick="selectCourse('TOEIC 집중반')">TOEIC 집중반</button>
+            <div class="course-grid" id="courseGrid">
+                <!-- 과정 버튼들이 동적으로 생성됩니다 -->
             </div>
             
             <button class="close-btn" onclick="closeCoursePopup()">돌아가기</button>
+        </div>
+    </div>
+
+    <!-- 관리자 설정 모달 -->
+    <div id="adminModal" class="admin-modal">
+        <div class="admin-content">
+            <div class="admin-header">
+                <h2>⚙️ 알림톡 발송 설정</h2>
+                <button class="close-admin" onclick="hideAdminModal()">×</button>
+            </div>
+            
+            <!-- 알림톡 API 설정 -->
+            <div class="setting-section">
+                <div class="setting-title">📱 알림톡 API 설정</div>
+                
+                <div class="setting-row">
+                    <label class="setting-label">API 서버 URL</label>
+                    <input type="text" class="setting-input" id="apiUrl" placeholder="https://your-api-server.com/send-sms">
+                </div>
+                
+                <div class="setting-row">
+                    <label class="setting-label">API 키</label>
+                    <input type="password" class="setting-input" id="apiKey" placeholder="API 키를 입력하세요">
+                </div>
+                
+                <div class="setting-row">
+                    <label class="setting-label">발신자 번호</label>
+                    <input type="text" class="setting-input" id="senderNumber" placeholder="02-1234-5678">
+                </div>
+                
+                <div class="setting-row">
+                    <label class="setting-label">알림톡 템플릿 ID</label>
+                    <input type="text" class="setting-input" id="templateId" placeholder="TEMPLATE_001">
+                </div>
+            </div>
+            
+            <!-- 메시지 템플릿 설정 -->
+            <div class="setting-section">
+                <div class="setting-title">💬 메시지 템플릿 설정</div>
+                
+                <div class="setting-row">
+                    <label class="setting-label">업체명</label>
+                    <input type="text" class="setting-input" id="businessName" placeholder="○○ 어학원">
+                </div>
+                
+                <div class="setting-row">
+                    <label class="setting-label">메시지 내용</label>
+                    <textarea class="setting-input" id="messageTemplate" rows="4" placeholder="안녕하세요. {{업체명}}입니다.&#10;대기번호: {{번호}}&#10;과정: {{과정}}&#10;발급시간: {{시간}}&#10;&#10;호출 시 안내드리겠습니다."></textarea>
+                </div>
+            </div>
+            
+            <!-- 발송 옵션 -->
+            <div class="setting-section">
+                <div class="setting-title">⚙️ 발송 옵션</div>
+                
+                <div class="setting-row">
+                    <label class="setting-label">자동 발송 활성화</label>
+                    <label class="setting-toggle">
+                        <input type="checkbox" id="autoSend">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="setting-row">
+                    <label class="setting-label">테스트 모드</label>
+                    <label class="setting-toggle">
+                        <input type="checkbox" id="testMode">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="setting-row">
+                    <label class="setting-label">발송 로그 저장</label>
+                    <label class="setting-toggle">
+                        <input type="checkbox" id="saveLog">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- 테스트 및 저장 -->
+            <div class="setting-section">
+                <div class="setting-title">🔧 테스트 및 저장</div>
+                
+                <div class="setting-row">
+                    <label class="setting-label">테스트 발송 (본인 번호)</label>
+                    <div>
+                        <input type="text" class="setting-input" id="testNumber" placeholder="01012345678" style="width: 200px;">
+                        <button class="test-btn" onclick="sendTestMessage()">테스트 발송</button>
+                    </div>
+                </div>
+                
+                <div class="test-result" id="testResult"></div>
+            </div>
+            
+            <button class="save-btn" onclick="saveSettings()">설정 저장</button>
         </div>
     </div>
 
@@ -221,32 +739,119 @@
         <div id="successText">대기표 발급 완료!</div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCNhcSqZgtSS63QTmjWtiMxgy5g8soOzho",
-            authDomain: "alimtalk-waiting-ticket.firebaseapp.com",
-            databaseURL: "https://alimtalk-waiting-ticket-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "alimtalk-waiting-ticket",
-            storageBucket: "alimtalk-waiting-ticket.firebasestorage.app",
-            messagingSenderId: "313045604729",
-            appId: "1:313045604729:web:2599fe60cad2b573bc37a8"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-
-        window.firebaseDB = database;
-        window.firebaseRef = ref;
-        window.firebaseSet = set;
-    </script>
-
     <script>
         let phoneNumber = '';
         let currentNumbers = { CH: 0, EN: 0, HSK: 0, TO: 0 };
+        let courses = [
+            { code: 'CH', name: '중국어 과정' },
+            { code: 'EN', name: '영어 과정' },
+            { code: 'HSK', name: 'HSK 시험반' },
+            { code: 'TO', name: 'TOEIC 집중반' }
+        ];
+
+        // 알림톡 설정 (기본값)
+        let smsSettings = {
+            apiUrl: '',
+            apiKey: '',
+            senderNumber: '',
+            templateId: '',
+            businessName: '',
+            messageTemplate: '안녕하세요. {{업체명}}입니다.\n대기번호: {{번호}}\n과정: {{과정}}\n발급시간: {{시간}}\n\n호출 시 안내드리겠습니다.',
+            autoSend: false,
+            testMode: false,
+            saveLog: true
+        };
+
+        // 초기화
+        function initialize() {
+            console.log('🎫 알림톡 키오스크 초기화 시작');
+            
+            // Firebase에서 설정 불러오기
+            loadSettings();
+            
+            // 키오스크 글로벌 설정 불러오기
+            loadGlobalSettings();
+            
+            // 과정 버튼 생성
+            renderCourseButtons();
+            
+            // 상태 표시 업데이트
+            updateStatusDisplay();
+            
+            console.log('✅ 알림톡 키오스크 초기화 완료');
+        }
+
+        // Firebase에서 설정 불러오기
+        function loadSettings() {
+            if (!window.firebaseDB) return;
+            
+            const settingsRef = window.firebaseRef(window.firebaseDB, 'kioskSettings');
+            window.firebaseOnValue(settingsRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    smsSettings = { ...smsSettings, ...data };
+                    console.log('📥 알림톡 설정 불러오기 완료:', smsSettings);
+                    updateStatusDisplay();
+                }
+            });
+        }
+
+        // 키오스크 글로벌 설정 불러오기
+        function loadGlobalSettings() {
+            if (!window.firebaseDB) return;
+            
+            const globalRef = window.firebaseRef(window.firebaseDB, 'kioskGlobalSettings');
+            window.firebaseOnValue(globalRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data && data.courses) {
+                    courses = data.courses;
+                    console.log('📚 과정 설정 불러오기 완료:', courses);
+                    renderCourseButtons();
+                }
+            });
+        }
+
+        // 과정 버튼 동적 생성
+        function renderCourseButtons() {
+            const courseGrid = document.getElementById('courseGrid');
+            courseGrid.innerHTML = '';
+            
+            courses.forEach(course => {
+                const button = document.createElement('button');
+                button.className = 'course-btn';
+                button.textContent = course.name;
+                button.onclick = () => selectCourse(course);
+                courseGrid.appendChild(button);
+            });
+        }
+
+        // 상태 표시 업데이트
+        function updateStatusDisplay() {
+            const smsStatus = document.getElementById('smsStatus');
+            const firebaseStatus = document.getElementById('firebaseStatus');
+            const autoStatus = document.getElementById('autoStatus');
+            
+            // 알림톡 설정 상태
+            if (smsSettings.apiUrl && smsSettings.apiKey) {
+                smsStatus.classList.add('active');
+            } else {
+                smsStatus.classList.remove('active');
+            }
+            
+            // Firebase 연결 상태
+            if (window.firebaseDB) {
+                firebaseStatus.classList.add('active');
+            } else {
+                firebaseStatus.classList.remove('active');
+            }
+            
+            // 자동 발송 상태
+            if (smsSettings.autoSend) {
+                autoStatus.classList.add('active');
+            } else {
+                autoStatus.classList.remove('active');
+            }
+        }
 
         // 팝업 열기
         function showPhonePopup() {
@@ -302,9 +907,9 @@
             
             if (phoneNumber.length === 0) {
                 display.textContent = '010-';
-            } else if (phoneNumber.length <= 3) {
+            } else if (phoneNumber.length <= 4) {
                 display.textContent = '010-' + phoneNumber;
-            } else if (phoneNumber.length <= 7) {
+            } else if (phoneNumber.length <= 8) {
                 display.textContent = '010-' + phoneNumber.substring(0, 4) + '-' + phoneNumber.substring(4);
             } else {
                 display.textContent = '010-' + phoneNumber.substring(0, 4) + '-' + phoneNumber.substring(4, 8);
@@ -319,47 +924,312 @@
         }
 
         // 과정 선택
-        function selectCourse(courseName) {
-            console.log('과정 선택:', courseName);
-            
-            // 과정 코드 매핑
-            const courseCode = {
-                '중국어 과정': 'CH',
-                '영어 과정': 'EN', 
-                'HSK 시험반': 'HSK',
-                'TOEIC 집중반': 'TO'
-            }[courseName];
+        function selectCourse(course) {
+            console.log('과정 선택:', course.name);
             
             // 번호 생성
-            currentNumbers[courseCode]++;
-            const ticketNumber = courseCode + currentNumbers[courseCode].toString().padStart(3, '0');
+            currentNumbers[course.code]++;
+            const ticketNumber = course.code + currentNumbers[course.code].toString().padStart(3, '0');
             
-            // Firebase 저장
+            // 대기표 데이터 생성
             const ticketData = {
                 number: ticketNumber,
-                course: courseName,
+                course: course.name,
                 phoneNumber: '010' + phoneNumber,
                 time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
                 timestamp: new Date().toISOString()
             };
             
-            // 시스템에 추가
-            if (!window.systemData) {
-                window.systemData = { waiting: [], totalToday: 0 };
-            }
+            // 대기열에 추가
+            addToWaitingQueue(ticketData);
             
-            window.systemData.waiting.push(ticketData);
-            window.systemData.totalToday++;
-            
-            // Firebase 저장
-            if (window.firebaseDB) {
-                const systemRef = window.firebaseRef(window.firebaseDB, 'counterSystem');
-                window.firebaseSet(systemRef, window.systemData);
+            // 알림톡 발송
+            if (smsSettings.autoSend) {
+                sendSMS(ticketData);
             }
             
             // 성공 메시지
-            showSuccess(ticketNumber, courseName);
+            showSuccess(ticketNumber, course.name);
             closeCoursePopup();
+        }
+
+        // 대기열에 추가
+        function addToWaitingQueue(ticketData) {
+            if (!window.firebaseDB) return;
+            
+            // 카운터 시스템 데이터 가져오기
+            const systemRef = window.firebaseRef(window.firebaseDB, 'counterSystem');
+            window.firebaseGet(systemRef).then((snapshot) => {
+                let systemData = snapshot.val();
+                
+                if (!systemData) {
+                    systemData = {
+                        currentCall: { number: '-', counter: 0, course: '-' },
+                        waiting: [],
+                        counters: Array.from({length: 6}, (_, i) => ({
+                            id: i + 1,
+                            current: null,
+                            course: null,
+                            count: 0
+                        })),
+                        totalToday: 0,
+                        counterSettings: {}
+                    };
+                }
+                
+                // 대기열에 추가
+                if (!systemData.waiting) systemData.waiting = [];
+                systemData.waiting.push(ticketData);
+                systemData.totalToday = (systemData.totalToday || 0) + 1;
+                
+                // Firebase에 저장
+                window.firebaseSet(systemRef, systemData);
+                
+                console.log('✅ 대기열 추가 완료:', ticketData);
+            }).catch(error => {
+                console.error('❌ 대기열 추가 실패:', error);
+            });
+        }
+
+        // 알림톡 발송
+        async function sendSMS(ticketData) {
+            if (!smsSettings.apiUrl || !smsSettings.apiKey) {
+                console.log('⚠️ 알림톡 설정이 완료되지 않았습니다.');
+                return;
+            }
+            
+            try {
+                // 메시지 템플릿 처리
+                const message = smsSettings.messageTemplate
+                    .replace(/\{\{업체명\}\}/g, smsSettings.businessName || '대기표 시스템')
+                    .replace(/\{\{번호\}\}/g, ticketData.number)
+                    .replace(/\{\{과정\}\}/g, ticketData.course)
+                    .replace(/\{\{시간\}\}/g, ticketData.time);
+                
+                const smsData = {
+                    to: ticketData.phoneNumber,
+                    from: smsSettings.senderNumber,
+                    message: message,
+                    templateId: smsSettings.templateId,
+                    testMode: smsSettings.testMode
+                };
+                
+                console.log('📱 알림톡 발송 시도:', smsData);
+                
+                const response = await fetch(smsSettings.apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${smsSettings.apiKey}`
+                    },
+                    body: JSON.stringify(smsData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    console.log('✅ 알림톡 발송 성공:', result);
+                    
+                    // 로그 저장
+                    if (smsSettings.saveLog) {
+                        saveLog({
+                            ...ticketData,
+                            smsResult: result,
+                            sendTime: new Date().toISOString(),
+                            status: 'success'
+                        });
+                    }
+                } else {
+                    console.error('❌ 알림톡 발송 실패:', result);
+                    
+                    // 실패 로그 저장
+                    if (smsSettings.saveLog) {
+                        saveLog({
+                            ...ticketData,
+                            smsResult: result,
+                            sendTime: new Date().toISOString(),
+                            status: 'failed'
+                        });
+                    }
+                }
+                
+            } catch (error) {
+                console.error('❌ 알림톡 발송 오류:', error);
+                
+                // 오류 로그 저장
+                if (smsSettings.saveLog) {
+                    saveLog({
+                        ...ticketData,
+                        smsResult: { error: error.message },
+                        sendTime: new Date().toISOString(),
+                        status: 'error'
+                    });
+                }
+            }
+        }
+
+        // 로그 저장
+        function saveLog(logData) {
+            if (!window.firebaseDB) return;
+            
+            const logRef = window.firebaseRef(window.firebaseDB, `smsLogs/${new Date().toISOString().split('T')[0]}`);
+            const timestamp = new Date().toISOString();
+            
+            window.firebaseGet(logRef).then((snapshot) => {
+                let logs = snapshot.val() || {};
+                logs[timestamp] = logData;
+                return window.firebaseSet(logRef, logs);
+            }).then(() => {
+                console.log('📝 로그 저장 완료');
+            }).catch(error => {
+                console.error('❌ 로그 저장 실패:', error);
+            });
+        }
+
+        // 관리자 모달 열기
+        function showAdminModal() {
+            // 현재 설정값으로 폼 채우기
+            document.getElementById('apiUrl').value = smsSettings.apiUrl || '';
+            document.getElementById('apiKey').value = smsSettings.apiKey || '';
+            document.getElementById('senderNumber').value = smsSettings.senderNumber || '';
+            document.getElementById('templateId').value = smsSettings.templateId || '';
+            document.getElementById('businessName').value = smsSettings.businessName || '';
+            document.getElementById('messageTemplate').value = smsSettings.messageTemplate || '';
+            document.getElementById('autoSend').checked = smsSettings.autoSend || false;
+            document.getElementById('testMode').checked = smsSettings.testMode || false;
+            document.getElementById('saveLog').checked = smsSettings.saveLog !== false;
+            
+            document.getElementById('adminModal').style.display = 'block';
+        }
+
+        // 관리자 모달 닫기
+        function hideAdminModal() {
+            document.getElementById('adminModal').style.display = 'none';
+        }
+
+        // 설정 저장
+        function saveSettings() {
+            // 폼에서 값 가져오기
+            const newSettings = {
+                apiUrl: document.getElementById('apiUrl').value.trim(),
+                apiKey: document.getElementById('apiKey').value.trim(),
+                senderNumber: document.getElementById('senderNumber').value.trim(),
+                templateId: document.getElementById('templateId').value.trim(),
+                businessName: document.getElementById('businessName').value.trim(),
+                messageTemplate: document.getElementById('messageTemplate').value.trim(),
+                autoSend: document.getElementById('autoSend').checked,
+                testMode: document.getElementById('testMode').checked,
+                saveLog: document.getElementById('saveLog').checked
+            };
+            
+            // 유효성 검사
+            if (newSettings.autoSend && (!newSettings.apiUrl || !newSettings.apiKey)) {
+                alert('자동 발송을 활성화하려면 API URL과 API 키를 입력해야 합니다.');
+                return;
+            }
+            
+            // 설정 업데이트
+            smsSettings = { ...smsSettings, ...newSettings };
+            
+            // Firebase에 저장
+            if (window.firebaseDB) {
+                const settingsRef = window.firebaseRef(window.firebaseDB, 'kioskSettings');
+                window.firebaseSet(settingsRef, smsSettings).then(() => {
+                    console.log('✅ 설정 저장 완료');
+                    updateStatusDisplay();
+                    hideAdminModal();
+                    showMessage('설정이 저장되었습니다!', 'success');
+                }).catch(error => {
+                    console.error('❌ 설정 저장 실패:', error);
+                    showMessage('설정 저장에 실패했습니다.', 'error');
+                });
+            }
+        }
+
+        // 테스트 메시지 발송
+        async function sendTestMessage() {
+            const testNumber = document.getElementById('testNumber').value.trim();
+            const testResult = document.getElementById('testResult');
+            
+            if (!testNumber) {
+                showTestResult('테스트 번호를 입력해주세요.', 'error');
+                return;
+            }
+            
+            if (!smsSettings.apiUrl || !smsSettings.apiKey) {
+                showTestResult('API URL과 API 키를 먼저 설정해주세요.', 'error');
+                return;
+            }
+            
+            // 테스트 버튼 비활성화
+            const testBtn = document.querySelector('.test-btn');
+            testBtn.disabled = true;
+            testBtn.textContent = '발송 중...';
+            
+            try {
+                const testData = {
+                    number: 'TEST001',
+                    course: '테스트 과정',
+                    phoneNumber: testNumber,
+                    time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+                    timestamp: new Date().toISOString()
+                };
+                
+                // 메시지 템플릿 처리
+                const message = smsSettings.messageTemplate
+                    .replace(/\{\{업체명\}\}/g, smsSettings.businessName || '대기표 시스템')
+                    .replace(/\{\{번호\}\}/g, testData.number)
+                    .replace(/\{\{과정\}\}/g, testData.course)
+                    .replace(/\{\{시간\}\}/g, testData.time);
+                
+                const smsData = {
+                    to: testData.phoneNumber,
+                    from: smsSettings.senderNumber,
+                    message: message,
+                    templateId: smsSettings.templateId,
+                    testMode: true // 테스트 모드 강제 활성화
+                };
+                
+                const response = await fetch(smsSettings.apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${smsSettings.apiKey}`
+                    },
+                    body: JSON.stringify(smsData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showTestResult('테스트 메시지가 성공적으로 발송되었습니다!', 'success');
+                    console.log('✅ 테스트 발송 성공:', result);
+                } else {
+                    showTestResult(`테스트 발송 실패: ${result.message || '알 수 없는 오류'}`, 'error');
+                    console.error('❌ 테스트 발송 실패:', result);
+                }
+                
+            } catch (error) {
+                showTestResult(`테스트 발송 오류: ${error.message}`, 'error');
+                console.error('❌ 테스트 발송 오류:', error);
+            } finally {
+                // 테스트 버튼 다시 활성화
+                testBtn.disabled = false;
+                testBtn.textContent = '테스트 발송';
+            }
+        }
+
+        // 테스트 결과 표시
+        function showTestResult(message, type) {
+            const testResult = document.getElementById('testResult');
+            testResult.textContent = message;
+            testResult.className = `test-result ${type}`;
+            testResult.style.display = 'block';
+            
+            // 5초 후 자동 숨김
+            setTimeout(() => {
+                testResult.style.display = 'none';
+            }, 5000);
         }
 
         // 성공 메시지
@@ -367,20 +1237,67 @@
             const successEl = document.getElementById('successMsg');
             const textEl = document.getElementById('successText');
             
-            textEl.innerHTML = `
+            let message = `
                 <div style="font-size: 2rem; margin-bottom: 10px;">${ticketNumber}</div>
-                <div>📱 알림톡 대기표 발급 완료!</div>
+                <div>📱 대기표 발급 완료!</div>
                 <div style="font-size: 1rem; margin-top: 10px;">${courseName}</div>
             `;
             
+            if (smsSettings.autoSend) {
+                message += `<div style="font-size: 0.9rem; margin-top: 15px; opacity: 0.8;">💬 알림톡이 발송되었습니다</div>`;
+            }
+            
+            textEl.innerHTML = message;
             successEl.classList.add('show');
             
             setTimeout(() => {
                 successEl.classList.remove('show');
+            }, 4000);
+        }
+
+        // 일반 메시지 표시
+        function showMessage(message, type = 'info') {
+            const messageEl = document.createElement('div');
+            messageEl.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                padding: 20px 40px;
+                border-radius: 15px;
+                font-size: 1.2rem;
+                font-weight: 600;
+                z-index: 5000;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                ${type === 'success' ? 'background: #d4edda; color: #155724;' : 
+                  type === 'error' ? 'background: #f8d7da; color: #721c24;' : 
+                  'background: #d1ecf1; color: #0c5460;'}
+            `;
+            messageEl.textContent = message;
+            
+            document.body.appendChild(messageEl);
+            
+            setTimeout(() => {
+                document.body.removeChild(messageEl);
             }, 3000);
         }
 
-        console.log('✅ 간단 키오스크 로드 완료');
+        // 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            const adminModal = document.getElementById('adminModal');
+            if (event.target === adminModal) {
+                hideAdminModal();
+            }
+        }
+
+        // 페이지 로드 시 초기화
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initialize);
+        } else {
+            initialize();
+        }
+
+        console.log('🎫 알림톡 키오스크 시스템 로드 완료');
     </script>
 </body>
 </html>
