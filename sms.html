@@ -1295,17 +1295,28 @@
 
         // 성공 결과 표시
         function showResult(data) {
-            document.getElementById('resultTicketNumber').textContent = data.ticketNumber;
-            document.getElementById('resultWaiting').textContent = data.waitingCount;
-            document.getElementById('resultTime').textContent = Math.max(5, data.waitingCount * 5);
+            const ticketNumberEl = document.getElementById('resultTicketNumber');
+            const waitingEl = document.getElementById('resultWaiting');
+            const timeEl = document.getElementById('resultTime');
+            const resultInfoEl = document.getElementById('resultInfo');
+            
+            // 요소 존재 확인
+            if (!ticketNumberEl || !waitingEl || !timeEl || !resultInfoEl) {
+                console.error('결과 모달 요소를 찾을 수 없습니다');
+                alert(`번호표 발급 완료!\n번호: ${data.ticketNumber}\n과정: ${data.courseName}`);
+                return;
+            }
+            
+            ticketNumberEl.textContent = data.ticketNumber;
+            waitingEl.textContent = data.waitingCount;
+            timeEl.textContent = Math.max(5, data.waitingCount * 5);
             
             // 알림톡 상태에 따른 메시지
-            const resultInfo = document.getElementById('resultInfo');
             const alimtalkStatus = data.alimtalkSuccess ? 
-                '📱 알림톡이 발송되었습니다!<br>호출 시 카카오톡으로 안내해 드립니다.' :
-                '⚠️ 알림톡 발송에 실패했지만<br>번호표는 정상 발급되었습니다.';
+                '📱 알림톡이 발송되었습니다!' :
+                '⚠️ 알림톡 발송에 실패했지만 번호표는 정상 발급되었습니다.';
             
-            resultInfo.innerHTML = `
+            resultInfoEl.innerHTML = `
                 <strong>${data.courseName}</strong><br>
                 현재 대기: <span>${data.waitingCount}</span>명<br>
                 예상 대기시간: 약 <span>${Math.max(5, data.waitingCount * 5)}</span>분<br><br>
