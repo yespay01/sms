@@ -1502,7 +1502,8 @@
 
         // 초기화
         function initialize() {
-            console.log('🚀 상담창구 시스템 초기화 시작 (새 Firebase: alimtalk-waiting-ticket)');
+            console.log("initialize 함수:", typeof initialize);
+console.log("initialize 실행됨:", window.initializeExecuted || "실행 안됨");
             
             currentCounter = getCounterFromUrl();
             selectCounter(currentCounter);
