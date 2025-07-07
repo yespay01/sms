@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>알림톡 테스트 - 간단 버전</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+        }
+        
+        .title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 30px;
+        }
+        
+        .phone-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.3rem;
+            border: 3px solid #dee2e6;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .phone-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .test-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .test-btn {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .test-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .test-issue {
+            background: #00b894;
+            color: white;
+        }
+        
+        .test-ready {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .test-call {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .test-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .result.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .result.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .loading {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🧪 알림톡 테스트</h1>
+        
+        <input type="tel" 
+               class="phone-input" 
+               id="testPhone" 
+               placeholder="010-0000-0000"
+               maxlength="13">
+        
+        <div class="test-buttons">
+            <button class="test-btn test-issue" onclick="testTemplate('issue')" disabled>
+                📱 발급 알림 테스트
+            </button>
+            <button class="test-btn test-ready" onclick="testTemplate('ready')" disabled>
+                ⏰ 호출 준비 알림 테스트
+            </button>
+            <button class="test-btn test-call" onclick="testTemplate('call')" disabled>
+                📢 호출 알림 테스트
+            </button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div>알림톡 발송 중...</div>
+        </div>
+        
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        // Firebase Functions URL
+        const FUNCTIONS_URL = 'https://sendalimtalk-74viab6pza-an.a.run.app';
+        
+        // 전화번호 입력 처리
+        document.getElementById('testPhone').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^0-9]/g, '');
+            
+            if (value.length > 0 && !value.startsWith('010')) {
+                if (value.startsWith('0')) {
+                    value = '010' + value.substring(1);
+                } else {
+                    value = '010' + value;
+                }
+            }
+            
+            if (value.length >= 3) {
+                value = value.substring(0, 3) + '-' + value.substring(3);
+            }
+            if (value.length >= 8) {
+                value = value.substring(0, 8) + '-' + value.substring(8);
+            }
+            if (value.length > 13) {
+                value = value.substring(0, 13);
+            }
+            
+            e.target.value = value;
+            
+            // 버튼 활성화/비활성화
+            const isValid = value.length === 13;
+            document.querySelectorAll('.test-btn').forEach(btn => {
+                btn.disabled = !isValid;
+            });
+        });
+        
+        // 템플릿 테스트 함수
+        async function testTemplate(type) {
+            const phone = document.getElementById('testPhone').value.replace(/-/g, '');
+            
+            if (!phone || phone.length !== 11) {
+                showResult('올바른 전화번호를 입력해 주세요.', false);
+                return;
+            }
+            
+            showLoading(true);
+            
+            try {
+                // 테스트 데이터 생성
+                const testData = {
+                    phoneNumber: phone,
+                    notificationType: type,
+                    // 공통 테스트 데이터
+                    ticketNumber: 'TEST001',
+                    courseName: '테스트 과정',
+                    waitingCount: 3,
+                    estimatedTime: 15
+                };
+                
+                // 호출 알림의 경우 창구 번호 추가
+                if (type === 'call') {
+                    testData.counterNumber = '1번 창구';
+                }
+                
+                console.log('🧪 테스트 데이터:', testData);
+                
+                // Firebase Functions 호출
+                const response = await fetch(`${FUNCTIONS_URL}/sendAlimtalk`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const result = await response.json();
+                console.log('📱 테스트 결과:', result);
+                
+                if (response.ok && result.success) {
+                    showResult(`✅ ${getTemplateName(type)} 발송 성공!`, true);
+                } else {
+                    showResult(`❌ 발송 실패: ${result.error || '알 수 없는 오류'}`, false);
+                }
+                
+            } catch (error) {
+                console.error('❌ 테스트 오류:', error);
+                showResult(`❌ 테스트 실패: ${error.message}`, false);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // 템플릿 이름 가져오기
+        function getTemplateName(type) {
+            switch(type) {
+                case 'issue': return '발급 알림';
+                case 'ready': return '호출 준비 알림';
+                case 'call': return '호출 알림';
+                default: return '알림';
+            }
+        }
+        
+        // 로딩 표시
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+        
+        // 결과 표시
+        function showResult(message, success) {
+            const resultEl = document.getElementById('result');
+            resultEl.textContent = message;
+            resultEl.className = `result ${success ? 'success' : 'error'}`;
+            resultEl.style.display = 'block';
+            
+            // 3초 후 자동 숨김
+            setTimeout(() => {
+                resultEl.style.display = 'none';
+            }, 5000);
+        }
+        
+        console.log('🧪 알림톡 테스트 시스템 준비 완료');
+    </script>
+</body>
+</html>
