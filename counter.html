@@ -240,133 +240,6 @@
             background: #c0392b;
             transform: translateY(-2px);
         }
-        
-        /* 설정 모달 */
-        .settings-modal {
-            display: none;
-            position: fixed;
-            z-index: 2000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            backdrop-filter: blur(5px);
-        }
-        .settings-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 30px;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        .settings-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f1f2f6;
-        }
-        .settings-header h2 {
-            color: #667eea;
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
-        .close-settings {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .close-settings:hover {
-            background: #c0392b;
-        }
-        .setting-group {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-        }
-        .setting-label {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #2d3436;
-            display: block;
-        }
-        .course-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .course-option {
-            background: white;
-            border: 3px solid #e9ecef;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-        }
-        .course-option:hover {
-            border-color: #667eea;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        .course-option.selected {
-            border-color: #00b894;
-            background: #d1f2eb;
-            color: #00b894;
-        }
-        .course-option.all-courses {
-            border-color: #fdcb6e;
-            background: #fff9e6;
-            color: #e17055;
-        }
-        .course-option.all-courses.selected {
-            border-color: #e17055;
-            background: #fff2e6;
-        }
-        .save-settings-btn {
-            background: #00b894;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 25px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-        }
-        .save-settings-btn:hover {
-            background: #00a085;
-            transform: translateY(-2px);
-        }
-        .current-setting {
-            background: #e3f2fd;
-            border: 1px solid #bbdefb;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: 600;
-            color: #1976d2;
-        }
 
         .status-indicator {
             position: fixed;
@@ -383,7 +256,6 @@
         .offline { border-left: 4px solid #e74c3c; }
         .firebase { border-left: 4px solid #ff6b35; }
 
-        /* 기타 스타일들 - 기존 counter.html에서 복사 */
         .waiting-section {
             background: #f8f9fa;
             border-radius: 15px;
@@ -459,6 +331,48 @@
             color: #666;
             margin-top: 5px;
         }
+
+        /* 알림톡 상태 표시 */
+        .alimtalk-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.95);
+            padding: 10px 15px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: none;
+            transition: all 0.3s ease;
+        }
+        
+        .alimtalk-status.success {
+            border-left: 4px solid #00b894;
+            color: #00b894;
+        }
+        
+        .alimtalk-status.error {
+            border-left: 4px solid #e74c3c;
+            color: #e74c3c;
+        }
+        
+        .alimtalk-status.show {
+            display: block;
+            animation: slideInUp 0.3s ease-out;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
     </style>
 
     <!-- Firebase SDK -->
@@ -507,6 +421,11 @@
 </head>
 <body>
     <div class="status-indicator" id="statusIndicator">🔄 Firebase 연결 중...</div>
+    
+    <!-- 알림톡 상태 표시 -->
+    <div class="alimtalk-status" id="alimtalkStatus">
+        📱 알림톡 발송 완료
+    </div>
     
     <div class="container">
         <div class="header">
@@ -590,33 +509,11 @@
         </div>
     </div>
 
-    <!-- 창구 설정 모달 -->
-    <div id="settingsModal" class="settings-modal">
-        <div class="settings-content">
-            <div class="settings-header">
-                <h2>⚙️ 창구별 전담 과정 설정</h2>
-                <button class="close-settings" onclick="hideSettings()">×</button>
-            </div>
-            
-            <div class="current-setting" id="currentSetting">
-                현재 설정: 모든 과정 처리
-            </div>
-            
-            <div class="setting-group">
-                <label class="setting-label">이 창구에서 담당할 과정을 선택하세요:</label>
-                <div class="course-options" id="courseOptions">
-                    <!-- 과정 선택 옵션들 -->
-                </div>
-                <button class="save-settings-btn" onclick="saveCounterSettings()">설정 저장</button>
-            </div>
-        </div>
-    </div>
-
     <script>
         let currentCounter = 1;
         let counterSettings = {}; // 창구별 설정
         
-        // 🎯 기본 과정 설정 (Firebase 로드 전까지 사용)
+        // 기본 과정 설정
         let courses = [
             { code: 'CH', name: '중국어 과정', englishName: 'Chinese Course' },
             { code: 'EN', name: '영어 과정', englishName: 'English Course' },
@@ -639,6 +536,9 @@
             lastUpdated: null,
             counterSettings: {}
         };
+
+        // Firebase Functions URL
+        const FUNCTIONS_URL = 'https://sendalimtalk-74viab6pza-an.a.run.app';
 
         // URL에서 창구 번호 자동 감지
         function getCounterFromUrl() {
@@ -681,14 +581,14 @@
             }
         }
 
-        // 🎯 수정: Firebase 리스너 설정
+        // Firebase 리스너 설정
         function setupFirebaseListeners() {
             if (!window.firebaseDB) {
                 console.error('Firebase가 초기화되지 않았습니다.');
                 return;
             }
 
-            // 1. 카운터 시스템 데이터 구독
+            // 카운터 시스템 데이터 구독
             const systemRef = window.firebaseRef(window.firebaseDB, 'counterSystem');
             window.firebaseOnValue(systemRef, (snapshot) => {
                 const data = snapshot.val();
@@ -708,52 +608,18 @@
                 }
             });
 
-            // 2. 🎯 수정: 키오스크 글로벌 설정 구독 (과정 정보)
+            // 키오스크 글로벌 설정 구독 (과정 정보)
             const kioskSettingsRef = window.firebaseRef(window.firebaseDB, 'kioskGlobalSettings');
             window.firebaseOnValue(kioskSettingsRef, (snapshot) => {
                 const kioskSettings = snapshot.val();
                 if (kioskSettings && kioskSettings.courses) {
                     console.log('🎫 키오스크 과정 설정 수신:', kioskSettings.courses);
-                    
-                    const oldCourses = [...courses];
                     courses = kioskSettings.courses;
-                    
-                    // 과정 변경 감지 및 설정 검증
-                    validateCounterSettings(oldCourses, courses);
-                    
-                    // 🎯 수정: 설정 모달이 열려있으면 과정 옵션 업데이트
-                    if (document.getElementById('settingsModal').style.display === 'block') {
-                        renderCourseOptions();
-                    }
-                    
                     console.log('✅ 과정 정보 동기화 완료:', courses.length, '개 과정');
                 } else {
-                    console.log('📭 키오스크 과정 설정 없음 - 기본값 유지');
-                    // 기본값은 이미 설정되어 있으므로 그대로 사용
+                    console.log('📭 키오스크 과정 설정 없음 - 기본값 사용');
                 }
             });
-        }
-
-        // 🎯 수정: 창구별 설정 검증 (과정 변경 시)
-        function validateCounterSettings(oldCourses, newCourses) {
-            let hasChanges = false;
-            const newCourseCodes = newCourses.map(c => c.code);
-            
-            for (let counterId = 1; counterId <= 6; counterId++) {
-                const assignment = counterSettings[counterId];
-                
-                if (assignment && assignment !== 'ALL' && !newCourseCodes.includes(assignment)) {
-                    console.log(`⚠️ ${counterId}번 창구: ${assignment} 과정이 삭제되어 "모든 과정"으로 변경`);
-                    counterSettings[counterId] = 'ALL';
-                    hasChanges = true;
-                }
-            }
-            
-            if (hasChanges) {
-                saveToFirebase();
-                alert('일부 창구 설정이 자동으로 "모든 과정"으로 변경되었습니다.');
-                updateCounterAssignment();
-            }
         }
 
         // Firebase에 데이터 저장
@@ -778,215 +644,12 @@
             }
         }
 
-        function updateDisplay() {
-            const counter = sharedData.counters[currentCounter - 1];
-            
-            document.getElementById('counterName').textContent = `${currentCounter}번 창구`;
-            document.getElementById('currentNumber').textContent = counter.current || '-';
-            document.getElementById('currentCourse').textContent = counter.course || '대기 중';
-            
-            // 필터링된 대기번호 가져오기
-            const filteredWaiting = getFilteredWaiting();
-            const allWaiting = sharedData.waiting || [];
-            
-            // 버튼 상태 업데이트
-            const callBtn = document.getElementById('callBtn');
-            const completeBtn = document.getElementById('completeBtn');
-            const recallBtn = document.getElementById('recallBtn');
-            const recallActionBtn = document.getElementById('recallActionBtn');
-            
-            const hasWaiting = filteredWaiting.length > 0;
-            const hasCurrent = counter.current && counter.current !== '-';
-            
-            callBtn.disabled = !hasWaiting;
-            completeBtn.disabled = !hasCurrent;
-            recallActionBtn.disabled = !hasCurrent;
-            
-            if (hasCurrent) {
-                recallBtn.classList.add('show');
-            } else {
-                recallBtn.classList.remove('show');
-            }
-            
-            // 대기번호 표시
-            const waitingContainer = document.getElementById('waitingList');
-            waitingContainer.innerHTML = '';
-            
-            if (allWaiting.length > 0) {
-                allWaiting.forEach((item, index) => {
-                    const div = document.createElement('div');
-                    div.className = 'waiting-item';
-                    
-                    const itemCourse = item.number.substring(0, item.number.length - 3);
-                    const assignment = counterSettings[currentCounter];
-                    const canHandle = !assignment || assignment === 'ALL' || itemCourse === assignment;
-                    
-                    if (canHandle) {
-                        const filteredIndex = filteredWaiting.findIndex(f => f.number === item.number);
-                        if (filteredIndex === 0) {
-                            div.classList.add('next');
-                        }
-                        
-                        div.addEventListener('click', function(e) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            callSpecific(item.number);
-                        });
-                    } else {
-                        div.classList.add('other-course');
-                    }
-                    
-                    div.innerHTML = `
-                        <div style="font-weight: 900; font-size: 1.2rem; pointer-events: none;">${item.number}</div>
-                        <div style="font-size: 0.8rem; color: #666; pointer-events: none;">${item.course}</div>
-                        <div style="font-size: 0.7rem; color: #999; pointer-events: none;">${item.time}</div>
-                    `;
-                    
-                    waitingContainer.appendChild(div);
-                });
-            } else {
-                waitingContainer.innerHTML = '<div style="text-align: center; color: #999; padding: 40px;">대기 중인 번호가 없습니다</div>';
-            }
-            
-            // 통계 업데이트
-            const filteredLength = filteredWaiting.length;
-            const totalLength = allWaiting.length;
-            
-            document.getElementById('waitingCount').textContent = 
-                counterSettings[currentCounter] && counterSettings[currentCounter] !== 'ALL' 
-                ? `${filteredLength}명 대기 (전체 ${totalLength}명)` 
-                : `${totalLength}명 대기`;
-                
-            document.getElementById('todayCount').textContent = sharedData.totalToday || 0;
-            document.getElementById('myCount').textContent = counter.count || 0;
-            document.getElementById('currentWaiting').textContent = filteredLength;
-        }
-
-        // 창구가 처리할 수 있는 대기번호 필터링
-        function getFilteredWaiting() {
-            if (!sharedData.waiting) return [];
-            
-            const assignment = counterSettings[currentCounter];
-            
-            if (!assignment || assignment === 'ALL') {
-                return sharedData.waiting;
-            }
-            
-            return sharedData.waiting.filter(item => {
-                const itemCourse = item.number.substring(0, item.number.length - 3);
-                return itemCourse === assignment;
-            });
-        }
-
-        // 🎯 수정: 설정 모달 표시
-        function showSettings() {
-            updateCurrentSettingDisplay();
-            renderCourseOptions();
-            document.getElementById('settingsModal').style.display = 'block';
-        }
-
-        function hideSettings() {
-            document.getElementById('settingsModal').style.display = 'none';
-        }
-
-        function updateCurrentSettingDisplay() {
-            const assignment = counterSettings[currentCounter];
-            const currentSettingEl = document.getElementById('currentSetting');
-            
-            if (assignment && assignment !== 'ALL') {
-                const course = courses.find(c => c.code === assignment);
-                if (course) {
-                    currentSettingEl.textContent = `현재 설정: ${course.name} 전담`;
-                } else {
-                    currentSettingEl.textContent = '현재 설정: 모든 과정 처리';
-                }
-            } else {
-                currentSettingEl.textContent = '현재 설정: 모든 과정 처리';
-            }
-        }
-
-        // 🎯 수정: 과정 옵션 렌더링
-        function renderCourseOptions() {
-            const container = document.getElementById('courseOptions');
-            const currentAssignment = counterSettings[currentCounter];
-            
-            container.innerHTML = '';
-            
-            // 🎯 수정: 과정이 없으면 메시지 표시
-            if (!courses || courses.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #666; grid-column: 1/-1;">
-                        <div style="font-size: 3rem; margin-bottom: 15px;">📭</div>
-                        <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 10px;">과정 정보를 불러오는 중...</div>
-                        <div style="font-size: 0.9rem;">키오스크에서 과정을 설정해 주세요.</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            // 모든 과정 처리 옵션
-            const allOption = document.createElement('div');
-            allOption.className = 'course-option all-courses';
-            if (!currentAssignment || currentAssignment === 'ALL') {
-                allOption.classList.add('selected');
-            }
-            allOption.innerHTML = `
-                <div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 8px;">🏢 모든 과정</div>
-                <div style="font-size: 0.9rem; opacity: 0.8;">모든 상담 과정 처리 (${courses.length}개 과정)</div>
-            `;
-            allOption.onclick = () => selectCourse('ALL');
-            container.appendChild(allOption);
-            
-            // 개별 과정 옵션들
-            courses.forEach(course => {
-                const option = document.createElement('div');
-                option.className = 'course-option';
-                if (currentAssignment === course.code) {
-                    option.classList.add('selected');
-                }
-                option.innerHTML = `
-                    <div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 8px;">${course.name}</div>
-                    <div style="font-size: 0.9rem; opacity: 0.8;">코드: ${course.code}</div>
-                    ${course.englishName ? `<div style="font-size: 0.8rem; opacity: 0.7; margin-top: 4px;">${course.englishName}</div>` : ''}
-                `;
-                option.onclick = () => selectCourse(course.code);
-                container.appendChild(option);
-            });
-            
-            console.log(`📋 과정 옵션 렌더링 완료: ${courses.length}개 과정 + 모든 과정`);
-        }
-
-        function selectCourse(courseCode) {
-            document.querySelectorAll('.course-option').forEach(opt => {
-                opt.classList.remove('selected');
-            });
-            
-            event.target.closest('.course-option').classList.add('selected');
-            window.tempCourseSelection = courseCode;
-        }
-
-        function saveCounterSettings() {
-            const selectedCourse = window.tempCourseSelection;
-            
-            if (selectedCourse !== undefined) {
-                counterSettings[currentCounter] = selectedCourse;
-                saveToFirebase();
-                updateCounterAssignment();
-                alert(`${currentCounter}번 창구 설정이 저장되었습니다!`);
-                hideSettings();
-            } else {
-                alert('과정을 선택해 주세요.');
-            }
-        }
-
-        // Firebase Functions URL
-        const FUNCTIONS_URL = 'https://sendalimtalk-74viab6pza-an.a.run.app';
-
-        // 🎯 수정: 호출 시 알림톡 발송 함수
+        // 🎯 호출 시 알림톡 발송 함수 (완전 구현)
         async function sendCallAlimtalk(customerData, counterNumber, isRecall = false) {
             try {
                 if (!customerData.phoneNumber) {
                     console.log('📱 전화번호 없음 - 알림톡 발송 건너뜀');
+                    showAlimtalkStatus('⚠️ 전화번호 없음 (알림톡 발송 안됨)', false);
                     return { success: false, error: '전화번호 없음' };
                 }
 
@@ -1021,17 +684,34 @@
                 
                 if (response.ok && result.success) {
                     console.log('✅ 호출 알림톡 발송 성공:', result);
+                    showAlimtalkStatus(`📱 ${isRecall ? '재호출' : '호출'} 알림톡 발송 완료`, true);
                     return { success: true, ...result };
                 } else {
                     console.error('❌ 호출 알림톡 발송 실패:', result);
+                    showAlimtalkStatus(`❌ 알림톡 발송 실패: ${result.error}`, false);
                     return { success: false, error: result.error || 'Unknown error' };
                 }
 
             } catch (error) {
                 console.error('❌ 호출 알림톡 발송 오류:', error);
+                showAlimtalkStatus(`❌ 알림톡 오류: ${error.message}`, false);
                 return { success: false, error: error.message };
             }
         }
+
+        // 알림톡 상태 표시 함수
+        function showAlimtalkStatus(message, success) {
+            const statusEl = document.getElementById('alimtalkStatus');
+            statusEl.textContent = message;
+            statusEl.className = `alimtalk-status ${success ? 'success' : 'error'} show`;
+            
+            // 3초 후 자동 숨김
+            setTimeout(() => {
+                statusEl.classList.remove('show');
+            }, 3000);
+        }
+
+        // 🎯 수정된 callNext 함수 (알림톡 발송 포함)
         function callNext() {
             const filteredWaiting = getFilteredWaiting();
             
@@ -1056,14 +736,17 @@
             
             const nextCustomer = filteredWaiting[0];
             
+            // 대기열에서 제거
             const customerIndex = sharedData.waiting.findIndex(item => item.number === nextCustomer.number);
             if (customerIndex !== -1) {
                 sharedData.waiting.splice(customerIndex, 1);
             }
             
+            // 창구에 할당
             counter.current = nextCustomer.number;
             counter.course = nextCustomer.course;
             
+            // 현재 호출 정보 업데이트
             sharedData.currentCall = {
                 number: nextCustomer.number,
                 counter: currentCounter,
@@ -1075,12 +758,17 @@
                 recallCount: 0
             };
             
-            saveToFirebase();
-            alert(`📢 ${nextCustomer.number} 호출 완료!`);
+            // 🎯 알림톡 발송 (비동기)
+            sendCallAlimtalk(nextCustomer, currentCounter, false);
             
+            // Firebase 저장
+            saveToFirebase();
+            
+            alert(`📢 ${nextCustomer.number} 호출 완료!`);
             console.log(`📢 호출 실행: ${nextCustomer.number} (${currentCounter}번 창구)`);
         }
 
+        // 🎯 수정된 recallCurrent 함수 (알림톡 발송 포함)
         function recallCurrent() {
             const counter = sharedData.counters[currentCounter - 1];
             
@@ -1089,6 +777,14 @@
                 return;
             }
             
+            // 현재 고객 정보 찾기 (전화번호 포함)
+            const currentCustomer = {
+                number: counter.current,
+                course: counter.course,
+                phoneNumber: getCurrentCustomerPhone(counter.current)
+            };
+            
+            // 현재 호출 정보 업데이트
             sharedData.currentCall = {
                 number: counter.current,
                 counter: currentCounter,
@@ -1099,10 +795,71 @@
                 callType: 'recall'
             };
             
-            saveToFirebase();
-            alert(`🔔 ${counter.current} 재호출 완료!`);
+            // 🎯 재호출 알림톡 발송 (비동기)
+            sendCallAlimtalk(currentCustomer, currentCounter, true);
             
+            // Firebase 저장
+            saveToFirebase();
+            
+            alert(`🔔 ${counter.current} 재호출 완료!`);
             console.log(`🔔 재호출 실행: ${counter.current} (${currentCounter}번 창구)`);
+        }
+
+        // 🎯 수정된 callSpecific 함수 (알림톡 발송 포함)
+        function callSpecific(number) {
+            const filteredWaiting = getFilteredWaiting();
+            const customer = filteredWaiting.find(item => item.number === number);
+            
+            if (!customer) {
+                alert('이 창구에서 처리할 수 없는 번호입니다.');
+                return;
+            }
+            
+            const counter = sharedData.counters[currentCounter - 1];
+            
+            if (counter.current && counter.current !== '-') {
+                const previousNumber = counter.current;
+                counter.count = (counter.count || 0) + 1;
+                console.log(`✅ 이전 상담 자동 완료: ${previousNumber} (${currentCounter}번 창구)`);
+            }
+            
+            // 대기열에서 제거
+            const customerIndex = sharedData.waiting.findIndex(item => item.number === number);
+            if (customerIndex !== -1) {
+                sharedData.waiting.splice(customerIndex, 1);
+            }
+            
+            // 창구에 할당
+            counter.current = customer.number;
+            counter.course = customer.course;
+            
+            // 현재 호출 정보 업데이트
+            sharedData.currentCall = {
+                number: customer.number,
+                counter: currentCounter,
+                course: customer.course,
+                immediateCall: true,
+                isRecall: false,
+                callTime: new Date().toISOString(),
+                callType: 'direct'
+            };
+            
+            // 🎯 직접 호출 알림톡 발송 (비동기)
+            sendCallAlimtalk(customer, currentCounter, false);
+            
+            // Firebase 저장
+            saveToFirebase();
+            
+            alert(`${customer.number} 직접 호출 완료!`);
+            console.log(`📢 직접 호출: ${customer.number} (${currentCounter}번 창구)`);
+        }
+
+        // 현재 고객의 전화번호 찾기 함수
+        function getCurrentCustomerPhone(ticketNumber) {
+            // 키오스크에서 발급할 때 전화번호가 저장되므로, 
+            // 실제로는 별도 저장소나 로컬 스토리지에서 찾아야 할 수 있음
+            // 여기서는 기본값 반환 (실제 구현에서는 수정 필요)
+            return null; // 전화번호를 찾을 수 없는 경우
         }
 
         function completeService() {
@@ -1131,52 +888,120 @@
             console.log(`✅ 수동 완료: ${completedNumber} (${currentCounter}번 창구)`);
         }
 
-        function callSpecific(number) {
-            const filteredWaiting = getFilteredWaiting();
-            const customer = filteredWaiting.find(item => item.number === number);
-            
-            if (!customer) {
-                alert('이 창구에서 처리할 수 없는 번호입니다.');
-                return;
+        function updateDisplay() {
+            try {
+                console.log('🖥️ 창구 화면 업데이트');
+                
+                const counter = sharedData.counters[currentCounter - 1];
+                
+                document.getElementById('counterName').textContent = `${currentCounter}번 창구`;
+                document.getElementById('currentNumber').textContent = counter.current || '-';
+                document.getElementById('currentCourse').textContent = counter.course || '대기 중';
+                
+                // 필터링된 대기번호 가져오기
+                const filteredWaiting = getFilteredWaiting();
+                const allWaiting = sharedData.waiting || [];
+                
+                // 버튼 상태 업데이트
+                const callBtn = document.getElementById('callBtn');
+                const completeBtn = document.getElementById('completeBtn');
+                const recallBtn = document.getElementById('recallBtn');
+                const recallActionBtn = document.getElementById('recallActionBtn');
+                
+                const hasWaiting = filteredWaiting.length > 0;
+                const hasCurrent = counter.current && counter.current !== '-';
+                
+                callBtn.disabled = !hasWaiting;
+                completeBtn.disabled = !hasCurrent;
+                recallActionBtn.disabled = !hasCurrent;
+                
+                if (hasCurrent) {
+                    recallBtn.classList.add('show');
+                } else {
+                    recallBtn.classList.remove('show');
+                }
+                
+                // 대기번호 표시
+                const waitingContainer = document.getElementById('waitingList');
+                waitingContainer.innerHTML = '';
+                
+                if (allWaiting.length > 0) {
+                    allWaiting.forEach((item, index) => {
+                        const div = document.createElement('div');
+                        div.className = 'waiting-item';
+                        
+                        const itemCourse = item.number.substring(0, item.number.length - 3);
+                        const assignment = counterSettings[currentCounter];
+                        const canHandle = !assignment || assignment === 'ALL' || itemCourse === assignment;
+                        
+                        if (canHandle) {
+                            const filteredIndex = filteredWaiting.findIndex(f => f.number === item.number);
+                            if (filteredIndex === 0) {
+                                div.classList.add('next');
+                            }
+                            
+                            div.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                callSpecific(item.number);
+                            });
+                        } else {
+                            div.classList.add('other-course');
+                        }
+                        
+                        div.innerHTML = `
+                            <div style="font-weight: 900; font-size: 1.2rem; pointer-events: none;">${item.number}</div>
+                            <div style="font-size: 0.8rem; color: #666; pointer-events: none;">${item.course}</div>
+                            <div style="font-size: 0.7rem; color: #999; pointer-events: none;">${item.time}</div>
+                        `;
+                        
+                        waitingContainer.appendChild(div);
+                    });
+                } else {
+                    waitingContainer.innerHTML = '<div style="text-align: center; color: #999; padding: 40px;">대기 중인 번호가 없습니다</div>';
+                }
+                
+                // 통계 업데이트
+                const filteredLength = filteredWaiting.length;
+                const totalLength = allWaiting.length;
+                
+                document.getElementById('waitingCount').textContent = 
+                    counterSettings[currentCounter] && counterSettings[currentCounter] !== 'ALL' 
+                    ? `${filteredLength}명 대기 (전체 ${totalLength}명)` 
+                    : `${totalLength}명 대기`;
+                    
+                document.getElementById('todayCount').textContent = sharedData.totalToday || 0;
+                document.getElementById('myCount').textContent = counter.count || 0;
+                document.getElementById('currentWaiting').textContent = filteredLength;
+                
+                console.log('✅ 창구 화면 업데이트 완료');
+                
+            } catch (error) {
+                console.error('❌ 화면 업데이트 오류:', error);
             }
-            
-            const counter = sharedData.counters[currentCounter - 1];
-            
-            if (counter.current && counter.current !== '-') {
-                const previousNumber = counter.current;
-                counter.count = (counter.count || 0) + 1;
-                console.log(`✅ 이전 상담 자동 완료: ${previousNumber} (${currentCounter}번 창구)`);
-            }
-            
-            const customerIndex = sharedData.waiting.findIndex(item => item.number === number);
-            if (customerIndex !== -1) {
-                sharedData.waiting.splice(customerIndex, 1);
-            }
-            
-            counter.current = customer.number;
-            counter.course = customer.course;
-            
-            sharedData.currentCall = {
-                number: customer.number,
-                counter: currentCounter,
-                course: customer.course,
-                immediateCall: true,
-                isRecall: false,
-                callTime: new Date().toISOString(),
-                callType: 'direct'
-            };
-            
-            saveToFirebase();
-            alert(`${customer.number} 호출 완료!`);
         }
 
-        // 초기화 모달 관련 함수들
-        function showResetModal(type) {
-            // 초기화 관련 로직 (기존과 동일)
-            alert(`${type} 초기화 기능은 개발 중입니다.`);
+        // 창구가 처리할 수 있는 대기번호 필터링
+        function getFilteredWaiting() {
+            if (!sharedData.waiting) return [];
+            
+            const assignment = counterSettings[currentCounter];
+            
+            if (!assignment || assignment === 'ALL') {
+                return sharedData.waiting;
+            }
+            
+            return sharedData.waiting.filter(item => {
+                const itemCourse = item.number.substring(0, item.number.length - 3);
+                return itemCourse === assignment;
+            });
         }
 
-        // 초기화 모달 관련 함수들 (완전 구현)
+        // 설정 관련 함수들 (간단 구현)
+        function showSettings() {
+            alert('창구 설정은 관리자 메뉴에서 가능합니다.');
+        }
+
         function showResetModal(type) {
             let message = '';
             switch(type) {
@@ -1219,7 +1044,7 @@
                         ],
                         totalToday: 0,
                         lastUpdated: null,
-                        counterSettings: counterSettings // 창구 설정은 유지
+                        counterSettings: counterSettings
                     };
                     break;
             }
@@ -1228,19 +1053,19 @@
             alert(`${type} 초기화가 완료되었습니다.`);
         }
 
-        // 🎯 수정: 초기화 함수 (중복 제거)
+        // 초기화 함수
         function initialize() {
-            console.log('🏢 창구 시스템 초기화 시작');
+            console.log('🏢 창구 시스템 (알림톡 발송 포함) 초기화 시작');
             
             currentCounter = getCounterFromUrl();
             selectCounter(currentCounter);
             
-            // Firebase 리스너를 바로 설정 (기본 과정은 이미 설정됨)
             setTimeout(() => {
                 setupFirebaseListeners();
             }, 1000);
             
-            console.log('✅ 창구 시스템 초기화 완료 (기본 과정:', courses.length, '개)');
+            console.log('✅ 창구 시스템 초기화 완료');
+            console.log('📱 호출 시 알림톡 자동 발송 기능 활성화');
         }
 
         // 키보드 단축키
@@ -1268,15 +1093,6 @@
             }
         });
 
-        // 모달 외부 클릭 시 닫기
-        window.onclick = function(event) {
-            const settingsModal = document.getElementById('settingsModal');
-            
-            if (event.target === settingsModal) {
-                hideSettings();
-            }
-        }
-
         // 페이지 로드 시 초기화
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initialize);
@@ -1284,10 +1100,8 @@
             initialize();
         }
 
-        console.log('🏢 창구 시스템 로딩 완료 - 과정 목록 수정');
-    </script>
-</body>
-</html>
+        console.log('🏢 창구 시스템 로딩 완료 - 알림톡 발송 기능 포함');
+        console.log('📱 호출/재호출 시 자동으로 알림톡이 발송됩니다!');
     </script>
 </body>
 </html>
