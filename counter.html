@@ -979,7 +979,59 @@
             }
         }
 
-        // 기본 기능들 (호출, 재호출, 완료 등)
+        // Firebase Functions URL
+        const FUNCTIONS_URL = 'https://sendalimtalk-74viab6pza-an.a.run.app';
+
+        // 🎯 수정: 호출 시 알림톡 발송 함수
+        async function sendCallAlimtalk(customerData, counterNumber, isRecall = false) {
+            try {
+                if (!customerData.phoneNumber) {
+                    console.log('📱 전화번호 없음 - 알림톡 발송 건너뜀');
+                    return { success: false, error: '전화번호 없음' };
+                }
+
+                console.log('📱 호출 알림톡 발송 시도:', {
+                    number: customerData.number,
+                    counter: counterNumber,
+                    phone: customerData.phoneNumber,
+                    isRecall: isRecall
+                });
+
+                const functionData = {
+                    phoneNumber: customerData.phoneNumber,
+                    ticketNumber: customerData.number,
+                    counterNumber: `${counterNumber}번 창구`,
+                    courseName: customerData.course,
+                    callTime: new Date().toLocaleTimeString('ko-KR', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    }),
+                    notificationType: isRecall ? 'recall' : 'call'
+                };
+
+                const response = await fetch(`${FUNCTIONS_URL}/sendAlimtalk`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(functionData)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    console.log('✅ 호출 알림톡 발송 성공:', result);
+                    return { success: true, ...result };
+                } else {
+                    console.error('❌ 호출 알림톡 발송 실패:', result);
+                    return { success: false, error: result.error || 'Unknown error' };
+                }
+
+            } catch (error) {
+                console.error('❌ 호출 알림톡 발송 오류:', error);
+                return { success: false, error: error.message };
+            }
+        }
         function callNext() {
             const filteredWaiting = getFilteredWaiting();
             
