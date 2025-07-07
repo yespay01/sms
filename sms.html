@@ -772,6 +772,7 @@
     <div class="container">
         <div class="admin-controls">
             <button class="admin-btn" onclick="showSettings()">⚙️ 과정설정</button>
+            <button class="admin-btn" onclick="showSolapiSettings()">📱 솔라피설정</button>
             <button class="admin-btn" onclick="showStats()">📊 통계</button>
         </div>
         
@@ -849,6 +850,89 @@
         </div>
     </div>
 
+    <!-- 솔라피 설정 모달 -->
+    <div class="settings-modal" id="solapiModal">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h2 class="settings-title">📱 솔라피 알림톡 설정</h2>
+                <button class="close-settings" onclick="hideSolapiSettings()">×</button>
+            </div>
+            
+            <div class="setting-group">
+                <div class="setting-label">📋 현재 설정 상태</div>
+                <div id="solapiStatus" class="current-setting">
+                    설정을 불러오는 중...
+                </div>
+            </div>
+            
+            <div class="setting-group">
+                <div class="setting-label">🔑 API 인증 정보</div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">API Key:</label>
+                    <input type="text" id="solapiApiKey" class="course-input" placeholder="NCSRVLD2FFGTEK7B" style="width: 100%;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">API Secret:</label>
+                    <input type="password" id="solapiSecret" class="course-input" placeholder="API Secret 키" style="width: 100%;">
+                    <button type="button" onclick="togglePasswordVisibility('solapiSecret')" style="margin-top: 5px; padding: 5px 10px; font-size: 0.8rem;">👁️ 보기</button>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">발신번호:</label>
+                    <input type="tel" id="senderNumber" class="course-input" placeholder="01012345678" style="width: 100%;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">카카오 채널 ID (pfId):</label>
+                    <input type="text" id="kakaoChannelId" class="course-input" placeholder="카카오 채널 ID" style="width: 100%;">
+                </div>
+            </div>
+            
+            <div class="setting-group">
+                <div class="setting-label">📝 알림톡 템플릿 ID</div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">발급 알림 템플릿:</label>
+                    <input type="text" id="templateIssue" class="course-input" placeholder="TEMPLATE_001" style="width: 100%;">
+                    <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                        번호표 발급 시 전송되는 템플릿
+                    </div>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">호출 준비 템플릿:</label>
+                    <input type="text" id="templateReady" class="course-input" placeholder="TEMPLATE_002" style="width: 100%;">
+                    <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                        곧 호출될 예정일 때 전송되는 템플릿
+                    </div>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">호출 알림 템플릿:</label>
+                    <input type="text" id="templateCall" class="course-input" placeholder="TEMPLATE_003" style="width: 100%;">
+                    <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                        호출 시 전송되는 템플릿
+                    </div>
+                </div>
+            </div>
+            
+            <div class="setting-group">
+                <div class="setting-label">🧪 테스트 설정</div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                    <input type="checkbox" id="testMode" style="transform: scale(1.5);">
+                    <label for="testMode" style="font-weight: 600;">테스트 모드 (실제 발송 안함)</label>
+                </div>
+                <div style="font-size: 0.9rem; color: #666;">
+                    테스트 모드에서는 실제 알림톡이 발송되지 않고 로그만 기록됩니다.
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button class="save-settings-btn" onclick="testSolapi()" style="width: 48%; background: #f39c12;">
+                    🧪 연결 테스트
+                </button>
+                <button class="save-settings-btn" onclick="saveSolapiSettings()" style="width: 48%;">
+                    💾 설정 저장
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- 설정 모달 -->
     <div class="settings-modal" id="settingsModal">
         <div class="settings-content">
@@ -882,7 +966,19 @@
         let kioskData = {
             currentNumbers: {}, // 과정별 현재 번호
             lastDate: new Date().toISOString().split('T')[0], // 마지막 업데이트 날짜
-            totalToday: 0 // 오늘 총 발급 수
+            totalToday: 0, // 오늘 총 발급 수
+            solapiSettings: { // 솔라피 설정
+                apiKey: '',
+                secret: '',
+                senderNumber: '',
+                kakaoChannelId: '',
+                templates: {
+                    issue: '',
+                    ready: '',
+                    call: ''
+                },
+                testMode: true
+            }
         };
 
         // Firebase Functions URL
@@ -931,6 +1027,10 @@
                         kioskData.totalToday = data.totalToday;
                     }
                     
+                    if (data.solapiSettings) {
+                        kioskData.solapiSettings = { ...kioskData.solapiSettings, ...data.solapiSettings };
+                    }
+                    
                     if (data.lastDate) {
                         kioskData.lastDate = data.lastDate;
                         checkDateReset();
@@ -964,6 +1064,7 @@
                 currentNumbers: kioskData.currentNumbers,
                 totalToday: kioskData.totalToday,
                 lastDate: kioskData.lastDate,
+                solapiSettings: kioskData.solapiSettings,
                 lastUpdated: new Date().toISOString()
             };
             
@@ -1353,6 +1454,160 @@
             document.getElementById('settingsModal').classList.add('show');
         }
 
+        // 솔라피 설정 모달 숨기기
+        function hideSolapiSettings() {
+            document.getElementById('solapiModal').classList.remove('show');
+        }
+
+        // 솔라피 설정 로드
+        function loadSolapiSettings() {
+            const settings = kioskData.solapiSettings;
+            
+            document.getElementById('solapiApiKey').value = settings.apiKey || '';
+            document.getElementById('solapiSecret').value = settings.secret || '';
+            document.getElementById('senderNumber').value = settings.senderNumber || '';
+            document.getElementById('kakaoChannelId').value = settings.kakaoChannelId || '';
+            document.getElementById('templateIssue').value = settings.templates.issue || '';
+            document.getElementById('templateReady').value = settings.templates.ready || '';
+            document.getElementById('templateCall').value = settings.templates.call || '';
+            document.getElementById('testMode').checked = settings.testMode !== false;
+            
+            updateSolapiStatus();
+        }
+
+        // 솔라피 상태 업데이트
+        function updateSolapiStatus() {
+            const settings = kioskData.solapiSettings;
+            const statusEl = document.getElementById('solapiStatus');
+            
+            const hasApiKey = settings.apiKey && settings.apiKey.length > 0;
+            const hasSecret = settings.secret && settings.secret.length > 0;
+            const hasSender = settings.senderNumber && settings.senderNumber.length > 0;
+            const hasTemplates = settings.templates.issue && settings.templates.ready && settings.templates.call;
+            
+            let status = '';
+            let statusClass = '';
+            
+            if (hasApiKey && hasSecret && hasSender && hasTemplates) {
+                status = `✅ 완전 설정됨 (${settings.testMode ? '테스트 모드' : '실제 발송 모드'})`;
+                statusClass = 'success';
+            } else if (hasApiKey && hasSecret) {
+                status = '⚠️ 부분 설정됨 - 템플릿 또는 발신번호 미설정';
+                statusClass = 'warning';
+            } else {
+                status = '❌ 미설정 - API 키와 시크릿 키 필요';
+                statusClass = 'error';
+            }
+            
+            statusEl.textContent = status;
+            statusEl.className = `current-setting ${statusClass}`;
+        }
+
+        // 패스워드 표시/숨김 토글
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            const btn = event.target;
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = '🙈 숨김';
+            } else {
+                input.type = 'password';
+                btn.textContent = '👁️ 보기';
+            }
+        }
+
+        // 솔라피 연결 테스트
+        async function testSolapi() {
+            const apiKey = document.getElementById('solapiApiKey').value.trim();
+            const secret = document.getElementById('solapiSecret').value.trim();
+            
+            if (!apiKey || !secret) {
+                alert('API Key와 Secret을 입력해 주세요.');
+                return;
+            }
+            
+            showLoading(true);
+            
+            try {
+                // Firebase Functions 헬스체크 호출
+                const response = await fetch(`${FUNCTIONS_URL}/healthCheck`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('🎉 Firebase Functions 연결 성공!\n\n' + 
+                          '솔라피 API 실제 테스트는 저장 후 번호표 발급으로 확인하세요.');
+                } else {
+                    alert('❌ 연결 테스트 실패: ' + result.error);
+                }
+            } catch (error) {
+                alert('❌ 연결 테스트 중 오류: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // 솔라피 설정 저장
+        function saveSolapiSettings() {
+            // 입력값 수집
+            const apiKey = document.getElementById('solapiApiKey').value.trim();
+            const secret = document.getElementById('solapiSecret').value.trim();
+            const senderNumber = document.getElementById('senderNumber').value.trim();
+            const kakaoChannelId = document.getElementById('kakaoChannelId').value.trim();
+            const templateIssue = document.getElementById('templateIssue').value.trim();
+            const templateReady = document.getElementById('templateReady').value.trim();
+            const templateCall = document.getElementById('templateCall').value.trim();
+            const testMode = document.getElementById('testMode').checked;
+            
+            // 필수값 검증
+            if (!apiKey || !secret) {
+                alert('API Key와 Secret은 필수입니다.');
+                return;
+            }
+            
+            if (!senderNumber) {
+                alert('발신번호는 필수입니다.');
+                return;
+            }
+            
+            // 발신번호 형식 검증
+            const phoneRegex = /^010\d{8}$/;
+            const cleanSender = senderNumber.replace(/[-\s]/g, '');
+            if (!phoneRegex.test(cleanSender)) {
+                alert('발신번호는 010으로 시작하는 11자리 숫자여야 합니다.');
+                return;
+            }
+            
+            // 설정 저장
+            kioskData.solapiSettings = {
+                apiKey: apiKey,
+                secret: secret,
+                senderNumber: cleanSender,
+                kakaoChannelId: kakaoChannelId,
+                templates: {
+                    issue: templateIssue,
+                    ready: templateReady,
+                    call: templateCall
+                },
+                testMode: testMode
+            };
+            
+            // Firebase에 저장
+            saveKioskSettings();
+            
+            // 상태 업데이트
+            updateSolapiStatus();
+            
+            // 모달 닫기
+            hideSolapiSettings();
+            
+            // 성공 메시지
+            setTimeout(() => {
+                alert('📱 솔라피 설정이 저장되었습니다!\n\n' +
+                      (testMode ? '🧪 테스트 모드로 설정됨' : '🚀 실제 발송 모드로 설정됨'));
+            }, 300);
+        }
+
         // 설정 모달 숨기기
         function hideSettings() {
             document.getElementById('settingsModal').classList.remove('show');
@@ -1491,6 +1746,7 @@
             const resultModal = document.getElementById('resultModal');
             const errorModal = document.getElementById('errorModal');
             const settingsModal = document.getElementById('settingsModal');
+            const solapiModal = document.getElementById('solapiModal');
             
             if (event.target === resultModal) {
                 closeResult();
@@ -1500,6 +1756,9 @@
             }
             if (event.target === settingsModal) {
                 hideSettings();
+            }
+            if (event.target === solapiModal) {
+                hideSolapiSettings();
             }
         }
 
