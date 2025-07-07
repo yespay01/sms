@@ -1124,20 +1124,97 @@
             alert(`${type} 초기화 기능은 개발 중입니다.`);
         }
 
-        // 🎯 수정: 초기화 함수
+        // 초기화 모달 관련 함수들 (완전 구현)
+        function showResetModal(type) {
+            let message = '';
+            switch(type) {
+                case 'waiting':
+                    message = '현재 대기 중인 모든 번호를 삭제하시겠습니까?';
+                    break;
+                case 'partial':
+                    message = '오늘 통계를 초기화하시겠습니까?';
+                    break;
+                case 'all':
+                    message = '모든 데이터를 초기화하시겠습니까? (되돌릴 수 없습니다)';
+                    break;
+            }
+            
+            if (confirm(message)) {
+                executeReset(type);
+            }
+        }
+
+        function executeReset(type) {
+            switch(type) {
+                case 'waiting':
+                    sharedData.waiting = [];
+                    break;
+                case 'partial':
+                    sharedData.totalToday = 0;
+                    sharedData.counters.forEach(counter => counter.count = 0);
+                    break;
+                case 'all':
+                    sharedData = {
+                        currentCall: { number: '-', counter: 0, course: '-' },
+                        waiting: [],
+                        counters: [
+                            { id: 1, current: null, course: null, count: 0 },
+                            { id: 2, current: null, course: null, count: 0 },
+                            { id: 3, current: null, course: null, count: 0 },
+                            { id: 4, current: null, course: null, count: 0 },
+                            { id: 5, current: null, course: null, count: 0 },
+                            { id: 6, current: null, course: null, count: 0 }
+                        ],
+                        totalToday: 0,
+                        lastUpdated: null,
+                        counterSettings: counterSettings // 창구 설정은 유지
+                    };
+                    break;
+            }
+            
+            saveToFirebase();
+            alert(`${type} 초기화가 완료되었습니다.`);
+        }
+
+        // 🎯 수정: 초기화 함수 (중복 제거)
         function initialize() {
             console.log('🏢 창구 시스템 초기화 시작');
             
             currentCounter = getCounterFromUrl();
             selectCounter(currentCounter);
             
-            // 🎯 중요: Firebase 리스너를 바로 설정 (기본 과정은 이미 설정됨)
+            // Firebase 리스너를 바로 설정 (기본 과정은 이미 설정됨)
             setTimeout(() => {
                 setupFirebaseListeners();
             }, 1000);
             
             console.log('✅ 창구 시스템 초기화 완료 (기본 과정:', courses.length, '개)');
         }
+
+        // 키보드 단축키
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                recallCurrent();
+            }
+            
+            if (e.ctrlKey && e.key === 'n') {
+                e.preventDefault();
+                callNext();
+            }
+            
+            if (e.ctrlKey && e.key === 'e') {
+                e.preventDefault();
+                completeService();
+            }
+            
+            if (e.key === 'r' && !e.ctrlKey && !e.altKey && !e.shiftKey) {
+                if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                    e.preventDefault();
+                    recallCurrent();
+                }
+            }
+        });
 
         // 모달 외부 클릭 시 닫기
         window.onclick = function(event) {
@@ -1156,6 +1233,9 @@
         }
 
         console.log('🏢 창구 시스템 로딩 완료 - 과정 목록 수정');
+    </script>
+</body>
+</html>
     </script>
 </body>
 </html>
