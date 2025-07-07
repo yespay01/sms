@@ -1062,11 +1062,13 @@
 
         // 설정 모달 표시/숨기기 (기존 기능 유지)
         function showSettings() {
-            alert('관리자 설정은 별도 관리 페이지에서 가능합니다.');
+            console.log('⚙️ 설정 버튼 클릭됨');
+            alert('관리자 설정은 별도 관리 페이지에서 가능합니다.\n\n단축키: Ctrl + Shift + S');
         }
 
         // 통계 표시 (기존 기능 유지)
         function showStats() {
+            console.log('📊 통계 버튼 클릭됨');
             const totalToday = kioskData.totalToday || 0;
             const courseCounts = {};
             
@@ -1088,6 +1090,18 @@
                     statsText += `• ${name}: ${count}개\n`;
                 });
             }
+            
+            // 현재 시간 및 과정 운영 상태 추가
+            const now = new Date();
+            const currentTime = now.toTimeString().substr(0, 5);
+            statsText += `\n\n현재 시간: ${currentTime}`;
+            statsText += `\n\n과정별 운영 상태:`;
+            
+            systemSettings.courses.forEach(course => {
+                const isOpen = isTimeInRange(currentTime, course.operationHours.start, course.operationHours.end);
+                const status = isOpen ? '✅ 운영중' : '❌ 운영종료';
+                statsText += `\n• ${course.name}: ${status} (${course.operationHours.start}-${course.operationHours.end})`;
+            });
             
             alert(statsText);
         }
