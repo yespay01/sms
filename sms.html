@@ -96,25 +96,31 @@
             top: 20px;
             right: 20px;
             display: flex;
-            gap: 10px;
+            gap: 15px;
         }
         
         .admin-btn {
             background: rgba(102, 126, 234, 0.8);
             color: white;
             border: none;
-            padding: 12px 18px;
-            border-radius: 20px;
+            padding: 12px;
+            border-radius: 50%;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 1.2rem;
             font-weight: 600;
             transition: all 0.3s ease;
             touch-action: manipulation;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
         }
         
         .admin-btn:hover, .admin-btn:active {
             background: rgba(102, 126, 234, 1);
-            transform: translateY(-2px);
+            transform: translateY(-2px) scale(1.1);
         }
         
         .admin-btn.settings {
@@ -123,6 +129,28 @@
         
         .admin-btn.settings:hover, .admin-btn.settings:active {
             background: rgba(243, 156, 18, 1);
+        }
+        
+        /* 툴팁 */
+        .admin-btn::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .admin-btn:hover::after {
+            opacity: 1;
         }
         
         .course-selection {
@@ -358,9 +386,173 @@
             backdrop-filter: blur(10px);
         }
         
-        .status-indicator.online { border-left: 4px solid #00b894; color: #00b894; }
-        .status-indicator.offline { border-left: 4px solid #e74c3c; color: #e74c3c; }
-        .status-indicator.firebase { border-left: 4px solid #ff6b35; color: #ff6b35; }
+        /* 터치 숫자패드 팝업 모달 */
+        .phone-popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .phone-popup.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .phone-popup-content {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: slideInUp 0.3s ease-out;
+        }
+        
+        .phone-popup-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .phone-display {
+            background: #f8f9fa;
+            border: 3px solid #dee2e6;
+            border-radius: 15px;
+            padding: 20px;
+            font-size: 2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 30px;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .phone-display.error {
+            border-color: #e74c3c;
+            background: #fdf2f2;
+            color: #e74c3c;
+        }
+        
+        .phone-display.success {
+            border-color: #00b894;
+            background: #f0fff4;
+            color: #00b894;
+        }
+        
+        .numpad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .numpad-btn {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #dee2e6;
+            border-radius: 15px;
+            padding: 20px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+            user-select: none;
+            color: #333;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .numpad-btn:hover, .numpad-btn:active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: scale(0.95);
+            border-color: #667eea;
+        }
+        
+        .numpad-btn.special {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .numpad-btn.special:hover, .numpad-btn.special:active {
+            background: linear-gradient(135deg, #c0392b, #a93226);
+            transform: scale(0.95);
+        }
+        
+        .numpad-btn.zero {
+            grid-column: 2;
+        }
+        
+        .phone-popup-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        
+        .phone-popup-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            touch-action: manipulation;
+            min-width: 120px;
+        }
+        
+        .phone-cancel-btn {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+        }
+        
+        .phone-cancel-btn:hover, .phone-cancel-btn:active {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.3);
+        }
+        
+        .phone-submit-btn {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: white;
+        }
+        
+        .phone-submit-btn:disabled {
+            background: #ddd;
+            color: #999;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .phone-submit-btn:hover:not(:disabled), .phone-submit-btn:active:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 184, 148, 0.3);
+        }
+        
+        .phone-help-text {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
         
         /* 로딩 모달 */
         .loading {
@@ -943,8 +1135,8 @@
         </div>
         
         <div class="admin-controls">
-            <button class="admin-btn settings" onclick="showSettings()">⚙️ 시스템설정</button>
-            <button class="admin-btn" onclick="showStats()">📊 통계</button>
+            <button class="admin-btn settings" onclick="showSettings()" data-tooltip="시스템설정">⚙️</button>
+            <button class="admin-btn" onclick="showStats()" data-tooltip="통계">📊</button>
         </div>
         
         <div class="header">
@@ -982,6 +1174,39 @@
             <button class="action-btn issue-btn" id="issueBtn" onclick="issueTicket()" disabled>
                 🎫 번호표 발급
             </button>
+        </div>
+    </div>
+
+    <!-- 터치 숫자패드 팝업 -->
+    <div class="phone-popup" id="phonePopup">
+        <div class="phone-popup-content">
+            <h2 class="phone-popup-title">📱 휴대폰 번호 입력</h2>
+            <div class="phone-help-text">
+                알림톡 발송을 위해 휴대폰 번호를 입력해 주세요.<br>
+                호출 시 카카오톡으로 알림을 받을 수 있습니다.
+            </div>
+            
+            <div class="phone-display" id="phoneDisplay">010-</div>
+            
+            <div class="numpad">
+                <button class="numpad-btn" onclick="inputNumber('1')">1</button>
+                <button class="numpad-btn" onclick="inputNumber('2')">2</button>
+                <button class="numpad-btn" onclick="inputNumber('3')">3</button>
+                <button class="numpad-btn" onclick="inputNumber('4')">4</button>
+                <button class="numpad-btn" onclick="inputNumber('5')">5</button>
+                <button class="numpad-btn" onclick="inputNumber('6')">6</button>
+                <button class="numpad-btn" onclick="inputNumber('7')">7</button>
+                <button class="numpad-btn" onclick="inputNumber('8')">8</button>
+                <button class="numpad-btn" onclick="inputNumber('9')">9</button>
+                <button class="numpad-btn special" onclick="deleteLastNumber()">←</button>
+                <button class="numpad-btn zero" onclick="inputNumber('0')">0</button>
+                <button class="numpad-btn special" onclick="clearAllNumbers()">전체<br>삭제</button>
+            </div>
+            
+            <div class="phone-popup-actions">
+                <button class="phone-popup-btn phone-cancel-btn" onclick="closePhonePopup()">취소</button>
+                <button class="phone-popup-btn phone-submit-btn" id="phoneSubmitBtn" onclick="submitPhoneNumber()" disabled>발급</button>
+            </div>
         </div>
     </div>
 
@@ -1221,6 +1446,10 @@
 
         // 자동 닫기 타이머 변수
         let autoCloseTimer = null;
+        
+        // 팝업 상태 변수
+        let phoneInputValue = '';
+        let selectedCourseForPopup = null;
 
         // Firebase Functions URL
         const FUNCTIONS_URL = 'https://sendalimtalk-74viab6pza-an.a.run.app';
@@ -1245,7 +1474,7 @@
             }
         }
 
-        // 🕐 시간별 과정 노출 체크 (안전한 버전)
+        // 🕐 시간별 과정 노출 체크 (운영시간 외 완전 숨김)
         function checkCourseAvailability() {
             try {
                 const now = new Date();
@@ -1276,12 +1505,15 @@
                         const isAvailable = isTimeInRange(currentTime, course.operationHours.start, course.operationHours.end);
                         
                         if (isAvailable) {
+                            // 운영시간 내: 표시
+                            courseBtn.style.display = 'flex';
                             courseBtn.classList.remove('disabled');
                             courseBtn.style.pointerEvents = 'auto';
                         } else {
-                            courseBtn.classList.add('disabled');
-                            courseBtn.style.pointerEvents = 'none';
+                            // 운영시간 외: 완전 숨김
+                            courseBtn.style.display = 'none';
                             
+                            // 선택된 과정이 숨겨지는 과정이면 선택 해제
                             if (selectedCourse && selectedCourse.code === course.code) {
                                 selectedCourse = null;
                                 courseBtn.classList.remove('selected');
@@ -1358,7 +1590,7 @@
             }
         }
 
-        // 🎯 과정 선택 (안전한 버전)
+        // 🎯 과정 선택 (팝업 방식으로 변경)
         function selectCourse(course, index) {
             try {
                 const now = new Date();
@@ -1375,28 +1607,24 @@
                     return;
                 }
                 
-                selectedCourse = course;
+                // 선택된 과정 저장
+                selectedCourseForPopup = course;
                 
+                // 모든 과정 버튼 선택 해제
                 document.querySelectorAll('.course-btn').forEach(btn => {
                     btn.classList.remove('selected');
                 });
                 
+                // 클릭된 과정 버튼 선택 상태로 변경
                 const courseBtn = document.querySelector(`[data-course-index="${index}"]`);
                 if (courseBtn) {
                     courseBtn.classList.add('selected');
                 }
                 
-                // 전화번호 입력 섹션 표시
-                document.getElementById('phoneSection').classList.add('show');
-                document.getElementById('backBtn').style.display = 'block';
+                // 터치 숫자패드 팝업 표시
+                showPhonePopup();
                 
-                // 스크롤 이동
-                document.getElementById('phoneSection').scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'center' 
-                });
-                
-                console.log('📚 과정 선택:', course.name);
+                console.log('📚 과정 선택 완료:', course.name, '- 팝업 표시');
                 
             } catch (error) {
                 console.error('❌ 과정 선택 오류:', error);
