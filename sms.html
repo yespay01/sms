@@ -992,7 +992,7 @@
         <div class="loading-sub">알림톡 발송까지 잠시만 기다려 주세요</div>
     </div>
 
-    <!-- 성공 결과 모달 -->
+    <!-- 성공 결과 모달 (2초 자동 닫기) -->
     <div class="result-modal" id="resultModal">
         <div class="result-content">
             <div class="result-icon">🎉</div>
@@ -1005,7 +1005,7 @@
                 📱 알림톡이 발송되었습니다!<br>
                 호출 시 카카오톡으로 안내해 드립니다.
             </div>
-            <button class="close-btn" onclick="closeResult()">확인</button>
+            <button class="close-btn" onclick="closeResult()">확인 (2초 후 자동 닫기)</button>
         </div>
     </div>
 
@@ -1218,6 +1218,9 @@
             lastDate: new Date().toISOString().split('T')[0],
             totalToday: 0
         };
+
+        // 자동 닫기 타이머 변수
+        let autoCloseTimer = null;
 
         // Firebase Functions URL
         const FUNCTIONS_URL = 'https://sendalimtalk-74viab6pza-an.a.run.app';
@@ -1963,9 +1966,15 @@
             }
         }
 
-        // 성공 결과 표시 (안전한 버전)
+        // 성공 결과 표시 (2초 자동 닫기)
         function showResult(data) {
             try {
+                // 기존 타이머가 있다면 제거
+                if (autoCloseTimer) {
+                    clearTimeout(autoCloseTimer);
+                    autoCloseTimer = null;
+                }
+                
                 const ticketNumberEl = document.getElementById('resultTicketNumber');
                 const waitingEl = document.getElementById('resultWaiting');
                 const timeEl = document.getElementById('resultTime');
@@ -2021,6 +2030,14 @@
                 const resultModal = document.getElementById('resultModal');
                 if (resultModal) {
                     resultModal.classList.add('show');
+                    console.log('🎉 결과 모달 표시 - 2초 후 자동 닫기');
+                    
+                    // ⭐ 2초 후 자동 닫기 타이머 설정
+                    autoCloseTimer = setTimeout(() => {
+                        console.log('⏰ 2초 경과 - 결과 모달 자동 닫기');
+                        closeResult();
+                    }, 2000);
+                    
                 } else {
                     console.error('❌ 결과 모달을 찾을 수 없음');
                     // 대체 알림 표시
@@ -2045,9 +2062,16 @@
             }
         }
 
-        // 결과 닫기 (안전한 버전)
+        // 결과 닫기 (타이머 관리 포함)
         function closeResult() {
             try {
+                // 자동 닫기 타이머가 있다면 취소
+                if (autoCloseTimer) {
+                    clearTimeout(autoCloseTimer);
+                    autoCloseTimer = null;
+                    console.log('🚫 자동 닫기 타이머 취소됨 (수동 닫기)');
+                }
+                
                 const resultModal = document.getElementById('resultModal');
                 if (resultModal) {
                     resultModal.classList.remove('show');
@@ -2615,12 +2639,13 @@
             }
         }
 
-        // 모달 외부 클릭 시 닫기
+        // 모달 외부 클릭 시 닫기 (타이머 관리 포함)
         window.onclick = function(event) {
             const resultModal = document.getElementById('resultModal');
             const settingsModal = document.getElementById('settingsModal');
             
             if (event.target === resultModal) {
+                console.log('🖱️ 모달 외부 클릭으로 결과 닫기');
                 closeResult();
             }
             
@@ -2629,16 +2654,23 @@
             }
         };
 
-        // 키보드 단축키
+        // 키보드 단축키 (타이머 관리 포함)
         document.addEventListener('keydown', function(e) {
             // ESC키로 모달 닫기
             if (e.key === 'Escape') {
-                closeResult();
-                hideSettings();
+                const resultModal = document.getElementById('resultModal');
+                const settingsModal = document.getElementById('settingsModal');
+                
+                if (resultModal && resultModal.classList.contains('show')) {
+                    console.log('⌨️ ESC 키로 결과 모달 닫기');
+                    closeResult();
+                } else if (settingsModal && settingsModal.style.display === 'block') {
+                    hideSettings();
+                }
             }
         });
 
-        // 초기화 (더 안전한 버전)
+        // 초기화 (Firebase 오류 수정)
         function initialize() {
             console.log('🚀 터치 키오스크 시스템 초기화 시작');
             console.log('📋 기본 시스템 설정:', systemSettings);
@@ -2670,17 +2702,20 @@
                 checkCourseAvailability();
                 setInterval(checkCourseAvailability, 60000);
                 
-                // 6. Firebase 상태 확인 (3초 후)
+                // 6. Firebase 상태 확인 (3초 후) - 간단하게 수정
                 setTimeout(() => {
                     try {
-                        const isConnected = isFirebaseConnected();
-                        if (isConnected) {
-                            console.log('6️⃣ ✅ Firebase 연결 확인 완료');
+                        if (window.firebaseDB && window.firebaseRef && window.firebaseSet) {
+                            console.log('6️⃣ ✅ Firebase 기본 연결 확인 완료');
                         } else {
-                            console.warn('6️⃣ ⚠️ Firebase 연결 문제 감지');
+                            console.warn('6️⃣ ⚠️ Firebase 일부 기능 누락:', {
+                                firebaseDB: !!window.firebaseDB,
+                                firebaseRef: !!window.firebaseRef,
+                                firebaseSet: !!window.firebaseSet
+                            });
                         }
                     } catch (error) {
-                        console.warn('6️⃣ ⚠️ Firebase 연결 확인 오류:', error.message);
+                        console.warn('6️⃣ ⚠️ Firebase 연결 확인 중 오류:', error.message);
                     }
                 }, 3000);
                 
