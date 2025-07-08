@@ -1567,10 +1567,13 @@
         // 🎯 과정 선택 (터치패드 팝업 방식)
         function selectCourse(course, index) {
             try {
+                console.log('📚 과정 선택 시도:', course, 'index:', index);
+                
                 const now = new Date();
                 const currentTime = now.toTimeString().substr(0, 5);
                 
                 if (!course || !course.operationHours) {
+                    console.error('❌ 과정 데이터 불완전:', course);
                     alert('이 과정의 운영시간이 설정되지 않았습니다.');
                     return;
                 }
@@ -1580,21 +1583,39 @@
                     return;
                 }
                 
-                selectedCourseForPopup = course;
+                // ✅ 선택된 과정을 전역 변수에 저장
+                selectedCourseForPopup = {
+                    code: course.code,
+                    name: course.name,
+                    englishName: course.englishName,
+                    icon: course.icon,
+                    operationHours: course.operationHours
+                };
                 
+                console.log('✅ selectedCourseForPopup 설정 완료:', selectedCourseForPopup);
+                
+                // 모든 과정 버튼 선택 해제
                 document.querySelectorAll('.course-btn').forEach(btn => {
                     btn.classList.remove('selected');
                 });
                 
+                // 클릭된 과정 버튼 선택 상태로 변경
                 const courseBtn = document.querySelector(`[data-course-index="${index}"]`);
                 if (courseBtn) {
                     courseBtn.classList.add('selected');
+                    console.log('✅ 과정 버튼 selected 클래스 추가');
+                } else {
+                    console.warn('⚠️ 과정 버튼을 찾을 수 없음, index:', index);
                 }
                 
+                // 터치패드 팝업 표시
                 showPhonePopup();
+                
+                console.log('🎯 과정 선택 완료:', course.name);
                 
             } catch (error) {
                 console.error('❌ 과정 선택 오류:', error);
+                selectedCourseForPopup = null; // 오류 시 초기화
                 alert('과정 선택 중 오류가 발생했습니다.');
             }
         }
@@ -1619,17 +1640,26 @@
         // 📱 터치패드 팝업 닫기
         function closePhonePopup() {
             try {
+                console.log('📱 터치패드 팝업 닫기 시작');
+                
                 const popup = document.getElementById('phonePopup');
                 if (popup) {
                     popup.classList.remove('show');
+                    console.log('✅ 팝업 숨김 완료');
+                } else {
+                    console.warn('⚠️ phonePopup 요소를 찾을 수 없음');
                 }
                 
+                // 입력값 초기화
                 phoneInputValue = '';
-                selectedCourseForPopup = null;
+                console.log('✅ 전화번호 입력값 초기화');
                 
-                document.querySelectorAll('.course-btn').forEach(btn => {
-                    btn.classList.remove('selected');
-                });
+                // ⚠️ 여기서 selectedCourseForPopup을 null로 만들지 않음
+                // 발급 과정에서 사용하기 때문에 유지
+                console.log('📚 selectedCourseForPopup 유지:', selectedCourseForPopup);
+                
+                // 과정 버튼 선택 상태는 유지 (발급 중 표시를 위해)
+                console.log('✅ 팝업 닫기 완료');
                 
             } catch (error) {
                 console.error('❌ 팝업 닫기 오류:', error);
@@ -1775,9 +1805,20 @@
         async function submitPhoneNumber() {
             try {
                 console.log('🎫 번호표 발급 버튼 클릭됨');
+                console.log('📚 selectedCourseForPopup 상태:', selectedCourseForPopup);
                 
                 if (!selectedCourseForPopup) {
-                    alert('과정이 선택되지 않았습니다.');
+                    console.error('❌ selectedCourseForPopup이 null임!');
+                    alert('과정이 선택되지 않았습니다.\n다시 과정을 선택해 주세요.');
+                    closePhonePopup();
+                    return;
+                }
+                
+                // 과정 데이터 안전 체크
+                if (!selectedCourseForPopup.code || !selectedCourseForPopup.name) {
+                    console.error('❌ 과정 데이터가 불완전함:', selectedCourseForPopup);
+                    alert('과정 정보에 오류가 있습니다.\n다시 과정을 선택해 주세요.');
+                    closePhonePopup();
                     return;
                 }
                 
@@ -2274,30 +2315,44 @@
         // 결과 닫기 (타이머 관리 포함)
         function closeResult() {
             try {
+                console.log('🔄 결과 모달 닫기 시작');
+                
                 if (autoCloseTimer) {
                     clearTimeout(autoCloseTimer);
                     autoCloseTimer = null;
+                    console.log('⏰ 자동 닫기 타이머 취소');
                 }
                 
                 const resultModal = document.getElementById('resultModal');
                 if (resultModal) {
                     resultModal.classList.remove('show');
+                    console.log('✅ 결과 모달 숨김 완료');
+                } else {
+                    console.warn('⚠️ resultModal 요소를 찾을 수 없음');
                 }
                 
+                // 피드백 제거
                 hideIssuingFeedback();
+                
+                // ✅ 이제 selectedCourseForPopup 초기화
                 selectedCourseForPopup = null;
                 phoneInputValue = '';
+                console.log('🧹 전역 변수 초기화 완료');
                 
+                // 300ms 후 과정 버튼 상태 초기화
                 setTimeout(() => {
                     try {
                         document.querySelectorAll('.course-btn').forEach(btn => {
                             btn.classList.remove('selected', 'issuing');
                         });
+                        console.log('✅ 과정 버튼 상태 초기화 완료');
                         
                     } catch (error) {
-                        console.error('❌ 초기화 오류:', error);
+                        console.error('❌ 과정 버튼 초기화 오류:', error);
                     }
                 }, 300);
+                
+                console.log('✅ 결과 닫기 완료');
                 
             } catch (error) {
                 console.error('❌ 결과 닫기 오류:', error);
