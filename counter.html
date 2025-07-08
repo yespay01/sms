@@ -383,7 +383,7 @@
         .offline { border-left: 4px solid #e74c3c; }
         .firebase { border-left: 4px solid #ff6b35; }
 
-        /* 기타 스타일들 - 기존 counter.html에서 복사 */
+        /* 기타 스타일들 */
         .waiting-section {
             background: #f8f9fa;
             border-radius: 15px;
@@ -458,6 +458,52 @@
             font-size: 0.9rem;
             color: #666;
             margin-top: 5px;
+        }
+        
+        /* 알림톡 상태 표시 CSS */
+        .alimtalk-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.95);
+            padding: 12px 18px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: none;
+            transition: all 0.3s ease;
+            min-width: 200px;
+            text-align: center;
+        }
+        
+        .alimtalk-status.success {
+            border-left: 4px solid #00b894;
+            color: #00b894;
+            background: rgba(0,184,148,0.1);
+        }
+        
+        .alimtalk-status.error {
+            border-left: 4px solid #e74c3c;
+            color: #e74c3c;
+            background: rgba(231,76,60,0.1);
+        }
+        
+        .alimtalk-status.show {
+            display: block;
+            animation: slideInUp 0.3s ease-out;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
     </style>
 
@@ -612,11 +658,15 @@
         </div>
     </div>
 
+    <!-- 알림톡 상태 표시 -->
+    <div class="alimtalk-status" id="alimtalkStatus">
+        📱 알림톡 발송 완료
+    </div>
+
     <script>
         let currentCounter = 1;
-        let counterSettings = {}; // 창구별 설정
+        let counterSettings = {};
         
-        // 🎯 기본 과정 설정 (Firebase 로드 전까지 사용)
         let courses = [
             { code: 'CH', name: '중국어 과정', englishName: 'Chinese Course' },
             { code: 'EN', name: '영어 과정', englishName: 'English Course' },
@@ -640,7 +690,8 @@
             counterSettings: {}
         };
 
-        // URL에서 창구 번호 자동 감지
+        const FUNCTIONS_URL = 'https://sendalimtalk-74viab6pza-an.a.run.app';
+
         function getCounterFromUrl() {
             const urlParams = new URLSearchParams(window.location.search);
             const counterId = urlParams.get('id');
@@ -650,7 +701,6 @@
             return 1;
         }
 
-        // 창구 선택
         function selectCounter(counterNum) {
             currentCounter = counterNum;
             
@@ -661,7 +711,6 @@
             updateCounterAssignment();
         }
 
-        // 창구별 전담 과정 표시 업데이트
         function updateCounterAssignment() {
             const assignment = counterSettings[currentCounter];
             const assignmentEl = document.getElementById('counterAssignment');
@@ -681,14 +730,12 @@
             }
         }
 
-        // 🎯 수정: Firebase 리스너 설정
         function setupFirebaseListeners() {
             if (!window.firebaseDB) {
                 console.error('Firebase가 초기화되지 않았습니다.');
                 return;
             }
 
-            // 1. 카운터 시스템 데이터 구독
             const systemRef = window.firebaseRef(window.firebaseDB, 'counterSystem');
             window.firebaseOnValue(systemRef, (snapshot) => {
                 const data = snapshot.val();
@@ -708,7 +755,6 @@
                 }
             });
 
-            // 2. 🎯 수정: 키오스크 글로벌 설정 구독 (과정 정보)
             const kioskSettingsRef = window.firebaseRef(window.firebaseDB, 'kioskGlobalSettings');
             window.firebaseOnValue(kioskSettingsRef, (snapshot) => {
                 const kioskSettings = snapshot.val();
@@ -718,10 +764,8 @@
                     const oldCourses = [...courses];
                     courses = kioskSettings.courses;
                     
-                    // 과정 변경 감지 및 설정 검증
                     validateCounterSettings(oldCourses, courses);
                     
-                    // 🎯 수정: 설정 모달이 열려있으면 과정 옵션 업데이트
                     if (document.getElementById('settingsModal').style.display === 'block') {
                         renderCourseOptions();
                     }
@@ -729,12 +773,10 @@
                     console.log('✅ 과정 정보 동기화 완료:', courses.length, '개 과정');
                 } else {
                     console.log('📭 키오스크 과정 설정 없음 - 기본값 유지');
-                    // 기본값은 이미 설정되어 있으므로 그대로 사용
                 }
             });
         }
 
-        // 🎯 수정: 창구별 설정 검증 (과정 변경 시)
         function validateCounterSettings(oldCourses, newCourses) {
             let hasChanges = false;
             const newCourseCodes = newCourses.map(c => c.code);
@@ -756,7 +798,6 @@
             }
         }
 
-        // Firebase에 데이터 저장
         function saveToFirebase() {
             if (!window.firebaseDB) {
                 console.error('Firebase가 초기화되지 않았습니다.');
@@ -778,6 +819,251 @@
             }
         }
 
+        function getCurrentCustomerPhone(ticketNumber) {
+            try {
+                if (sharedData.waiting && Array.isArray(sharedData.waiting)) {
+                    const customer = sharedData.waiting.find(item => item.number === ticketNumber);
+                    if (customer && customer.phoneNumber) {
+                        console.log(`📱 전화번호 찾음: ${ticketNumber} -> ${customer.phoneNumber}`);
+                        return customer.phoneNumber;
+                    }
+                }
+                console.log(`📱 전화번호 없음: ${ticketNumber}`);
+                return null;
+            } catch (error) {
+                console.error('❌ 전화번호 조회 오류:', error);
+                return null;
+            }
+        }
+
+        function showAlimtalkStatus(message, success) {
+            const statusEl = document.getElementById('alimtalkStatus');
+            if (!statusEl) {
+                console.warn('⚠️ alimtalkStatus 요소를 찾을 수 없음');
+                return;
+            }
+            
+            statusEl.textContent = message;
+            statusEl.className = `alimtalk-status ${success ? 'success' : 'error'} show`;
+            
+            setTimeout(() => {
+                statusEl.classList.remove('show');
+            }, 4000);
+        }
+
+        async function sendCallAlimtalk(customerData, counterNumber, isRecall = false) {
+            try {
+                if (!customerData.phoneNumber) {
+                    console.log('📱 전화번호 없음 - 알림톡 발송 건너뜀');
+                    showAlimtalkStatus('⚠️ 전화번호 없음 (알림톡 발송 안됨)', false);
+                    return { success: false, error: '전화번호 없음' };
+                }
+
+                console.log('📱 호출 알림톡 발송 시도:', {
+                    number: customerData.number,
+                    counter: counterNumber,
+                    phone: customerData.phoneNumber,
+                    isRecall: isRecall
+                });
+
+                showAlimtalkStatus('📱 알림톡 발송 중...', true);
+
+                const functionData = {
+                    phoneNumber: customerData.phoneNumber,
+                    ticketNumber: customerData.number,
+                    counterNumber: `${counterNumber}번 창구`,
+                    courseName: customerData.course,
+                    callTime: new Date().toLocaleTimeString('ko-KR', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    }),
+                    notificationType: isRecall ? 'recall' : 'call'
+                };
+
+                const response = await fetch(`${FUNCTIONS_URL}/sendAlimtalk`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(functionData)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    console.log('✅ 호출 알림톡 발송 성공:', result);
+                    showAlimtalkStatus(`📱 ${isRecall ? '재호출' : '호출'} 알림톡 발송 완료!`, true);
+                    return { success: true, ...result };
+                } else {
+                    console.error('❌ 호출 알림톡 발송 실패:', result);
+                    showAlimtalkStatus(`❌ 알림톡 발송 실패: ${result.error || '알 수 없는 오류'}`, false);
+                    return { success: false, error: result.error || 'Unknown error' };
+                }
+
+            } catch (error) {
+                console.error('❌ 호출 알림톡 발송 오류:', error);
+                showAlimtalkStatus(`❌ 알림톡 오류: ${error.message}`, false);
+                return { success: false, error: error.message };
+            }
+        }
+
+        function callNext() {
+            const filteredWaiting = getFilteredWaiting();
+
+            if (filteredWaiting.length === 0) {
+                const assignment = counterSettings[currentCounter];
+                if (assignment && assignment !== 'ALL') {
+                    const course = courses.find(c => c.code === assignment);
+                    alert(`${course ? course.name : '설정된 과정'}의 대기 번호가 없습니다.`);
+                } else {
+                    alert('대기 중인 번호가 없습니다.');
+                }
+                return;
+            }
+
+            const counter = sharedData.counters[currentCounter - 1];
+
+            if (counter.current && counter.current !== '-') {
+                const previousNumber = counter.current;
+                counter.count = (counter.count || 0) + 1;
+                console.log(`✅ 이전 상담 자동 완료: ${previousNumber} (${currentCounter}번 창구)`);
+            }
+
+            const nextCustomer = filteredWaiting[0];
+            
+            const customerWithPhone = {
+                number: nextCustomer.number,
+                course: nextCustomer.course,
+                phoneNumber: nextCustomer.phoneNumber || null
+            };
+
+            const customerIndex = sharedData.waiting.findIndex(item => item.number === nextCustomer.number);
+            if (customerIndex !== -1) {
+                sharedData.waiting.splice(customerIndex, 1);
+            }
+
+            counter.current = nextCustomer.number;
+            counter.course = nextCustomer.course;
+
+            sharedData.currentCall = {
+                number: nextCustomer.number,
+                counter: currentCounter,
+                course: nextCustomer.course,
+                immediateCall: true,
+                isRecall: false,
+                callTime: new Date().toISOString(),
+                callType: 'normal',
+                recallCount: 0
+            };
+
+            sendCallAlimtalk(customerWithPhone, currentCounter, false);
+            saveToFirebase();
+            alert(`📢 ${nextCustomer.number} 호출 완료!`);
+            console.log(`📢 호출 실행: ${nextCustomer.number} (${currentCounter}번 창구)`);
+        }
+
+        function recallCurrent() {
+            const counter = sharedData.counters[currentCounter - 1];
+
+            if (!counter.current || counter.current === '-') {
+                alert('현재 상담 중인 번호가 없습니다.');
+                return;
+            }
+
+            const currentCustomer = {
+                number: counter.current,
+                course: counter.course,
+                phoneNumber: getCurrentCustomerPhone(counter.current)
+            };
+            
+            sharedData.currentCall = {
+                number: counter.current,
+                counter: currentCounter,
+                course: counter.course,
+                immediateCall: true,
+                isRecall: true,
+                recallTime: new Date().toISOString(),
+                callType: 'recall'
+            };
+
+            sendCallAlimtalk(currentCustomer, currentCounter, true);
+            saveToFirebase();
+            alert(`🔔 ${counter.current} 재호출 완료!`);
+            console.log(`🔔 재호출 실행: ${counter.current} (${currentCounter}번 창구)`);
+        }
+
+        function completeService() {
+            const counter = sharedData.counters[currentCounter - 1];
+            
+            if (!counter.current) {
+                alert('현재 상담 중인 고객이 없습니다.');
+                return;
+            }
+            
+            const completedNumber = counter.current;
+            
+            counter.current = null;
+            counter.course = null;
+            counter.count = (counter.count || 0) + 1;
+            
+            sharedData.currentCall = {
+                number: '-',
+                counter: 0,
+                course: '-'
+            };
+            
+            saveToFirebase();
+            alert(`${completedNumber} 수동 완료!`);
+            console.log(`✅ 수동 완료: ${completedNumber} (${currentCounter}번 창구)`);
+        }
+
+        function callSpecific(number) {
+            const filteredWaiting = getFilteredWaiting();
+            const customer = filteredWaiting.find(item => item.number === number);
+            
+            if (!customer) {
+                alert('이 창구에서 처리할 수 없는 번호입니다.');
+                return;
+            }
+            
+            const counter = sharedData.counters[currentCounter - 1];
+            
+            if (counter.current && counter.current !== '-') {
+                const previousNumber = counter.current;
+                counter.count = (counter.count || 0) + 1;
+                console.log(`✅ 이전 상담 자동 완료: ${previousNumber} (${currentCounter}번 창구)`);
+            }
+            
+            const customerWithPhone = {
+                number: customer.number,
+                course: customer.course,
+                phoneNumber: customer.phoneNumber || null
+            };
+
+            const customerIndex = sharedData.waiting.findIndex(item => item.number === number);
+            if (customerIndex !== -1) {
+                sharedData.waiting.splice(customerIndex, 1);
+            }
+            
+            counter.current = customer.number;
+            counter.course = customer.course;
+            
+            sharedData.currentCall = {
+                number: customer.number,
+                counter: currentCounter,
+                course: customer.course,
+                immediateCall: true,
+                isRecall: false,
+                callTime: new Date().toISOString(),
+                callType: 'direct'
+            };
+            
+            sendCallAlimtalk(customerWithPhone, currentCounter, false);
+            saveToFirebase();
+            alert(`${customer.number} 직접 호출 완료!`);
+            console.log(`📢 직접 호출: ${customer.number} (${currentCounter}번 창구)`);
+        }
+
         function updateDisplay() {
             const counter = sharedData.counters[currentCounter - 1];
             
@@ -785,11 +1071,9 @@
             document.getElementById('currentNumber').textContent = counter.current || '-';
             document.getElementById('currentCourse').textContent = counter.course || '대기 중';
             
-            // 필터링된 대기번호 가져오기
             const filteredWaiting = getFilteredWaiting();
             const allWaiting = sharedData.waiting || [];
             
-            // 버튼 상태 업데이트
             const callBtn = document.getElementById('callBtn');
             const completeBtn = document.getElementById('completeBtn');
             const recallBtn = document.getElementById('recallBtn');
@@ -808,7 +1092,6 @@
                 recallBtn.classList.remove('show');
             }
             
-            // 대기번호 표시
             const waitingContainer = document.getElementById('waitingList');
             waitingContainer.innerHTML = '';
             
@@ -848,7 +1131,6 @@
                 waitingContainer.innerHTML = '<div style="text-align: center; color: #999; padding: 40px;">대기 중인 번호가 없습니다</div>';
             }
             
-            // 통계 업데이트
             const filteredLength = filteredWaiting.length;
             const totalLength = allWaiting.length;
             
@@ -862,7 +1144,6 @@
             document.getElementById('currentWaiting').textContent = filteredLength;
         }
 
-        // 창구가 처리할 수 있는 대기번호 필터링
         function getFilteredWaiting() {
             if (!sharedData.waiting) return [];
             
@@ -878,7 +1159,6 @@
             });
         }
 
-        // 🎯 수정: 설정 모달 표시
         function showSettings() {
             updateCurrentSettingDisplay();
             renderCourseOptions();
@@ -905,14 +1185,12 @@
             }
         }
 
-        // 🎯 수정: 과정 옵션 렌더링
         function renderCourseOptions() {
             const container = document.getElementById('courseOptions');
             const currentAssignment = counterSettings[currentCounter];
             
             container.innerHTML = '';
             
-            // 🎯 수정: 과정이 없으면 메시지 표시
             if (!courses || courses.length === 0) {
                 container.innerHTML = `
                     <div style="text-align: center; padding: 40px; color: #666; grid-column: 1/-1;">
@@ -924,7 +1202,6 @@
                 return;
             }
             
-            // 모든 과정 처리 옵션
             const allOption = document.createElement('div');
             allOption.className = 'course-option all-courses';
             if (!currentAssignment || currentAssignment === 'ALL') {
@@ -937,7 +1214,6 @@
             allOption.onclick = () => selectCourse('ALL');
             container.appendChild(allOption);
             
-            // 개별 과정 옵션들
             courses.forEach(course => {
                 const option = document.createElement('div');
                 option.className = 'course-option';
@@ -979,220 +1255,6 @@
             }
         }
 
-        // Firebase Functions URL
-        const FUNCTIONS_URL = 'https://sendalimtalk-74viab6pza-an.a.run.app';
-// 현재 고객의 전화번호 찾기 함수
-function getCurrentCustomerPhone(ticketNumber) {
-    try {
-        if (sharedData.waiting && Array.isArray(sharedData.waiting)) {
-            const customer = sharedData.waiting.find(item => item.number === ticketNumber);
-            if (customer && customer.phoneNumber) {
-                console.log(`📱 전화번호 찾음: ${ticketNumber} -> ${customer.phoneNumber}`);
-                return customer.phoneNumber;
-            }
-        }
-        console.log(`📱 전화번호 없음: ${ticketNumber}`);
-        return null;
-    } catch (error) {
-        console.error('❌ 전화번호 조회 오류:', error);
-        return null;
-    }
-}
-        // 🎯 수정: 호출 시 알림톡 발송 함수
-        async function sendCallAlimtalk(customerData, counterNumber, isRecall = false) {
-            try {
-                if (!customerData.phoneNumber) {
-                    console.log('📱 전화번호 없음 - 알림톡 발송 건너뜀');
-                    return { success: false, error: '전화번호 없음' };
-                }
-
-                console.log('📱 호출 알림톡 발송 시도:', {
-                    number: customerData.number,
-                    counter: counterNumber,
-                    phone: customerData.phoneNumber,
-                    isRecall: isRecall
-                });
-
-                const functionData = {
-                    phoneNumber: customerData.phoneNumber,
-                    ticketNumber: customerData.number,
-                    counterNumber: `${counterNumber}번 창구`,
-                    courseName: customerData.course,
-                    callTime: new Date().toLocaleTimeString('ko-KR', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                    }),
-                    notificationType: isRecall ? 'recall' : 'call'
-                };
-
-                const response = await fetch(`${FUNCTIONS_URL}/sendAlimtalk`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(functionData)
-                });
-
-                const result = await response.json();
-                
-                if (response.ok && result.success) {
-                    console.log('✅ 호출 알림톡 발송 성공:', result);
-                    return { success: true, ...result };
-                } else {
-                    console.error('❌ 호출 알림톡 발송 실패:', result);
-                    return { success: false, error: result.error || 'Unknown error' };
-                }
-
-            } catch (error) {
-                console.error('❌ 호출 알림톡 발송 오류:', error);
-                return { success: false, error: error.message };
-            }
-        }
-        function callNext() {
-            const filteredWaiting = getFilteredWaiting();
-            
-            if (filteredWaiting.length === 0) {
-                const assignment = counterSettings[currentCounter];
-                if (assignment && assignment !== 'ALL') {
-                    const course = courses.find(c => c.code === assignment);
-                    alert(`${course ? course.name : '설정된 과정'}의 대기 번호가 없습니다.`);
-                } else {
-                    alert('대기 중인 번호가 없습니다.');
-                }
-                return;
-            }
-            
-            const counter = sharedData.counters[currentCounter - 1];
-            
-            if (counter.current && counter.current !== '-') {
-                const previousNumber = counter.current;
-                counter.count = (counter.count || 0) + 1;
-                console.log(`✅ 이전 상담 자동 완료: ${previousNumber} (${currentCounter}번 창구)`);
-            }
-            
-            const nextCustomer = filteredWaiting[0];
-            
-            const customerIndex = sharedData.waiting.findIndex(item => item.number === nextCustomer.number);
-            if (customerIndex !== -1) {
-                sharedData.waiting.splice(customerIndex, 1);
-            }
-            
-            counter.current = nextCustomer.number;
-            counter.course = nextCustomer.course;
-            
-            sharedData.currentCall = {
-                number: nextCustomer.number,
-                counter: currentCounter,
-                course: nextCustomer.course,
-                immediateCall: true,
-                isRecall: false,
-                callTime: new Date().toISOString(),
-                callType: 'normal',
-                recallCount: 0
-            };
-            
-            saveToFirebase();
-            alert(`📢 ${nextCustomer.number} 호출 완료!`);
-            
-            console.log(`📢 호출 실행: ${nextCustomer.number} (${currentCounter}번 창구)`);
-        }
-
-        function recallCurrent() {
-            const counter = sharedData.counters[currentCounter - 1];
-            
-            if (!counter.current || counter.current === '-') {
-                alert('현재 상담 중인 번호가 없습니다.');
-                return;
-            }
-            
-            sharedData.currentCall = {
-                number: counter.current,
-                counter: currentCounter,
-                course: counter.course,
-                immediateCall: true,
-                isRecall: true,
-                recallTime: new Date().toISOString(),
-                callType: 'recall'
-            };
-            
-            saveToFirebase();
-            alert(`🔔 ${counter.current} 재호출 완료!`);
-            
-            console.log(`🔔 재호출 실행: ${counter.current} (${currentCounter}번 창구)`);
-        }
-
-        function completeService() {
-            const counter = sharedData.counters[currentCounter - 1];
-            
-            if (!counter.current) {
-                alert('현재 상담 중인 고객이 없습니다.');
-                return;
-            }
-            
-            const completedNumber = counter.current;
-            
-            counter.current = null;
-            counter.course = null;
-            counter.count = (counter.count || 0) + 1;
-            
-            sharedData.currentCall = {
-                number: '-',
-                counter: 0,
-                course: '-'
-            };
-            
-            saveToFirebase();
-            alert(`${completedNumber} 수동 완료!`);
-            
-            console.log(`✅ 수동 완료: ${completedNumber} (${currentCounter}번 창구)`);
-        }
-
-        function callSpecific(number) {
-            const filteredWaiting = getFilteredWaiting();
-            const customer = filteredWaiting.find(item => item.number === number);
-            
-            if (!customer) {
-                alert('이 창구에서 처리할 수 없는 번호입니다.');
-                return;
-            }
-            
-            const counter = sharedData.counters[currentCounter - 1];
-            
-            if (counter.current && counter.current !== '-') {
-                const previousNumber = counter.current;
-                counter.count = (counter.count || 0) + 1;
-                console.log(`✅ 이전 상담 자동 완료: ${previousNumber} (${currentCounter}번 창구)`);
-            }
-            
-            const customerIndex = sharedData.waiting.findIndex(item => item.number === number);
-            if (customerIndex !== -1) {
-                sharedData.waiting.splice(customerIndex, 1);
-            }
-            
-            counter.current = customer.number;
-            counter.course = customer.course;
-            
-            sharedData.currentCall = {
-                number: customer.number,
-                counter: currentCounter,
-                course: customer.course,
-                immediateCall: true,
-                isRecall: false,
-                callTime: new Date().toISOString(),
-                callType: 'direct'
-            };
-            
-            saveToFirebase();
-            alert(`${customer.number} 호출 완료!`);
-        }
-
-        // 초기화 모달 관련 함수들
-        function showResetModal(type) {
-            // 초기화 관련 로직 (기존과 동일)
-            alert(`${type} 초기화 기능은 개발 중입니다.`);
-        }
-
-        // 초기화 모달 관련 함수들 (완전 구현)
         function showResetModal(type) {
             let message = '';
             switch(type) {
@@ -1235,7 +1297,7 @@ function getCurrentCustomerPhone(ticketNumber) {
                         ],
                         totalToday: 0,
                         lastUpdated: null,
-                        counterSettings: counterSettings // 창구 설정은 유지
+                        counterSettings: counterSettings
                     };
                     break;
             }
@@ -1244,14 +1306,12 @@ function getCurrentCustomerPhone(ticketNumber) {
             alert(`${type} 초기화가 완료되었습니다.`);
         }
 
-        // 🎯 수정: 초기화 함수 (중복 제거)
         function initialize() {
             console.log('🏢 창구 시스템 초기화 시작');
             
             currentCounter = getCounterFromUrl();
             selectCounter(currentCounter);
             
-            // Firebase 리스너를 바로 설정 (기본 과정은 이미 설정됨)
             setTimeout(() => {
                 setupFirebaseListeners();
             }, 1000);
@@ -1259,7 +1319,6 @@ function getCurrentCustomerPhone(ticketNumber) {
             console.log('✅ 창구 시스템 초기화 완료 (기본 과정:', courses.length, '개)');
         }
 
-        // 키보드 단축키
         document.addEventListener('keydown', function(e) {
             if (e.ctrlKey && e.key === 'r') {
                 e.preventDefault();
@@ -1284,7 +1343,6 @@ function getCurrentCustomerPhone(ticketNumber) {
             }
         });
 
-        // 모달 외부 클릭 시 닫기
         window.onclick = function(event) {
             const settingsModal = document.getElementById('settingsModal');
             
@@ -1293,17 +1351,13 @@ function getCurrentCustomerPhone(ticketNumber) {
             }
         }
 
-        // 페이지 로드 시 초기화
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initialize);
         } else {
             initialize();
         }
 
-        console.log('🏢 창구 시스템 로딩 완료 - 과정 목록 수정');
-    </script>
-</body>
-</html>
+        console.log('🏢 창구 시스템 로딩 완료 - 알림톡 발송 기능 포함');
     </script>
 </body>
 </html>
