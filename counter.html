@@ -240,7 +240,132 @@
             background: #c0392b;
             transform: translateY(-2px);
         }
-
+    /* 설정 모달 */
+        .settings-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+        .settings-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f2f6;
+        }
+        .settings-header h2 {
+            color: #667eea;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        .close-settings {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .close-settings:hover {
+            background: #c0392b;
+        }
+        .setting-group {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        .setting-label {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2d3436;
+            display: block;
+        }
+        .course-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .course-option {
+            background: white;
+            border: 3px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        .course-option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .course-option.selected {
+            border-color: #00b894;
+            background: #d1f2eb;
+            color: #00b894;
+        }
+        .course-option.all-courses {
+            border-color: #fdcb6e;
+            background: #fff9e6;
+            color: #e17055;
+        }
+        .course-option.all-courses.selected {
+            border-color: #e17055;
+            background: #fff2e6;
+        }
+        .save-settings-btn {
+            background: #00b894;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        .save-settings-btn:hover {
+            background: #00a085;
+            transform: translateY(-2px);
+        }
+        .current-setting {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            color: #1976d2;
+        }
         .status-indicator {
             position: fixed;
             top: 20px;
