@@ -981,7 +981,23 @@
 
         // Firebase Functions URL
         const FUNCTIONS_URL = 'https://sendalimtalk-74viab6pza-an.a.run.app';
-
+// 현재 고객의 전화번호 찾기 함수
+function getCurrentCustomerPhone(ticketNumber) {
+    try {
+        if (sharedData.waiting && Array.isArray(sharedData.waiting)) {
+            const customer = sharedData.waiting.find(item => item.number === ticketNumber);
+            if (customer && customer.phoneNumber) {
+                console.log(`📱 전화번호 찾음: ${ticketNumber} -> ${customer.phoneNumber}`);
+                return customer.phoneNumber;
+            }
+        }
+        console.log(`📱 전화번호 없음: ${ticketNumber}`);
+        return null;
+    } catch (error) {
+        console.error('❌ 전화번호 조회 오류:', error);
+        return null;
+    }
+}
         // 🎯 수정: 호출 시 알림톡 발송 함수
         async function sendCallAlimtalk(customerData, counterNumber, isRecall = false) {
             try {
