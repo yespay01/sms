@@ -553,34 +553,48 @@
             line-height: 1.5;
         }
         
-        /* 🎯 수정 1: 로딩 모달 크기 줄이기 */
+        /* 🎯 수정 1: 로딩창을 작은 중앙 팝업으로 변경 */
         .loading {
             display: none;
-            background: rgba(255, 255, 255, 0.95);
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            padding: 30px 40px;
             z-index: 9999;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(10px);
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            min-width: 250px;
+            text-align: center;
         }
         
         .loading.show {
-            display: flex;
+            display: block;
+            animation: loadingFadeIn 0.3s ease-out;
+        }
+        
+        @keyframes loadingFadeIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
         }
         
         .spinner {
-            width: 50px;  /* 🎯 100px → 50px로 크기 줄임 */
-            height: 50px; /* 🎯 100px → 50px로 크기 줄임 */
-            border: 5px solid #f3f3f3;  /* 🎯 10px → 5px로 줄임 */
-            border-top: 5px solid #667eea; /* 🎯 10px → 5px로 줄임 */
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 20px; /* 🎯 40px → 20px로 줄임 */
+            margin: 0 auto 15px auto;
         }
         
         @keyframes spin {
@@ -589,14 +603,14 @@
         }
         
         .loading-text {
-            font-size: 1.2rem; /* 🎯 2rem → 1.2rem로 줄임 */
-            font-weight: 700;
+            font-size: 1rem;
+            font-weight: 600;
             color: #333;
-            margin-bottom: 8px; /* 🎯 15px → 8px로 줄임 */
+            margin-bottom: 5px;
         }
         
         .loading-sub {
-            font-size: 0.9rem; /* 🎯 1.2rem → 0.9rem로 줄임 */
+            font-size: 0.8rem;
             color: #666;
         }
         
@@ -1856,17 +1870,11 @@
                 await saveKioskSettings();
                 console.log('✅ 통계 업데이트 완료');
                 
-                // 🎯 수정 3: 결과 팝업 표시 대신 간단한 완료 알림만 표시
-                console.log('🎉 발급 완료 - 간단한 알림 표시');
+                // 🎯 수정 2: 모든 알림 제거 - 조용하게 발급 완료
+                console.log('🎉 발급 완료 - 조용히 처리');
                 
-                // 간단한 완료 알림 (alert 사용)
-                const alimtalkStatus = alimtalkResult.success ? '✅ 알림톡 발송 성공' : '⚠️ 알림톡 발송 실패';
-                alert(`🎉 번호표 발급 완료!\n\n` +
-                      `📱 번호: ${ticketNumber}\n` +
-                      `📚 과정: ${selectedCourseForPopup.name}\n` +
-                      `👥 대기: ${waitingCount}명\n` +
-                      `⏰ 예상시간: 약 ${Math.max(5, waitingCount * 5)}분\n\n` +
-                      `${alimtalkStatus}`);
+                // 아무런 알림 없이 조용하게 완료 처리
+                // alert, 팝업 등 모든 사용자 알림 제거
                 
             } catch (error) {
                 console.error('❌ 팝업 번호표 발급 실패:', error);
