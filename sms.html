@@ -1565,71 +1565,181 @@
             }
         }
 
-        // 키오스크 설정 저장
-        function saveKioskSettings() {
-            if (!window.firebaseDB) return;
+        // 키오스크 설정 저장 (검증 포함)
+        async function saveKioskSettingsWithValidation() {
+            if (!window.firebaseDB) {
+                throw new Error('Firebase 데이터베이스가 초기화되지 않았습니다.');
+            }
             
-            const kioskRef = window.firebaseRef(window.firebaseDB, 'kioskGlobalSettings');
-            const data = {
-                courses: systemSettings.courses,
-                currentNumbers: kioskData.currentNumbers,
-                totalToday: kioskData.totalToday,
-                lastDate: kioskData.lastDate,
-                solapiSettings: systemSettings.solapiSettings,
-                timeSettings: systemSettings.timeSettings,
-                lastUpdated: new Date().toISOString()
-            };
+            try {
+                const kioskRef = window.firebaseRef(window.firebaseDB, 'kioskGlobalSettings');
+                
+                const data = {
+                    courses: systemSettings.courses,
+                    currentNumbers: kioskData.currentNumbers,
+                    totalToday: kioskData.totalToday,
+                    lastDate: kioskData.lastDate,
+                    solapiSettings: systemSettings.solapiSettings,
+                    timeSettings: systemSettings.timeSettings,
+                    lastUpdated: new Date().toISOString(),
+                    version: '2.0' // 설정 버전 추가
+                };
+                
+                console.log('💾 Firebase 저장 데이터:', data);
+                
+                // Firebase에 저장 (Promise로 대기)
+                await window.firebaseSet(kioskRef, data);
+                
+                console.log('✅ Firebase 저장 성공');
+                
+                // 저장 확인을 위한 재검증
+                await validateSavedSettings();
+                
+                return true;
+                
+            } catch (error) {
+                console.error('❌ Firebase 저장 실패:', error);
+                throw error;
+            }
+        }
+
+        // 저장된 설정 검증
+        async function validateSavedSettings() {
+            try {
+                const kioskRef = window.firebaseRef(window.firebaseDB, 'kioskGlobalSettings');
+                
+                return new Promise((resolve, reject) => {
+                    window.firebaseOnValue(kioskRef, (snapshot) => {
+                        const data = snapshot.val();
+                        if (data && data.version === '2.0') {
+                            console.log('✅ 설정 저장 검증 성공');
+                            resolve(data);
+                        } else {
+                            reject(new Error('저장된 데이터 검증 실패'));
+                        }
+                    }, { onlyOnce: true });
+                    
+                    // 5초 타임아웃
+                    setTimeout(() => {
+                        reject(new Error('설정 검증 타임아웃'));
+                    }, 5000);
+                });
+                
+            } catch (error) {
+                console.error('❌ 설정 검증 실패:', error);
+                throw error;
+            }
+        }
+
+        // 키오스크 설정 저장 (기존 함수 개선)
+        async function saveKioskSettings() {
+            if (!window.firebaseDB) {
+                console.warn('⚠️ Firebase 연결 없음 - 설정 저장 건너뜀');
+                return false;
+            }
             
-            window.firebaseSet(kioskRef, data).then(() => {
+            try {
+                const kioskRef = window.firebaseRef(window.firebaseDB, 'kioskGlobalSettings');
+                const data = {
+                    courses: systemSettings.courses,
+                    currentNumbers: kioskData.currentNumbers,
+                    totalToday: kioskData.totalToday,
+                    lastDate: kioskData.lastDate,
+                    solapiSettings: systemSettings.solapiSettings || {},
+                    timeSettings: systemSettings.timeSettings || {},
+                    lastUpdated: new Date().toISOString()
+                };
+                
+                await window.firebaseSet(kioskRef, data);
                 console.log('✅ 키오스크 설정 저장 완료');
-            }).catch((error) => {
+                return true;
+                
+            } catch (error) {
                 console.error('❌ 키오스크 설정 저장 실패:', error);
-            });
+                return false;
+            }
         }
 
         // Firebase 리스너 설정
         function setupFirebaseListeners() {
             if (!window.firebaseDB) {
-                console.error('Firebase가 초기화되지 않았습니다.');
+                console.error('❌ Firebase가 초기화되지 않았습니다.');
                 return;
             }
+
+            console.log('🔥 Firebase 리스너 설정 시작...');
 
             const kioskRef = window.firebaseRef(window.firebaseDB, 'kioskGlobalSettings');
             window.firebaseOnValue(kioskRef, (snapshot) => {
                 const data = snapshot.val();
+                
+                console.log('🔥 Firebase 데이터 수신:', data);
+                
                 if (data) {
-                    console.log('🔥 키오스크 설정 수신:', data);
+                    let hasChanges = false;
                     
-                    if (data.courses) {
+                    // 과정 설정 로드
+                    if (data.courses && Array.isArray(data.courses)) {
+                        console.log('📚 과정 설정 로드:', data.courses.length, '개');
                         systemSettings.courses = data.courses;
                         renderCourses();
                         checkCourseAvailability();
+                        hasChanges = true;
                     }
                     
+                    // 현재 번호 데이터 로드
                     if (data.currentNumbers) {
+                        console.log('🔢 현재 번호 데이터 로드:', data.currentNumbers);
                         kioskData.currentNumbers = data.currentNumbers;
+                        hasChanges = true;
                     }
                     
+                    // 오늘 총 발급 수 로드
                     if (data.totalToday !== undefined) {
+                        console.log('📊 오늘 총 발급 수:', data.totalToday);
                         kioskData.totalToday = data.totalToday;
+                        hasChanges = true;
                     }
                     
+                    // 마지막 날짜 로드
                     if (data.lastDate) {
+                        console.log('📅 마지막 날짜:', data.lastDate);
                         kioskData.lastDate = data.lastDate;
                         checkDateReset();
+                        hasChanges = true;
                     }
 
+                    // 솔라피 설정 로드
                     if (data.solapiSettings) {
-                        systemSettings.solapiSettings = { ...systemSettings.solapiSettings, ...data.solapiSettings };
+                        console.log('📱 솔라피 설정 로드');
+                        systemSettings.solapiSettings = { 
+                            ...systemSettings.solapiSettings, 
+                            ...data.solapiSettings 
+                        };
+                        hasChanges = true;
                     }
 
+                    // 시간 설정 로드
                     if (data.timeSettings) {
-                        systemSettings.timeSettings = { ...systemSettings.timeSettings, ...data.timeSettings };
+                        console.log('⏰ 시간 설정 로드');
+                        systemSettings.timeSettings = { 
+                            ...systemSettings.timeSettings, 
+                            ...data.timeSettings 
+                        };
+                        hasChanges = true;
                     }
+                    
+                    if (hasChanges) {
+                        console.log('✅ 설정 동기화 완료');
+                        console.log('📋 현재 시스템 설정:', systemSettings);
+                    }
+                    
                 } else {
-                    console.log('📭 키오스크 설정 없음 - 기본값 사용');
+                    console.log('📭 Firebase 데이터 없음 - 기본값으로 초기화');
                     saveKioskSettings();
                 }
+            }, (error) => {
+                console.error('❌ Firebase 리스너 오류:', error);
             });
         }
 
@@ -1796,63 +1906,115 @@
             });
         }
 
-        // 과정 업데이트
-        function updateCourse(index, field, value) {
+        // 과정 업데이트 (자동 저장 포함)
+        async function updateCourse(index, field, value) {
             if (systemSettings.courses[index]) {
+                console.log(`📝 과정 ${index} ${field} 업데이트:`, value);
+                
                 systemSettings.courses[index][field] = value;
                 if (field === 'name') {
                     systemSettings.courses[index].englishName = value + ' Course';
                 }
+                
+                // UI 즉시 업데이트
                 renderCourses();
                 checkCourseAvailability();
+                
+                // Firebase에 자동 저장
+                try {
+                    await saveKioskSettings();
+                    console.log('✅ 과정 변경사항 자동 저장 완료');
+                } catch (error) {
+                    console.error('❌ 과정 변경사항 자동 저장 실패:', error);
+                }
             }
         }
 
-        // 과정 운영시간 업데이트
-        function updateCourseTime(index, timeType, value) {
+        // 과정 운영시간 업데이트 (자동 저장 포함)
+        async function updateCourseTime(index, timeType, value) {
             if (systemSettings.courses[index]) {
+                console.log(`🕐 과정 ${index} ${timeType} 시간 업데이트:`, value);
+                
                 if (!systemSettings.courses[index].operationHours) {
                     systemSettings.courses[index].operationHours = {};
                 }
                 systemSettings.courses[index].operationHours[timeType] = value;
+                
+                // UI 즉시 업데이트
                 renderCourses();
                 checkCourseAvailability();
+                
+                // Firebase에 자동 저장
+                try {
+                    await saveKioskSettings();
+                    console.log('✅ 시간 변경사항 자동 저장 완료');
+                } catch (error) {
+                    console.error('❌ 시간 변경사항 자동 저장 실패:', error);
+                }
             }
         }
 
-        // 새 과정 추가
-        function addNewCourse() {
+        // 새 과정 추가 (자동 저장 포함)
+        async function addNewCourse() {
             if (systemSettings.courses.length >= 8) {
                 alert('최대 8개까지만 등록할 수 있습니다.');
                 return;
             }
             
             const newCourse = {
-                code: 'NEW',
+                code: 'NEW' + Date.now().toString().slice(-3), // 중복 방지
                 name: '새 과정',
                 englishName: 'New Course',
                 icon: '📚',
                 operationHours: { start: '09:00', end: '18:00' }
             };
             
+            console.log('➕ 새 과정 추가:', newCourse);
+            
             systemSettings.courses.push(newCourse);
+            
+            // UI 즉시 업데이트
             renderCourseManagement();
             renderCourses();
             checkCourseAvailability();
+            
+            // Firebase에 자동 저장
+            try {
+                await saveKioskSettings();
+                console.log('✅ 새 과정 자동 저장 완료');
+            } catch (error) {
+                console.error('❌ 새 과정 자동 저장 실패:', error);
+                alert('새 과정 저장에 실패했습니다.');
+            }
         }
 
-        // 과정 삭제
-        function removeCourse(index) {
+        // 과정 삭제 (자동 저장 포함)
+        async function removeCourse(index) {
             if (systemSettings.courses.length <= 1) {
                 alert('최소 1개의 과정은 유지해야 합니다.');
                 return;
             }
             
-            if (confirm('이 과정을 삭제하시겠습니까?')) {
+            const courseToRemove = systemSettings.courses[index];
+            
+            if (confirm(`'${courseToRemove.name}'을(를) 삭제하시겠습니까?`)) {
+                console.log('🗑️ 과정 삭제:', courseToRemove);
+                
                 systemSettings.courses.splice(index, 1);
+                
+                // UI 즉시 업데이트
                 renderCourseManagement();
                 renderCourses();
                 checkCourseAvailability();
+                
+                // Firebase에 자동 저장
+                try {
+                    await saveKioskSettings();
+                    console.log('✅ 과정 삭제 자동 저장 완료');
+                } catch (error) {
+                    console.error('❌ 과정 삭제 자동 저장 실패:', error);
+                    alert('과정 삭제 저장에 실패했습니다.');
+                }
             }
         }
 
@@ -1927,39 +2089,84 @@
         }
 
         // 모든 설정 저장
-        function saveAllSettings() {
-            // 시간 설정 수집
-            systemSettings.timeSettings.baseTimePerPerson = parseInt(document.getElementById('baseTimePerPerson').value) || 5;
-            systemSettings.timeSettings.minWaitTime = parseInt(document.getElementById('minWaitTime').value) || 5;
-            systemSettings.timeSettings.operationStart = document.getElementById('operationStart').value || '09:00';
-            systemSettings.timeSettings.operationEnd = document.getElementById('operationEnd').value || '18:00';
+        async function saveAllSettings() {
+            const saveBtn = event.target;
+            const originalText = saveBtn.textContent;
             
-            // 솔라피 설정 수집
-            systemSettings.solapiSettings.apiKey = document.getElementById('solapiApiKey').value || '';
-            systemSettings.solapiSettings.secret = document.getElementById('solapiSecret').value || '';
-            systemSettings.solapiSettings.senderNumber = document.getElementById('senderNumber').value || '';
-            systemSettings.solapiSettings.kakaoChannelId = document.getElementById('kakaoChannelId').value || '';
-            
-            // 템플릿 설정 수집
-            systemSettings.solapiSettings.templates = {
-                issue: document.getElementById('issueTemplateId').value || '',
-                ready: document.getElementById('readyTemplateId').value || '',
-                call: document.getElementById('callTemplateId').value || ''
-            };
-            
-            // 테스트 설정 수집
-            systemSettings.solapiSettings.testPhoneNumber = document.getElementById('testPhoneNumber').value || '';
-            systemSettings.solapiSettings.testMode = document.getElementById('testMode').checked;
-            
-            // Firebase에 저장
-            saveKioskSettings();
-            
-            // UI 업데이트
-            renderCourses();
-            checkCourseAvailability();
-            
-            alert('모든 설정이 저장되었습니다!');
-            hideSettings();
+            try {
+                saveBtn.disabled = true;
+                saveBtn.textContent = '💾 저장 중...';
+                saveBtn.style.opacity = '0.6';
+                
+                console.log('💾 설정 저장 시작...');
+                
+                // 시간 설정 수집
+                systemSettings.timeSettings.baseTimePerPerson = parseInt(document.getElementById('baseTimePerPerson').value) || 5;
+                systemSettings.timeSettings.minWaitTime = parseInt(document.getElementById('minWaitTime').value) || 5;
+                systemSettings.timeSettings.operationStart = document.getElementById('operationStart').value || '09:00';
+                systemSettings.timeSettings.operationEnd = document.getElementById('operationEnd').value || '18:00';
+                
+                console.log('⏰ 시간 설정 수집:', systemSettings.timeSettings);
+                
+                // 솔라피 설정 수집
+                systemSettings.solapiSettings.apiKey = document.getElementById('solapiApiKey').value || '';
+                systemSettings.solapiSettings.secret = document.getElementById('solapiSecret').value || '';
+                systemSettings.solapiSettings.senderNumber = document.getElementById('senderNumber').value || '';
+                systemSettings.solapiSettings.kakaoChannelId = document.getElementById('kakaoChannelId').value || '';
+                
+                // 템플릿 설정 수집
+                systemSettings.solapiSettings.templates = {
+                    issue: document.getElementById('issueTemplateId').value || '',
+                    ready: document.getElementById('readyTemplateId').value || '',
+                    call: document.getElementById('callTemplateId').value || ''
+                };
+                
+                // 테스트 설정 수집
+                systemSettings.solapiSettings.testPhoneNumber = document.getElementById('testPhoneNumber').value || '';
+                systemSettings.solapiSettings.testMode = document.getElementById('testMode').checked;
+                
+                console.log('📱 솔라피 설정 수집:', systemSettings.solapiSettings);
+                console.log('📚 과정 설정:', systemSettings.courses);
+                
+                // Firebase 연결 확인
+                if (!window.firebaseDB) {
+                    throw new Error('Firebase 연결이 없습니다.');
+                }
+                
+                // Firebase에 저장
+                await saveKioskSettingsWithValidation();
+                
+                console.log('✅ 모든 설정 저장 완료!');
+                
+                // UI 업데이트
+                renderCourses();
+                checkCourseAvailability();
+                
+                // 성공 알림
+                saveBtn.textContent = '✅ 저장 완료!';
+                saveBtn.style.background = '#00b894';
+                
+                setTimeout(() => {
+                    alert('모든 설정이 성공적으로 저장되었습니다!');
+                    hideSettings();
+                }, 500);
+                
+            } catch (error) {
+                console.error('❌ 설정 저장 실패:', error);
+                
+                saveBtn.textContent = '❌ 저장 실패';
+                saveBtn.style.background = '#e74c3c';
+                
+                alert(`설정 저장에 실패했습니다:\n${error.message}\n\n콘솔을 확인해 주세요.`);
+                
+            } finally {
+                setTimeout(() => {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = originalText;
+                    saveBtn.style.opacity = '1';
+                    saveBtn.style.background = '';
+                }, 2000);
+            }
         }
 
         // 통계 표시
@@ -2054,26 +2261,47 @@
 
         // 초기화
         function initialize() {
-            console.log('🚀 터치 키오스크 시스템 초기화');
+            console.log('🚀 터치 키오스크 시스템 초기화 시작');
+            console.log('📋 기본 시스템 설정:', systemSettings);
             
-            // Firebase 리스너 설정
-            setupFirebaseListeners();
-            
-            // 과정 렌더링
-            renderCourses();
-            
-            // 전화번호 입력 이벤트
-            setupPhoneInput();
-            
-            // 시간 표시 시작
-            updateTimeDisplay();
-            setInterval(updateTimeDisplay, 1000);
-            
-            // 과정 가용성 체크 시작
-            checkCourseAvailability();
-            setInterval(checkCourseAvailability, 60000);
-            
-            console.log('✅ 터치 키오스크 시스템 초기화 완료');
+            try {
+                // 1. Firebase 리스너 설정 (우선순위 1)
+                console.log('1️⃣ Firebase 리스너 설정...');
+                setupFirebaseListeners();
+                
+                // 2. 과정 렌더링
+                console.log('2️⃣ 과정 렌더링...');
+                renderCourses();
+                
+                // 3. 전화번호 입력 이벤트
+                console.log('3️⃣ 전화번호 입력 이벤트 설정...');
+                setupPhoneInput();
+                
+                // 4. 시간 표시 시작
+                console.log('4️⃣ 시간 표시 시작...');
+                updateTimeDisplay();
+                setInterval(updateTimeDisplay, 1000);
+                
+                // 5. 과정 가용성 체크 시작
+                console.log('5️⃣ 과정 가용성 체크 시작...');
+                checkCourseAvailability();
+                setInterval(checkCourseAvailability, 60000);
+                
+                // 6. Firebase 상태 확인 (3초 후)
+                setTimeout(async () => {
+                    try {
+                        await checkFirebaseConnection();
+                        console.log('6️⃣ Firebase 연결 확인 완료');
+                    } catch (error) {
+                        console.warn('⚠️ Firebase 연결 문제:', error.message);
+                    }
+                }, 3000);
+                
+                console.log('✅ 터치 키오스크 시스템 초기화 완료');
+                
+            } catch (error) {
+                console.error('❌ 초기화 실패:', error);
+            }
         }
 
         // 페이지 로드 시 초기화
