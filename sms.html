@@ -24,10 +24,9 @@
             color: white;
             position: relative;
             overflow: hidden;
-            user-select: none; /* 터치 시스템용 */
+            user-select: none;
         }
         
-        /* 배경 애니메이션 */
         body::before {
             content: '';
             position: fixed;
@@ -80,7 +79,6 @@
             font-weight: 500;
         }
         
-        /* 시간 표시 */
         .time-display {
             position: absolute;
             top: 20px;
@@ -231,250 +229,140 @@
             color: white;
         }
         
-        /* 터치 입력 팝업 */
-        .touch-input-modal {
+        /* 전화번호 입력 섹션 */
+        .phone-section {
             display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 10000;
-            backdrop-filter: blur(10px);
+            margin-bottom: 40px;
+            animation: slideInUp 0.5s ease-out;
         }
         
-        .touch-input-modal.show {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .phone-section.show {
+            display: block;
         }
         
-        .touch-input-content {
-            background: white;
-            border-radius: 30px;
-            padding: 40px;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
-            animation: modalSlideIn 0.4s ease-out;
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
-        @keyframes modalSlideIn {
-            from { transform: scale(0.8) translateY(50px); opacity: 0; }
-            to { transform: scale(1) translateY(0); opacity: 1; }
-        }
-        
-        .input-title {
-            font-size: 2rem;
+        .phone-title {
+            font-size: 2.2rem;
             font-weight: 700;
             color: #333;
             margin-bottom: 20px;
         }
         
-        .input-subtitle {
-            font-size: 1.2rem;
-            color: #666;
-            margin-bottom: 30px;
-        }
-        
-        .phone-display {
+        .phone-input-group {
             background: #f8f9fa;
-            border: 3px solid #dee2e6;
-            border-radius: 15px;
-            padding: 20px;
+            border-radius: 25px;
+            padding: 40px;
+            margin-bottom: 20px;
+        }
+        
+        .phone-input {
+            width: 100%;
+            max-width: 500px;
+            padding: 25px;
             font-size: 2rem;
-            font-weight: 600;
+            border: 4px solid #dee2e6;
+            border-radius: 20px;
             text-align: center;
-            margin-bottom: 30px;
-            min-height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #333;
-        }
-        
-        .keypad {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        
-        .key-btn {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border: 2px solid #dee2e6;
-            border-radius: 15px;
-            padding: 20px;
-            font-size: 1.8rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            touch-action: manipulation;
-            min-height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .key-btn:hover, .key-btn:active {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            transform: scale(0.95);
-            border-color: #667eea;
-        }
-        
-        .key-btn.special {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: white;
-        }
-        
-        .key-btn.special:hover, .key-btn.special:active {
-            background: linear-gradient(135deg, #c0392b, #a93226);
-        }
-        
-        .input-actions {
-            display: flex;
-            gap: 15px;
-        }
-        
-        .input-btn {
-            flex: 1;
-            padding: 18px;
-            border: none;
-            border-radius: 15px;
-            font-size: 1.3rem;
-            font-weight: 700;
-            cursor: pointer;
+            font-weight: 600;
             transition: all 0.3s ease;
+            background: white;
             touch-action: manipulation;
         }
         
-        .confirm-btn {
-            background: linear-gradient(135deg, #00b894, #00cec9);
-            color: white;
+        .phone-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 25px rgba(102, 126, 234, 0.3);
+            transform: scale(1.02);
         }
         
-        .confirm-btn:hover, .confirm-btn:active {
-            background: linear-gradient(135deg, #00a085, #00b894);
-            transform: translateY(-2px);
+        .phone-help {
+            font-size: 1.1rem;
+            color: #666;
+            margin-top: 20px;
+            font-weight: 500;
+            line-height: 1.6;
         }
         
-        .confirm-btn:disabled {
+        .action-buttons {
+            display: flex;
+            gap: 25px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            padding: 25px 50px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            min-width: 250px;
+            touch-action: manipulation;
+        }
+        
+        .action-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-            transform: none;
+            transform: none !important;
         }
         
-        .cancel-btn {
-            background: linear-gradient(135deg, #6c757d, #495057);
+        .issue-btn {
+            background: linear-gradient(135deg, #00b894, #00cec9);
             color: white;
+            box-shadow: 0 10px 30px rgba(0, 184, 148, 0.4);
         }
         
-        .cancel-btn:hover, .cancel-btn:active {
-            background: linear-gradient(135deg, #495057, #343a40);
-            transform: translateY(-2px);
+        .issue-btn:hover:not(:disabled), .issue-btn:active:not(:disabled) {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(0, 184, 148, 0.5);
         }
         
-        /* 안내 메시지 팝업 */
-        .guide-modal {
-            display: none;
+        .back-btn {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+            box-shadow: 0 10px 30px rgba(108, 92, 231, 0.4);
+        }
+        
+        .back-btn:hover, .back-btn:active {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(108, 92, 231, 0.5);
+        }
+        
+        .status-indicator {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 10001;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
             backdrop-filter: blur(10px);
         }
         
-        .guide-modal.show {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        .status-indicator.online { border-left: 4px solid #00b894; color: #00b894; }
+        .status-indicator.offline { border-left: 4px solid #e74c3c; color: #e74c3c; }
+        .status-indicator.firebase { border-left: 4px solid #ff6b35; color: #ff6b35; }
         
-        .guide-content {
-            background: white;
-            border-radius: 30px;
-            padding: 50px;
-            max-width: 600px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
-            animation: modalSlideIn 0.4s ease-out;
-        }
-        
-        .guide-icon {
-            font-size: 5rem;
-            margin-bottom: 30px;
-        }
-        
-        .guide-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        
-        .guide-message {
-            font-size: 1.4rem;
-            color: #666;
-            line-height: 1.6;
-            margin-bottom: 40px;
-        }
-        
-        .guide-steps {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 40px;
-            text-align: left;
-        }
-        
-        .guide-step {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-        }
-        
-        .guide-step:last-child {
-            margin-bottom: 0;
-        }
-        
-        .step-number {
-            background: #667eea;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-            font-weight: 700;
-        }
-        
-        .guide-close-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 18px 40px;
-            border-radius: 25px;
-            font-size: 1.3rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            touch-action: manipulation;
-        }
-        
-        .guide-close-btn:hover, .guide-close-btn:active {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-        }
-        
+        /* 로딩 모달 */
         .loading {
             display: none;
             background: rgba(255, 255, 255, 0.95);
@@ -501,7 +389,7 @@
             border-top: 10px solid #667eea;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
         
         @keyframes spin {
@@ -510,10 +398,10 @@
         }
         
         .loading-text {
-            font-size: 1.8rem;
-            font-weight: 600;
+            font-size: 2rem;
+            font-weight: 700;
             color: #333;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
         
         .loading-sub {
@@ -521,25 +409,7 @@
             color: #666;
         }
         
-        .status-indicator {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-        }
-        
-        .status-indicator.online { border-left: 4px solid #00b894; color: #00b894; }
-        .status-indicator.offline { border-left: 4px solid #e74c3c; color: #e74c3c; }
-        .status-indicator.firebase { border-left: 4px solid #ff6b35; color: #ff6b35; }
-        
+        /* 결과 모달 */
         .result-modal {
             display: none;
             position: fixed;
@@ -547,9 +417,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.5);
             z-index: 10000;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(5px);
         }
         
         .result-modal.show {
@@ -561,7 +431,7 @@
         .result-content {
             background: white;
             border-radius: 30px;
-            padding: 50px;
+            padding: 60px;
             text-align: center;
             max-width: 600px;
             width: 90%;
@@ -592,7 +462,7 @@
         .result-info {
             font-size: 1.3rem;
             color: #666;
-            line-height: 1.6;
+            line-height: 1.8;
             margin-bottom: 40px;
         }
         
@@ -600,8 +470,8 @@
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             border: none;
-            padding: 18px 40px;
-            border-radius: 25px;
+            padding: 20px 40px;
+            border-radius: 30px;
             font-size: 1.3rem;
             font-weight: 600;
             cursor: pointer;
@@ -610,8 +480,337 @@
         }
         
         .close-btn:hover, .close-btn:active {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* 설정 모달 스타일 */
+        .settings-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+        
+        .settings-content {
+            background-color: white;
+            margin: 2% auto;
+            padding: 0;
+            border-radius: 20px;
+            width: 95%;
+            max-width: 900px;
+            max-height: 95vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+        
+        @keyframes modalSlideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .settings-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .settings-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .close-settings {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            touch-action: manipulation;
+        }
+        
+        .close-settings:hover, .close-settings:active {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+        
+        .settings-body {
+            padding: 30px;
+        }
+        
+        .settings-tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f1f2f6;
+        }
+        
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 15px 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            touch-action: manipulation;
+        }
+        
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .tab-btn:hover, .tab-btn:active {
+            color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .setting-group {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .setting-label {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2d3436;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .setting-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1rem;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            touch-action: manipulation;
+        }
+        
+        .setting-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+        }
+        
+        .course-management {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .course-item {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 80px 1fr 1fr 1fr 100px;
+            gap: 15px;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .course-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .course-icon-input {
+            font-size: 2rem;
+            text-align: center;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 10px;
+            width: 60px;
+            height: 60px;
+        }
+        
+        .course-code-input {
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-align: center;
+            text-transform: uppercase;
+            max-width: 100px;
+        }
+        
+        .time-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .time-input {
+            font-size: 0.9rem;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .remove-course-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            touch-action: manipulation;
+        }
+        
+        .remove-course-btn:hover, .remove-course-btn:active {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
+        
+        .add-course-btn {
+            background: #00b894;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            touch-action: manipulation;
+        }
+        
+        .add-course-btn:hover, .add-course-btn:active {
+            background: #00a085;
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .time-settings {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .time-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid #e9ecef;
+        }
+        
+        .time-item label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .kakao-settings {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .kakao-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .test-btn {
+            background: #f39c12;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            touch-action: manipulation;
+        }
+        
+        .test-btn:hover, .test-btn:active {
+            background: #e67e22;
+        }
+        
+        .test-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .test-result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        
+        .test-result.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .test-result.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .save-all-btn {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 25px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 30px;
+            touch-action: manipulation;
+        }
+        
+        .save-all-btn:hover, .save-all-btn:active {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 184, 148, 0.3);
         }
         
         /* 반응형 디자인 */
@@ -647,6 +846,21 @@
                 font-size: 1.5rem;
             }
             
+            .phone-input {
+                font-size: 1.5rem;
+                padding: 20px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-btn {
+                width: 100%;
+                max-width: 350px;
+            }
+            
             .admin-controls {
                 position: static;
                 margin-bottom: 20px;
@@ -658,34 +872,20 @@
                 display: inline-block;
                 margin-bottom: 20px;
             }
-        }
-        
-        @media (max-width: 480px) {
-            .container {
-                padding: 20px 15px;
+            
+            .settings-content {
+                width: 98%;
+                margin: 1% auto;
             }
             
-            .title {
-                font-size: 2rem;
-            }
-            
-            .touch-input-content,
-            .result-content {
-                padding: 30px 20px;
-            }
-            
-            .ticket-number {
-                font-size: 4rem;
-            }
-            
-            .keypad {
+            .course-item {
+                grid-template-columns: 1fr;
                 gap: 10px;
+                text-align: center;
             }
             
-            .key-btn {
-                padding: 15px;
-                font-size: 1.5rem;
-                min-height: 60px;
+            .time-settings {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -758,61 +958,30 @@
                 <!-- 과정들이 동적으로 생성됩니다 -->
             </div>
         </div>
-    </div>
 
-    <!-- 터치 전화번호 입력 팝업 -->
-    <div class="touch-input-modal" id="touchInputModal">
-        <div class="touch-input-content">
-            <h2 class="input-title">📱 휴대폰 번호 입력</h2>
-            <p class="input-subtitle">알림톡 발송을 위해 휴대폰 번호를 입력해 주세요</p>
-            
-            <div class="phone-display" id="phoneDisplay">010-</div>
-            
-            <div class="keypad">
-                <button class="key-btn" onclick="inputNumber('1')">1</button>
-                <button class="key-btn" onclick="inputNumber('2')">2</button>
-                <button class="key-btn" onclick="inputNumber('3')">3</button>
-                <button class="key-btn" onclick="inputNumber('4')">4</button>
-                <button class="key-btn" onclick="inputNumber('5')">5</button>
-                <button class="key-btn" onclick="inputNumber('6')">6</button>
-                <button class="key-btn" onclick="inputNumber('7')">7</button>
-                <button class="key-btn" onclick="inputNumber('8')">8</button>
-                <button class="key-btn" onclick="inputNumber('9')">9</button>
-                <button class="key-btn special" onclick="clearAll()">전체삭제</button>
-                <button class="key-btn" onclick="inputNumber('0')">0</button>
-                <button class="key-btn special" onclick="backspace()">←</button>
-            </div>
-            
-            <div class="input-actions">
-                <button class="input-btn cancel-btn" onclick="cancelInput()">취소</button>
-                <button class="input-btn confirm-btn" id="confirmBtn" onclick="confirmInput()" disabled>확인</button>
+        <!-- 전화번호 입력 섹션 -->
+        <div class="phone-section" id="phoneSection">
+            <h2 class="phone-title">📱 휴대폰 번호 입력</h2>
+            <div class="phone-input-group">
+                <input type="tel" 
+                       class="phone-input" 
+                       id="phoneInput" 
+                       placeholder="010-0000-0000"
+                       maxlength="13">
+                <div class="phone-help">
+                    알림톡 발송을 위해 휴대폰 번호를 입력해 주세요.<br>
+                    호출 시 카카오톡으로 알림을 받을 수 있습니다.
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- 안내 메시지 팝업 -->
-    <div class="guide-modal" id="guideModal">
-        <div class="guide-content">
-            <div class="guide-icon">📋</div>
-            <h2 class="guide-title">대기표 발급 안내</h2>
-            <p class="guide-message">번호표 발급을 진행하겠습니다.<br>다음 단계를 확인해 주세요.</p>
-            
-            <div class="guide-steps">
-                <div class="guide-step">
-                    <div class="step-number">1</div>
-                    <div>휴대폰 번호 입력 (알림톡 발송용)</div>
-                </div>
-                <div class="guide-step">
-                    <div class="step-number">2</div>
-                    <div>번호표 발급 및 대기열 등록</div>
-                </div>
-                <div class="guide-step">
-                    <div class="step-number">3</div>
-                    <div>호출 시 카카오톡 알림 발송</div>
-                </div>
-            </div>
-            
-            <button class="guide-close-btn" onclick="closeGuide()">확인했습니다</button>
+        <div class="action-buttons">
+            <button class="action-btn back-btn" id="backBtn" onclick="goBack()" style="display: none;">
+                ← 뒤로가기
+            </button>
+            <button class="action-btn issue-btn" id="issueBtn" onclick="issueTicket()" disabled>
+                🎫 번호표 발급
+            </button>
         </div>
     </div>
 
@@ -840,11 +1009,149 @@
         </div>
     </div>
 
+    <!-- 설정 모달 -->
+    <div id="settingsModal" class="settings-modal">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h2>⚙️ 시스템 설정</h2>
+                <button class="close-settings" onclick="hideSettings()">×</button>
+            </div>
+            
+            <div class="settings-body">
+                <div class="settings-tabs">
+                    <button class="tab-btn active" onclick="showTab('courses')">📚 과정 설정</button>
+                    <button class="tab-btn" onclick="showTab('time')">⏰ 시간 설정</button>
+                    <button class="tab-btn" onclick="showTab('kakao')">📱 카카오 설정</button>
+                </div>
+
+                <!-- 과정 설정 탭 -->
+                <div id="coursesTab" class="tab-content active">
+                    <div class="setting-group">
+                        <div class="setting-label">
+                            📚 상담 과정 관리
+                            <small style="font-weight: 400; color: #666;">(최대 8개까지 등록 가능)</small>
+                        </div>
+                        <div class="course-management" id="courseManagement">
+                            <!-- 과정들이 동적으로 생성됩니다 -->
+                        </div>
+                        <button class="add-course-btn" onclick="addNewCourse()">
+                            ➕ 새 과정 추가
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 시간 설정 탭 -->
+                <div id="timeTab" class="tab-content">
+                    <div class="setting-group">
+                        <div class="setting-label">⏰ 대기시간 설정</div>
+                        <div class="time-settings">
+                            <div class="time-item">
+                                <label>1인당 기본 상담시간</label>
+                                <input type="number" class="setting-input time-input" id="baseTimePerPerson" 
+                                       value="5" min="1" max="30">
+                                <small>분</small>
+                            </div>
+                            <div class="time-item">
+                                <label>최소 대기시간</label>
+                                <input type="number" class="setting-input time-input" id="minWaitTime" 
+                                       value="5" min="1" max="60">
+                                <small>분</small>
+                            </div>
+                            <div class="time-item">
+                                <label>전체 운영시간 (시작)</label>
+                                <input type="time" class="setting-input time-input" id="operationStart" value="09:00">
+                            </div>
+                            <div class="time-item">
+                                <label>전체 운영시간 (종료)</label>
+                                <input type="time" class="setting-input time-input" id="operationEnd" value="18:00">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 카카오 설정 탭 -->
+                <div id="kakaoTab" class="tab-content">
+                    <div class="setting-group">
+                        <div class="setting-label">📱 솔라피 API 설정</div>
+                        <div class="kakao-settings">
+                            <div class="kakao-item">
+                                <label>API Key</label>
+                                <input type="text" class="setting-input" id="solapiApiKey" 
+                                       placeholder="NCSRVLD2FFGTEK7B" value="NCSRVLD2FFGTEK7B">
+                            </div>
+                            <div class="kakao-item">
+                                <label>Secret Key</label>
+                                <input type="password" class="setting-input" id="solapiSecret" 
+                                       placeholder="Secret Key 입력" value="IYLPMGODFSDJA3Y88QZDHBQYG6XYCNV8">
+                            </div>
+                            <div class="kakao-item">
+                                <label>발신번호</label>
+                                <input type="tel" class="setting-input" id="senderNumber" 
+                                       placeholder="01074240832" value="01074240832">
+                            </div>
+                            <div class="kakao-item">
+                                <label>카카오 채널 ID</label>
+                                <input type="text" class="setting-input" id="kakaoChannelId" 
+                                       placeholder="KA01PF..." value="KA01PF250703061140859DlTkL4q0BXu">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <div class="setting-label">📝 알림톡 템플릿 설정</div>
+                        <div class="kakao-settings">
+                            <div class="kakao-item">
+                                <label>발급 알림 템플릿 ID</label>
+                                <input type="text" class="setting-input" id="issueTemplateId" 
+                                       placeholder="KA01TP..." value="KA01TP2507030622190404veLphvzG33">
+                                <button class="test-btn" onclick="testTemplate('issue')">발급 알림 테스트</button>
+                                <div class="test-result" id="issueTestResult"></div>
+                            </div>
+                            <div class="kakao-item">
+                                <label>호출 준비 템플릿 ID</label>
+                                <input type="text" class="setting-input" id="readyTemplateId" 
+                                       placeholder="KA01TP..." value="KA01TP250703062421839i1JoNmtv93a">
+                                <button class="test-btn" onclick="testTemplate('ready')">호출 준비 테스트</button>
+                                <div class="test-result" id="readyTestResult"></div>
+                            </div>
+                            <div class="kakao-item">
+                                <label>호출 알림 템플릿 ID</label>
+                                <input type="text" class="setting-input" id="callTemplateId" 
+                                       placeholder="KA01TP..." value="KA01TP2507030626323441FVCnDG8idr">
+                                <button class="test-btn" onclick="testTemplate('call')">호출 알림 테스트</button>
+                                <div class="test-result" id="callTestResult"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <div class="setting-label">🧪 테스트 설정</div>
+                        <div class="kakao-settings">
+                            <div class="kakao-item">
+                                <label>테스트 전화번호</label>
+                                <input type="tel" class="setting-input" id="testPhoneNumber" 
+                                       placeholder="010-0000-0000" maxlength="13">
+                                <div style="margin-top: 10px;">
+                                    <label style="display: flex; align-items: center; gap: 10px;">
+                                        <input type="checkbox" id="testMode" checked>
+                                        <span>테스트 모드 (실제 발송 안함)</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="save-all-btn" onclick="saveAllSettings()">
+                    💾 모든 설정 저장
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // 전역 변수 선언
         let selectedCourse = null;
-        let currentTab = 'courses';
-        let phoneNumber = '';
         
         // 기본 설정
         let systemSettings = {
@@ -869,7 +1176,7 @@
                 secret: 'IYLPMGODFSDJA3Y88QZDHBQYG6XYCNV8',
                 senderNumber: '01074240832',
                 kakaoChannelId: 'KA01PF250703061140859DlTkL4q0BXu',
-                testMode: true,
+                testMode: false, // 이제 실제 발송 가능
                 testPhoneNumber: '',
                 templates: {
                     issue: 'KA01TP2507030622190404veLphvzG33',
@@ -911,7 +1218,7 @@
         // 🕐 시간별 과정 노출 체크
         function checkCourseAvailability() {
             const now = new Date();
-            const currentTime = now.toTimeString().substr(0, 5); // HH:MM 형식
+            const currentTime = now.toTimeString().substr(0, 5);
             
             systemSettings.courses.forEach((course, index) => {
                 const courseBtn = document.querySelector(`[data-course-index="${index}"]`);
@@ -926,10 +1233,10 @@
                     courseBtn.classList.add('disabled');
                     courseBtn.style.pointerEvents = 'none';
                     
-                    // 선택된 과정이 비활성화되면 선택 해제
                     if (selectedCourse && selectedCourse.code === course.code) {
                         selectedCourse = null;
                         courseBtn.classList.remove('selected');
+                        goBack(); // 자동으로 처음 화면으로
                     }
                 }
             });
@@ -942,7 +1249,6 @@
             const end = timeToMinutes(endTime);
             
             if (end < start) {
-                // 다음날까지 이어지는 경우 (예: 22:00 - 02:00)
                 return current >= start || current <= end;
             } else {
                 return current >= start && current <= end;
@@ -955,73 +1261,11 @@
             return hours * 60 + minutes;
         }
 
-        // 📱 터치 입력 관련 함수들
-        function inputNumber(num) {
-            if (phoneNumber.replace(/-/g, '').length >= 11) return;
-            
-            phoneNumber += num;
-            updatePhoneDisplay();
-            checkConfirmButton();
-        }
-
-        function backspace() {
-            if (phoneNumber.length > 4) { // '010-' 보다 길어야 삭제 가능
-                phoneNumber = phoneNumber.slice(0, -1);
-                updatePhoneDisplay();
-                checkConfirmButton();
-            }
-        }
-
-        function clearAll() {
-            phoneNumber = '010-';
-            updatePhoneDisplay();
-            checkConfirmButton();
-        }
-
-        function updatePhoneDisplay() {
-            let displayNumber = phoneNumber;
-            
-            // 자동 하이픈 삽입
-            if (displayNumber.length >= 8) {
-                displayNumber = displayNumber.substring(0, 8) + '-' + displayNumber.substring(8);
-            }
-            
-            document.getElementById('phoneDisplay').textContent = displayNumber;
-        }
-
-        function checkConfirmButton() {
-            const cleanNumber = phoneNumber.replace(/-/g, '');
-            const isValid = cleanNumber.length === 11 && cleanNumber.startsWith('010');
-            document.getElementById('confirmBtn').disabled = !isValid;
-        }
-
-        function cancelInput() {
-            phoneNumber = '010-';
-            updatePhoneDisplay();
-            checkConfirmButton();
-            document.getElementById('touchInputModal').classList.remove('show');
-            
-            // 과정 선택 해제
-            selectedCourse = null;
-            document.querySelectorAll('.course-btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-        }
-
-        function confirmInput() {
-            const cleanNumber = phoneNumber.replace(/-/g, '');
-            if (cleanNumber.length === 11 && cleanNumber.startsWith('010')) {
-                document.getElementById('touchInputModal').classList.remove('show');
-                issueTicket();
-            }
-        }
-
-        // 🎯 과정 선택 (터치 친화적)
+        // 🎯 과정 선택
         function selectCourse(course, index) {
             const now = new Date();
             const currentTime = now.toTimeString().substr(0, 5);
             
-            // 운영시간 체크
             if (!isTimeInRange(currentTime, course.operationHours.start, course.operationHours.end)) {
                 alert(`${course.name}은(는) ${course.operationHours.start} - ${course.operationHours.end} 시간에만 이용 가능합니다.`);
                 return;
@@ -1029,7 +1273,6 @@
             
             selectedCourse = course;
             
-            // 선택 상태 업데이트
             document.querySelectorAll('.course-btn').forEach(btn => {
                 btn.classList.remove('selected');
             });
@@ -1039,209 +1282,98 @@
                 courseBtn.classList.add('selected');
             }
             
+            // 전화번호 입력 섹션 표시
+            document.getElementById('phoneSection').classList.add('show');
+            document.getElementById('backBtn').style.display = 'block';
+            
+            // 스크롤 이동
+            document.getElementById('phoneSection').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+            
             console.log('📚 과정 선택:', course.name);
+        }
+
+        // 전화번호 입력 설정
+        function setupPhoneInput() {
+            const phoneInput = document.getElementById('phoneInput');
+            const issueBtn = document.getElementById('issueBtn');
             
-            // 안내 메시지 표시
-            showGuide();
-        }
-
-        // 📋 안내 메시지 표시
-        function showGuide() {
-            document.getElementById('guideModal').classList.add('show');
-        }
-
-        function closeGuide() {
-            document.getElementById('guideModal').classList.remove('show');
-            
-            // 전화번호 입력 팝업 표시
-            phoneNumber = '010-';
-            updatePhoneDisplay();
-            checkConfirmButton();
-            document.getElementById('touchInputModal').classList.add('show');
-        }
-
-        // 설정 모달 표시/숨기기 (기존 기능 유지)
-        function showSettings() {
-            console.log('⚙️ 설정 버튼 클릭됨');
-            alert('관리자 설정은 별도 관리 페이지에서 가능합니다.\n\n단축키: Ctrl + Shift + S');
-        }
-
-        // 통계 표시 (기존 기능 유지)
-        function showStats() {
-            console.log('📊 통계 버튼 클릭됨');
-            const totalToday = kioskData.totalToday || 0;
-            const courseCounts = {};
-            
-            Object.keys(kioskData.currentNumbers || {}).forEach(code => {
-                const course = systemSettings.courses.find(c => c.code === code);
-                if (course) {
-                    courseCounts[course.name] = kioskData.currentNumbers[code];
+            phoneInput.addEventListener('input', function(e) {
+                // 숫자만 입력 허용
+                let value = e.target.value.replace(/[^0-9]/g, '');
+                
+                // 010으로 시작하지 않으면 010 추가
+                if (value.length > 0 && !value.startsWith('010')) {
+                    if (value.startsWith('0')) {
+                        value = '010' + value.substring(1);
+                    } else {
+                        value = '010' + value;
+                    }
                 }
+                
+                // 하이픈 자동 추가
+                if (value.length >= 3) {
+                    value = value.substring(0, 3) + '-' + value.substring(3);
+                }
+                if (value.length >= 8) {
+                    value = value.substring(0, 8) + '-' + value.substring(8);
+                }
+                
+                // 최대 13자 (010-0000-0000)
+                if (value.length > 13) {
+                    value = value.substring(0, 13);
+                }
+                
+                e.target.value = value;
+                
+                // 발급 버튼 활성화/비활성화
+                const isValid = value.length === 13 && value.match(/^010-\d{4}-\d{4}$/);
+                issueBtn.disabled = !isValid;
             });
             
-            let statsText = `📊 오늘의 통계 (${kioskData.lastDate})\n\n`;
-            statsText += `전체 발급: ${totalToday}개\n\n`;
-            statsText += `과정별 현황:\n`;
-            
-            if (Object.keys(courseCounts).length === 0) {
-                statsText += '아직 발급된 번호가 없습니다.';
-            } else {
-                Object.entries(courseCounts).forEach(([name, count]) => {
-                    statsText += `• ${name}: ${count}개\n`;
-                });
-            }
-            
-            // 현재 시간 및 과정 운영 상태 추가
-            const now = new Date();
-            const currentTime = now.toTimeString().substr(0, 5);
-            statsText += `\n\n현재 시간: ${currentTime}`;
-            statsText += `\n\n과정별 운영 상태:`;
-            
-            systemSettings.courses.forEach(course => {
-                const isOpen = isTimeInRange(currentTime, course.operationHours.start, course.operationHours.end);
-                const status = isOpen ? '✅ 운영중' : '❌ 운영종료';
-                statsText += `\n• ${course.name}: ${status} (${course.operationHours.start}-${course.operationHours.end})`;
-            });
-            
-            alert(statsText);
-        }
-
-        // 초기화 (기존 기능 유지하면서 터치 기능 추가)
-        function initialize() {
-            console.log('🚀 터치 키오스크 시스템 초기화');
-            
-            setupFirebaseListeners();
-            renderCourses();
-            
-            // 시간 표시 시작
-            updateTimeDisplay();
-            setInterval(updateTimeDisplay, 1000);
-            
-            // 과정 가용성 체크 시작
-            checkCourseAvailability();
-            setInterval(checkCourseAvailability, 60000); // 1분마다 체크
-            
-            console.log('✅ 터치 키오스크 시스템 초기화 완료');
-        }
-
-        // Firebase 리스너 설정 (기존과 동일)
-        function setupFirebaseListeners() {
-            if (!window.firebaseDB) {
-                console.error('Firebase가 초기화되지 않았습니다.');
-                return;
-            }
-
-            const kioskRef = window.firebaseRef(window.firebaseDB, 'kioskGlobalSettings');
-            window.firebaseOnValue(kioskRef, (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    console.log('🔥 키오스크 설정 수신:', data);
-                    
-                    if (data.courses) {
-                        systemSettings.courses = data.courses;
-                        renderCourses();
-                        checkCourseAvailability(); // 과정 업데이트 시 가용성 재체크
-                    }
-                    
-                    if (data.timeSettings) {
-                        systemSettings.timeSettings = { ...systemSettings.timeSettings, ...data.timeSettings };
-                    }
-                    
-                    if (data.solapiSettings) {
-                        systemSettings.solapiSettings = { ...systemSettings.solapiSettings, ...data.solapiSettings };
-                    }
-                    
-                    if (data.currentNumbers) {
-                        kioskData.currentNumbers = data.currentNumbers;
-                    }
-                    
-                    if (data.totalToday !== undefined) {
-                        kioskData.totalToday = data.totalToday;
-                    }
-                    
-                    if (data.lastDate) {
-                        kioskData.lastDate = data.lastDate;
-                        checkDateReset();
-                    }
-                } else {
-                    console.log('📭 키오스크 설정 없음 - 기본값 사용');
-                    saveKioskSettings();
+            // 엔터키로 발급
+            phoneInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !issueBtn.disabled) {
+                    issueTicket();
                 }
             });
         }
 
-        // 날짜 변경 확인 및 리셋
-        function checkDateReset() {
-            const today = new Date().toISOString().split('T')[0];
-            if (kioskData.lastDate !== today) {
-                console.log('📅 날짜 변경 감지 - 번호 초기화');
-                kioskData.currentNumbers = {};
-                kioskData.totalToday = 0;
-                kioskData.lastDate = today;
-                saveKioskSettings();
-            }
-        }
-
-        // 키오스크 설정 저장
-        function saveKioskSettings() {
-            if (!window.firebaseDB) return;
+        // 뒤로가기
+        function goBack() {
+            selectedCourse = null;
             
-            const kioskRef = window.firebaseRef(window.firebaseDB, 'kioskGlobalSettings');
-            const data = {
-                courses: systemSettings.courses,
-                timeSettings: systemSettings.timeSettings,
-                solapiSettings: systemSettings.solapiSettings,
-                currentNumbers: kioskData.currentNumbers,
-                totalToday: kioskData.totalToday,
-                lastDate: kioskData.lastDate,
-                lastUpdated: new Date().toISOString()
-            };
+            // 모든 버튼에서 selected 클래스 제거
+            document.querySelectorAll('.course-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
             
-            window.firebaseSet(kioskRef, data).then(() => {
-                console.log('✅ 키오스크 설정 저장 완료');
-            }).catch((error) => {
-                console.error('❌ 키오스크 설정 저장 실패:', error);
+            // 전화번호 섹션 숨기기
+            document.getElementById('phoneSection').classList.remove('show');
+            document.getElementById('backBtn').style.display = 'none';
+            
+            // 입력 초기화
+            document.getElementById('phoneInput').value = '';
+            document.getElementById('issueBtn').disabled = true;
+            
+            // 상단으로 스크롤
+            document.getElementById('courseSelection').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
             });
         }
 
-        // 과정 렌더링 (터치 친화적으로 수정)
-        function renderCourses() {
-            const container = document.getElementById('courseGrid');
-            if (!container) return;
-            
-            container.innerHTML = '';
-            
-            systemSettings.courses.forEach((course, index) => {
-                const button = document.createElement('button');
-                button.className = 'course-btn';
-                button.setAttribute('data-course-index', index);
-                button.onclick = () => selectCourse(course, index);
-                
-                // 운영시간 표시
-                const timeDisplay = course.operationHours ? 
-                    `${course.operationHours.start} - ${course.operationHours.end}` : 
-                    '운영시간 미설정';
-                
-                button.innerHTML = `
-                    <span class="course-icon">${course.icon}</span>
-                    <div class="course-name">${course.name}</div>
-                    <div class="course-desc">${course.englishName || course.code}</div>
-                    <div class="course-time">운영시간: ${timeDisplay}</div>
-                `;
-                
-                container.appendChild(button);
-            });
-        }
-
-        // 번호표 발급 (기존 기능 유지)
+        // 번호표 발급
         async function issueTicket() {
             if (!selectedCourse) {
                 alert('과정을 선택해 주세요.');
                 return;
             }
             
-            const cleanPhone = phoneNumber.replace(/-/g, '');
-            if (!cleanPhone || cleanPhone.length !== 11) {
+            const phoneNumber = document.getElementById('phoneInput').value;
+            if (!phoneNumber || phoneNumber.length !== 13) {
                 alert('올바른 전화번호를 입력해 주세요.');
                 return;
             }
@@ -1249,12 +1381,14 @@
             showLoading(true);
             
             try {
+                // 새 번호 생성
                 const ticketNumber = generateTicketNumber(selectedCourse.code);
                 
+                // 대기열에 추가할 데이터
                 const ticketData = {
                     number: ticketNumber,
                     course: selectedCourse.name,
-                    phoneNumber: cleanPhone,
+                    phoneNumber: phoneNumber.replace(/-/g, ''), // 하이픈 제거
                     time: new Date().toLocaleTimeString('ko-KR', { 
                         hour: '2-digit', 
                         minute: '2-digit' 
@@ -1265,9 +1399,13 @@
                 
                 console.log('🎫 번호표 발급 시도:', ticketData);
                 
+                // Firebase에 대기열 추가
                 await addToWaitingQueue(ticketData);
+                
+                // 대기 인원 계산
                 const waitingCount = await getWaitingCount(selectedCourse.code);
                 
+                // 알림톡 발송 (Firebase Functions)
                 const alimtalkResult = await sendAlimtalk({
                     ...ticketData,
                     waitingCount: waitingCount
@@ -1275,9 +1413,11 @@
                 
                 console.log('📱 알림톡 발송 결과:', alimtalkResult);
                 
+                // 키오스크 데이터 업데이트
                 kioskData.totalToday++;
                 saveKioskSettings();
                 
+                // 성공 결과 표시
                 showResult({
                     ticketNumber: ticketNumber,
                     courseName: selectedCourse.name,
@@ -1293,7 +1433,7 @@
             }
         }
 
-        // 번호 생성 (기존과 동일)
+        // 번호 생성
         function generateTicketNumber(courseCode) {
             checkDateReset();
             
@@ -1307,10 +1447,23 @@
             return `${courseCode}${number}`;
         }
 
-        // 대기열에 추가 (기존과 동일)
+        // 날짜 변경 확인 및 리셋
+        function checkDateReset() {
+            const today = new Date().toISOString().split('T')[0];
+            if (kioskData.lastDate !== today) {
+                console.log('📅 날짜 변경 감지 - 번호 초기화');
+                kioskData.currentNumbers = {};
+                kioskData.totalToday = 0;
+                kioskData.lastDate = today;
+                saveKioskSettings();
+            }
+        }
+
+        // 대기열에 추가
         async function addToWaitingQueue(ticketData) {
             if (!window.firebaseDB) throw new Error('Firebase 연결 없음');
             
+            // 카운터 시스템에 추가
             const systemRef = window.firebaseRef(window.firebaseDB, 'counterSystem');
             const snapshot = await new Promise((resolve, reject) => {
                 window.firebaseOnValue(systemRef, resolve, { onlyOnce: true });
@@ -1322,17 +1475,19 @@
                 totalToday: 0
             };
             
+            // 대기열에 추가
             systemData.waiting = systemData.waiting || [];
             systemData.waiting.push(ticketData);
             systemData.totalToday = (systemData.totalToday || 0) + 1;
             systemData.lastUpdated = new Date().toISOString();
             
+            // Firebase에 저장
             await window.firebaseSet(systemRef, systemData);
             
             console.log('✅ 대기열 추가 완료:', ticketData.number);
         }
 
-        // 대기 인원 계산 (기존과 동일)
+        // 대기 인원 계산
         async function getWaitingCount(courseCode) {
             try {
                 if (!window.firebaseDB) return 0;
@@ -1355,7 +1510,7 @@
             }
         }
 
-        // Firebase Functions를 통한 알림톡 발송 (기존과 동일)
+        // Firebase Functions를 통한 알림톡 발송
         async function sendAlimtalk(ticketData, notificationType = 'issue') {
             try {
                 console.log('🚀 Firebase Functions 알림톡 발송 시도:', {
@@ -1365,22 +1520,22 @@
                     type: notificationType
                 });
 
-                const estimatedTime = Math.max(
-                    systemSettings.timeSettings.minWaitTime,
-                    (ticketData.waitingCount || 0) * systemSettings.timeSettings.baseTimePerPerson
-                );
+                const estimatedTime = Math.max(5, (ticketData.waitingCount || 0) * 5);
                 
+                // Firebase Functions 호출 데이터
                 const functionData = {
-                    phoneNumber: ticketData.phoneNumber,
+                    phoneNumber: ticketData.phoneNumber, // 하이픈 제거된 상태
                     ticketNumber: ticketData.number,
                     courseName: ticketData.course,
                     waitingCount: ticketData.waitingCount || 0,
                     estimatedTime: estimatedTime,
+                    issueTime: new Date().toLocaleString('ko-KR'),
                     notificationType: notificationType
                 };
 
                 console.log('📱 Firebase Functions 호출 데이터:', functionData);
                 
+                // Firebase Functions 호출
                 const response = await fetch(`${FUNCTIONS_URL}/sendAlimtalk`, {
                     method: 'POST',
                     headers: {
@@ -1410,52 +1565,109 @@
             }
         }
 
-        // 로딩 표시 (기존과 동일)
+        // 키오스크 설정 저장
+        function saveKioskSettings() {
+            if (!window.firebaseDB) return;
+            
+            const kioskRef = window.firebaseRef(window.firebaseDB, 'kioskGlobalSettings');
+            const data = {
+                courses: systemSettings.courses,
+                currentNumbers: kioskData.currentNumbers,
+                totalToday: kioskData.totalToday,
+                lastDate: kioskData.lastDate,
+                solapiSettings: systemSettings.solapiSettings,
+                timeSettings: systemSettings.timeSettings,
+                lastUpdated: new Date().toISOString()
+            };
+            
+            window.firebaseSet(kioskRef, data).then(() => {
+                console.log('✅ 키오스크 설정 저장 완료');
+            }).catch((error) => {
+                console.error('❌ 키오스크 설정 저장 실패:', error);
+            });
+        }
+
+        // Firebase 리스너 설정
+        function setupFirebaseListeners() {
+            if (!window.firebaseDB) {
+                console.error('Firebase가 초기화되지 않았습니다.');
+                return;
+            }
+
+            const kioskRef = window.firebaseRef(window.firebaseDB, 'kioskGlobalSettings');
+            window.firebaseOnValue(kioskRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    console.log('🔥 키오스크 설정 수신:', data);
+                    
+                    if (data.courses) {
+                        systemSettings.courses = data.courses;
+                        renderCourses();
+                        checkCourseAvailability();
+                    }
+                    
+                    if (data.currentNumbers) {
+                        kioskData.currentNumbers = data.currentNumbers;
+                    }
+                    
+                    if (data.totalToday !== undefined) {
+                        kioskData.totalToday = data.totalToday;
+                    }
+                    
+                    if (data.lastDate) {
+                        kioskData.lastDate = data.lastDate;
+                        checkDateReset();
+                    }
+
+                    if (data.solapiSettings) {
+                        systemSettings.solapiSettings = { ...systemSettings.solapiSettings, ...data.solapiSettings };
+                    }
+
+                    if (data.timeSettings) {
+                        systemSettings.timeSettings = { ...systemSettings.timeSettings, ...data.timeSettings };
+                    }
+                } else {
+                    console.log('📭 키오스크 설정 없음 - 기본값 사용');
+                    saveKioskSettings();
+                }
+            });
+        }
+
+        // 로딩 표시
         function showLoading(show) {
             const loadingModal = document.getElementById('loadingModal');
-            if (loadingModal) {
-                if (show) {
-                    loadingModal.classList.add('show');
-                } else {
-                    loadingModal.classList.remove('show');
-                }
+            if (show) {
+                loadingModal.classList.add('show');
+            } else {
+                loadingModal.classList.remove('show');
             }
         }
 
-        // 성공 결과 표시 (기존과 동일)
+        // 성공 결과 표시
         function showResult(data) {
             const ticketNumberEl = document.getElementById('resultTicketNumber');
             const waitingEl = document.getElementById('resultWaiting');
             const timeEl = document.getElementById('resultTime');
             const resultInfoEl = document.getElementById('resultInfo');
             
-            const estimatedTime = Math.max(
-                systemSettings.timeSettings.minWaitTime,
-                data.waitingCount * systemSettings.timeSettings.baseTimePerPerson
-            );
+            ticketNumberEl.textContent = data.ticketNumber;
+            waitingEl.textContent = data.waitingCount;
+            timeEl.textContent = Math.max(5, data.waitingCount * 5);
             
-            if (ticketNumberEl) ticketNumberEl.textContent = data.ticketNumber;
-            if (waitingEl) waitingEl.textContent = data.waitingCount;
-            if (timeEl) timeEl.textContent = estimatedTime;
-            
+            // 알림톡 상태에 따른 메시지
             const alimtalkStatus = data.alimtalkSuccess ? 
                 '📱 알림톡이 발송되었습니다!' :
                 '⚠️ 알림톡 발송에 실패했지만 번호표는 정상 발급되었습니다.';
             
-            if (resultInfoEl) {
-                resultInfoEl.innerHTML = `
-                    <strong>${data.courseName}</strong><br>
-                    현재 대기: <span>${data.waitingCount}</span>명<br>
-                    예상 대기시간: 약 <span>${estimatedTime}</span>분<br><br>
-                    ${alimtalkStatus}<br>
-                    호출 시 카카오톡으로 안내해 드립니다.
-                `;
-            }
+            resultInfoEl.innerHTML = `
+                <strong>${data.courseName}</strong><br>
+                현재 대기: <span>${data.waitingCount}</span>명<br>
+                예상 대기시간: 약 <span>${Math.max(5, data.waitingCount * 5)}</span>분<br><br>
+                ${alimtalkStatus}<br>
+                호출 시 카카오톡으로 안내해 드립니다.
+            `;
             
-            const resultModal = document.getElementById('resultModal');
-            if (resultModal) {
-                resultModal.classList.add('show');
-            }
+            document.getElementById('resultModal').classList.add('show');
         }
 
         // 결과 닫기
@@ -1464,42 +1676,405 @@
             
             // 초기 상태로 복원
             setTimeout(() => {
-                selectedCourse = null;
-                phoneNumber = '010-';
-                
-                document.querySelectorAll('.course-btn').forEach(btn => {
-                    btn.classList.remove('selected');
-                });
-                
-                updatePhoneDisplay();
-                checkConfirmButton();
+                goBack();
             }, 300);
         }
 
-        // 터치 이벤트 최적화
-        document.addEventListener('touchstart', function(e) {
-            // 터치 시작 시 기본 동작 방지 (더블탭 줌 등)
-            if (e.target.classList.contains('course-btn') || 
-                e.target.classList.contains('key-btn') ||
-                e.target.classList.contains('input-btn') ||
-                e.target.classList.contains('admin-btn')) {
-                e.preventDefault();
-            }
-        }, { passive: false });
+        // 설정 모달 표시/숨기기
+        function showSettings() {
+            console.log('⚙️ 설정 버튼 클릭됨');
+            loadSettingsToUI();
+            document.getElementById('settingsModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
 
-        // 키보드 이벤트 (관리자용)
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.shiftKey && e.key === 'S') {
-                e.preventDefault();
-                showSettings();
+        function hideSettings() {
+            console.log('⚙️ 설정 모달 닫기');
+            document.getElementById('settingsModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // 탭 전환
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
+        // UI에 설정 로드
+        function loadSettingsToUI() {
+            renderCourseManagement();
+            
+            // 시간 설정 로드
+            document.getElementById('baseTimePerPerson').value = systemSettings.timeSettings.baseTimePerPerson || 5;
+            document.getElementById('minWaitTime').value = systemSettings.timeSettings.minWaitTime || 5;
+            document.getElementById('operationStart').value = systemSettings.timeSettings.operationStart || '09:00';
+            document.getElementById('operationEnd').value = systemSettings.timeSettings.operationEnd || '18:00';
+            
+            // 솔라피 설정 로드
+            document.getElementById('solapiApiKey').value = systemSettings.solapiSettings.apiKey || '';
+            document.getElementById('solapiSecret').value = systemSettings.solapiSettings.secret || '';
+            document.getElementById('senderNumber').value = systemSettings.solapiSettings.senderNumber || '';
+            document.getElementById('kakaoChannelId').value = systemSettings.solapiSettings.kakaoChannelId || '';
+            
+            // 템플릿 설정 로드
+            document.getElementById('issueTemplateId').value = systemSettings.solapiSettings.templates?.issue || '';
+            document.getElementById('readyTemplateId').value = systemSettings.solapiSettings.templates?.ready || '';
+            document.getElementById('callTemplateId').value = systemSettings.solapiSettings.templates?.call || '';
+            
+            // 테스트 설정 로드
+            document.getElementById('testPhoneNumber').value = systemSettings.solapiSettings.testPhoneNumber || '';
+            document.getElementById('testMode').checked = systemSettings.solapiSettings.testMode !== false;
+
+            // 테스트 전화번호 자동 포맷팅
+            const testPhoneInput = document.getElementById('testPhoneNumber');
+            if (testPhoneInput) {
+                testPhoneInput.addEventListener('input', formatPhoneNumber);
+            }
+        }
+
+        // 전화번호 포맷팅
+        function formatPhoneNumber(e) {
+            let value = e.target.value.replace(/[^0-9]/g, '');
+            
+            if (value.length > 0 && !value.startsWith('010')) {
+                if (value.startsWith('0')) {
+                    value = '010' + value.substring(1);
+                } else {
+                    value = '010' + value;
+                }
             }
             
+            if (value.length >= 3) {
+                value = value.substring(0, 3) + '-' + value.substring(3);
+            }
+            if (value.length >= 8) {
+                value = value.substring(0, 8) + '-' + value.substring(8);
+            }
+            if (value.length > 13) {
+                value = value.substring(0, 13);
+            }
+            
+            e.target.value = value;
+        }
+
+        // 과정 관리 렌더링
+        function renderCourseManagement() {
+            const container = document.getElementById('courseManagement');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            systemSettings.courses.forEach((course, index) => {
+                const div = document.createElement('div');
+                div.className = 'course-item';
+                div.innerHTML = `
+                    <input type="text" class="setting-input course-icon-input" 
+                           value="${course.icon}" placeholder="🎓" 
+                           onchange="updateCourse(${index}, 'icon', this.value)">
+                    <input type="text" class="setting-input course-code-input" 
+                           value="${course.code}" placeholder="CODE" 
+                           onchange="updateCourse(${index}, 'code', this.value.toUpperCase())">
+                    <input type="text" class="setting-input" 
+                           value="${course.name}" placeholder="과정명" 
+                           onchange="updateCourse(${index}, 'name', this.value)">
+                    <div class="time-inputs">
+                        <input type="time" class="setting-input time-input" 
+                               value="${course.operationHours?.start || '09:00'}" 
+                               onchange="updateCourseTime(${index}, 'start', this.value)" 
+                               placeholder="시작시간">
+                        <input type="time" class="setting-input time-input" 
+                               value="${course.operationHours?.end || '18:00'}" 
+                               onchange="updateCourseTime(${index}, 'end', this.value)" 
+                               placeholder="종료시간">
+                    </div>
+                    <button class="remove-course-btn" onclick="removeCourse(${index})">🗑️</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // 과정 업데이트
+        function updateCourse(index, field, value) {
+            if (systemSettings.courses[index]) {
+                systemSettings.courses[index][field] = value;
+                if (field === 'name') {
+                    systemSettings.courses[index].englishName = value + ' Course';
+                }
+                renderCourses();
+                checkCourseAvailability();
+            }
+        }
+
+        // 과정 운영시간 업데이트
+        function updateCourseTime(index, timeType, value) {
+            if (systemSettings.courses[index]) {
+                if (!systemSettings.courses[index].operationHours) {
+                    systemSettings.courses[index].operationHours = {};
+                }
+                systemSettings.courses[index].operationHours[timeType] = value;
+                renderCourses();
+                checkCourseAvailability();
+            }
+        }
+
+        // 새 과정 추가
+        function addNewCourse() {
+            if (systemSettings.courses.length >= 8) {
+                alert('최대 8개까지만 등록할 수 있습니다.');
+                return;
+            }
+            
+            const newCourse = {
+                code: 'NEW',
+                name: '새 과정',
+                englishName: 'New Course',
+                icon: '📚',
+                operationHours: { start: '09:00', end: '18:00' }
+            };
+            
+            systemSettings.courses.push(newCourse);
+            renderCourseManagement();
+            renderCourses();
+            checkCourseAvailability();
+        }
+
+        // 과정 삭제
+        function removeCourse(index) {
+            if (systemSettings.courses.length <= 1) {
+                alert('최소 1개의 과정은 유지해야 합니다.');
+                return;
+            }
+            
+            if (confirm('이 과정을 삭제하시겠습니까?')) {
+                systemSettings.courses.splice(index, 1);
+                renderCourseManagement();
+                renderCourses();
+                checkCourseAvailability();
+            }
+        }
+
+        // 템플릿 테스트
+        async function testTemplate(type) {
+            const testPhone = document.getElementById('testPhoneNumber').value.replace(/-/g, '');
+            
+            if (!testPhone || testPhone.length !== 11) {
+                alert('테스트 전화번호를 먼저 입력해 주세요.');
+                return;
+            }
+            
+            const resultEl = document.getElementById(type + 'TestResult');
+            const btnEl = event.target;
+            
+            btnEl.disabled = true;
+            btnEl.textContent = '테스트 중...';
+            resultEl.style.display = 'none';
+            
+            try {
+                const testData = {
+                    phoneNumber: testPhone,
+                    notificationType: type,
+                    ticketNumber: 'TEST001',
+                    courseName: 'Test Course',
+                    waitingCount: 3,
+                    estimatedTime: 15,
+                    issueTime: new Date().toLocaleString('ko-KR')
+                };
+                
+                if (type === 'call') {
+                    testData.counterNumber = '1번 창구';
+                    testData.callTime = new Date().toLocaleTimeString('ko-KR', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                }
+                
+                console.log('🧪 템플릿 테스트:', testData);
+                
+                const response = await fetch(`${FUNCTIONS_URL}/sendAlimtalk`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    resultEl.className = 'test-result success';
+                    resultEl.textContent = '✅ 테스트 발송 성공!';
+                } else {
+                    resultEl.className = 'test-result error';
+                    resultEl.textContent = `❌ 테스트 실패: ${result.error || '알 수 없는 오류'}`;
+                }
+                
+            } catch (error) {
+                resultEl.className = 'test-result error';
+                resultEl.textContent = `❌ 테스트 오류: ${error.message}`;
+            } finally {
+                btnEl.disabled = false;
+                btnEl.textContent = type === 'issue' ? '발급 알림 테스트' : 
+                                   type === 'ready' ? '호출 준비 테스트' : '호출 알림 테스트';
+                resultEl.style.display = 'block';
+                
+                setTimeout(() => {
+                    resultEl.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // 모든 설정 저장
+        function saveAllSettings() {
+            // 시간 설정 수집
+            systemSettings.timeSettings.baseTimePerPerson = parseInt(document.getElementById('baseTimePerPerson').value) || 5;
+            systemSettings.timeSettings.minWaitTime = parseInt(document.getElementById('minWaitTime').value) || 5;
+            systemSettings.timeSettings.operationStart = document.getElementById('operationStart').value || '09:00';
+            systemSettings.timeSettings.operationEnd = document.getElementById('operationEnd').value || '18:00';
+            
+            // 솔라피 설정 수집
+            systemSettings.solapiSettings.apiKey = document.getElementById('solapiApiKey').value || '';
+            systemSettings.solapiSettings.secret = document.getElementById('solapiSecret').value || '';
+            systemSettings.solapiSettings.senderNumber = document.getElementById('senderNumber').value || '';
+            systemSettings.solapiSettings.kakaoChannelId = document.getElementById('kakaoChannelId').value || '';
+            
+            // 템플릿 설정 수집
+            systemSettings.solapiSettings.templates = {
+                issue: document.getElementById('issueTemplateId').value || '',
+                ready: document.getElementById('readyTemplateId').value || '',
+                call: document.getElementById('callTemplateId').value || ''
+            };
+            
+            // 테스트 설정 수집
+            systemSettings.solapiSettings.testPhoneNumber = document.getElementById('testPhoneNumber').value || '';
+            systemSettings.solapiSettings.testMode = document.getElementById('testMode').checked;
+            
+            // Firebase에 저장
+            saveKioskSettings();
+            
+            // UI 업데이트
+            renderCourses();
+            checkCourseAvailability();
+            
+            alert('모든 설정이 저장되었습니다!');
+            hideSettings();
+        }
+
+        // 통계 표시
+        function showStats() {
+            console.log('📊 통계 버튼 클릭됨');
+            const totalToday = kioskData.totalToday || 0;
+            const courseCounts = {};
+            
+            Object.keys(kioskData.currentNumbers || {}).forEach(code => {
+                const course = systemSettings.courses.find(c => c.code === code);
+                if (course) {
+                    courseCounts[course.name] = kioskData.currentNumbers[code];
+                }
+            });
+            
+            let statsText = `📊 오늘의 통계 (${kioskData.lastDate})\n\n`;
+            statsText += `전체 발급: ${totalToday}개\n\n`;
+            statsText += `과정별 현황:\n`;
+            
+            if (Object.keys(courseCounts).length === 0) {
+                statsText += '아직 발급된 번호가 없습니다.';
+            } else {
+                Object.entries(courseCounts).forEach(([name, count]) => {
+                    statsText += `• ${name}: ${count}개\n`;
+                });
+            }
+            
+            const now = new Date();
+            const currentTime = now.toTimeString().substr(0, 5);
+            statsText += `\n\n현재 시간: ${currentTime}`;
+            statsText += `\n\n과정별 운영 상태:`;
+            
+            systemSettings.courses.forEach(course => {
+                const isOpen = isTimeInRange(currentTime, course.operationHours.start, course.operationHours.end);
+                const status = isOpen ? '✅ 운영중' : '❌ 운영종료';
+                statsText += `\n• ${course.name}: ${status} (${course.operationHours.start}-${course.operationHours.end})`;
+            });
+            
+            alert(statsText);
+        }
+
+        // 과정 렌더링
+        function renderCourses() {
+            const container = document.getElementById('courseGrid');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            systemSettings.courses.forEach((course, index) => {
+                const button = document.createElement('button');
+                button.className = 'course-btn';
+                button.setAttribute('data-course-index', index);
+                button.onclick = () => selectCourse(course, index);
+                
+                const timeDisplay = course.operationHours ? 
+                    `${course.operationHours.start} - ${course.operationHours.end}` : 
+                    '운영시간 미설정';
+                
+                button.innerHTML = `
+                    <span class="course-icon">${course.icon}</span>
+                    <div class="course-name">${course.name}</div>
+                    <div class="course-desc">${course.englishName || course.code}</div>
+                    <div class="course-time">운영시간: ${timeDisplay}</div>
+                `;
+                
+                container.appendChild(button);
+            });
+        }
+
+        // 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            const resultModal = document.getElementById('resultModal');
+            const settingsModal = document.getElementById('settingsModal');
+            
+            if (event.target === resultModal) {
+                closeResult();
+            }
+            
+            if (event.target === settingsModal) {
+                hideSettings();
+            }
+        };
+
+        // 키보드 단축키
+        document.addEventListener('keydown', function(e) {
+            // ESC키로 모달 닫기
             if (e.key === 'Escape') {
-                document.getElementById('touchInputModal').classList.remove('show');
-                document.getElementById('guideModal').classList.remove('show');
-                document.getElementById('resultModal').classList.remove('show');
+                closeResult();
+                hideSettings();
             }
         });
+
+        // 초기화
+        function initialize() {
+            console.log('🚀 터치 키오스크 시스템 초기화');
+            
+            // Firebase 리스너 설정
+            setupFirebaseListeners();
+            
+            // 과정 렌더링
+            renderCourses();
+            
+            // 전화번호 입력 이벤트
+            setupPhoneInput();
+            
+            // 시간 표시 시작
+            updateTimeDisplay();
+            setInterval(updateTimeDisplay, 1000);
+            
+            // 과정 가용성 체크 시작
+            checkCourseAvailability();
+            setInterval(checkCourseAvailability, 60000);
+            
+            console.log('✅ 터치 키오스크 시스템 초기화 완료');
+        }
 
         // 페이지 로드 시 초기화
         if (document.readyState === 'loading') {
@@ -1508,9 +2083,7 @@
             initialize();
         }
 
-        console.log('🎫 터치 키오스크 시스템 (시간별 노출 + 팝업 입력) 로딩 완료');
-        console.log('📱 터치 친화적 인터페이스 활성화');
-        console.log('🕐 시간별 과정 노출 기능 활성화');
+        console.log('🎫 터치 키오스크 시스템 로딩 완료');
     </script>
 </body>
 </html>
