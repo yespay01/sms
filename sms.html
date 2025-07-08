@@ -1447,38 +1447,83 @@
             });
         }
 
-        // 뒤로가기
+        // 뒤로가기 (안전한 버전)
         function goBack() {
-            selectedCourse = null;
-            
-            // 모든 버튼에서 selected 클래스 제거
-            document.querySelectorAll('.course-btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            
-            // 전화번호 섹션 숨기기
-            document.getElementById('phoneSection').classList.remove('show');
-            document.getElementById('backBtn').style.display = 'none';
-            
-            // 입력 초기화
-            document.getElementById('phoneInput').value = '';
-            document.getElementById('issueBtn').disabled = true;
-            
-            // 상단으로 스크롤
-            document.getElementById('courseSelection').scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'start' 
-            });
+            try {
+                console.log('🔙 뒤로가기 실행');
+                
+                selectedCourse = null;
+                
+                // 모든 버튼에서 selected 클래스 제거
+                document.querySelectorAll('.course-btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                
+                // 전화번호 섹션 숨기기
+                const phoneSection = document.getElementById('phoneSection');
+                const backBtn = document.getElementById('backBtn');
+                
+                if (phoneSection) {
+                    phoneSection.classList.remove('show');
+                } else {
+                    console.warn('⚠️ phoneSection 요소를 찾을 수 없음');
+                }
+                
+                if (backBtn) {
+                    backBtn.style.display = 'none';
+                } else {
+                    console.warn('⚠️ backBtn 요소를 찾을 수 없음');
+                }
+                
+                // 입력 초기화
+                const phoneInput = document.getElementById('phoneInput');
+                const issueBtn = document.getElementById('issueBtn');
+                
+                if (phoneInput) {
+                    phoneInput.value = '';
+                } else {
+                    console.warn('⚠️ phoneInput 요소를 찾을 수 없음');
+                }
+                
+                if (issueBtn) {
+                    issueBtn.disabled = true;
+                } else {
+                    console.warn('⚠️ issueBtn 요소를 찾을 수 없음');
+                }
+                
+                // 상단으로 스크롤
+                const courseSelection = document.getElementById('courseSelection');
+                if (courseSelection) {
+                    courseSelection.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start' 
+                    });
+                } else {
+                    // 대체 스크롤
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                
+                console.log('✅ 뒤로가기 완료');
+                
+            } catch (error) {
+                console.error('❌ 뒤로가기 오류:', error);
+            }
         }
 
-        // 번호표 발급
+        // 번호표 발급 (안전한 버전)
         async function issueTicket() {
             if (!selectedCourse) {
                 alert('과정을 선택해 주세요.');
                 return;
             }
             
-            const phoneNumber = document.getElementById('phoneInput').value;
+            const phoneInput = document.getElementById('phoneInput');
+            if (!phoneInput) {
+                alert('전화번호 입력 오류가 발생했습니다.');
+                return;
+            }
+            
+            const phoneNumber = phoneInput.value;
             if (!phoneNumber || phoneNumber.length !== 13) {
                 alert('올바른 전화번호를 입력해 주세요.');
                 return;
@@ -1487,8 +1532,14 @@
             showLoading(true);
             
             try {
+                console.log('🎫 번호표 발급 시작:', {
+                    course: selectedCourse.name,
+                    phone: phoneNumber
+                });
+                
                 // 새 번호 생성
                 const ticketNumber = generateTicketNumber(selectedCourse.code);
+                console.log('🔢 생성된 번호:', ticketNumber);
                 
                 // 대기열에 추가할 데이터
                 const ticketData = {
@@ -1503,13 +1554,15 @@
                     courseCode: selectedCourse.code
                 };
                 
-                console.log('🎫 번호표 발급 시도:', ticketData);
+                console.log('📋 티켓 데이터:', ticketData);
                 
                 // Firebase에 대기열 추가
                 await addToWaitingQueue(ticketData);
+                console.log('✅ Firebase 대기열 추가 완료');
                 
                 // 대기 인원 계산
                 const waitingCount = await getWaitingCount(selectedCourse.code);
+                console.log('👥 현재 대기 인원:', waitingCount);
                 
                 // 알림톡 발송 (Firebase Functions)
                 const alimtalkResult = await sendAlimtalk({
@@ -1521,19 +1574,38 @@
                 
                 // 키오스크 데이터 업데이트
                 kioskData.totalToday++;
-                saveKioskSettings();
+                await saveKioskSettings();
+                console.log('📊 통계 업데이트 완료');
                 
                 // 성공 결과 표시
-                showResult({
+                const resultData = {
                     ticketNumber: ticketNumber,
                     courseName: selectedCourse.name,
                     waitingCount: waitingCount,
                     alimtalkSuccess: alimtalkResult.success
-                });
+                };
+                
+                console.log('🎉 발급 완료 - 결과 표시:', resultData);
+                showResult(resultData);
                 
             } catch (error) {
                 console.error('❌ 번호표 발급 실패:', error);
-                alert('번호표 발급 중 오류가 발생했습니다.\n잠시 후 다시 시도해 주세요.');
+                
+                // 상세한 오류 메시지 제공
+                let errorMessage = '번호표 발급 중 오류가 발생했습니다.';
+                
+                if (error.message.includes('Firebase')) {
+                    errorMessage += '\n\n🔥 Firebase 연결 오류: 네트워크를 확인해 주세요.';
+                } else if (error.message.includes('알림톡')) {
+                    errorMessage += '\n\n📱 알림톡 발송 오류: 번호표는 발급되었습니다.';
+                } else {
+                    errorMessage += `\n\n오류 내용: ${error.message}`;
+                }
+                
+                errorMessage += '\n\n잠시 후 다시 시도해 주세요.';
+                
+                alert(errorMessage);
+                
             } finally {
                 showLoading(false);
             }
@@ -1870,51 +1942,147 @@
             });
         }
 
-        // 로딩 표시
+        // 로딩 표시 (안전한 버전)
         function showLoading(show) {
-            const loadingModal = document.getElementById('loadingModal');
-            if (show) {
-                loadingModal.classList.add('show');
-            } else {
-                loadingModal.classList.remove('show');
+            try {
+                const loadingModal = document.getElementById('loadingModal');
+                if (!loadingModal) {
+                    console.warn('⚠️ 로딩 모달을 찾을 수 없음');
+                    return;
+                }
+                
+                if (show) {
+                    loadingModal.classList.add('show');
+                    console.log('⏳ 로딩 표시 시작');
+                } else {
+                    loadingModal.classList.remove('show');
+                    console.log('✅ 로딩 표시 종료');
+                }
+            } catch (error) {
+                console.error('❌ 로딩 표시 오류:', error);
             }
         }
 
-        // 성공 결과 표시
+        // 성공 결과 표시 (안전한 버전)
         function showResult(data) {
-            const ticketNumberEl = document.getElementById('resultTicketNumber');
-            const waitingEl = document.getElementById('resultWaiting');
-            const timeEl = document.getElementById('resultTime');
-            const resultInfoEl = document.getElementById('resultInfo');
-            
-            ticketNumberEl.textContent = data.ticketNumber;
-            waitingEl.textContent = data.waitingCount;
-            timeEl.textContent = Math.max(5, data.waitingCount * 5);
-            
-            // 알림톡 상태에 따른 메시지
-            const alimtalkStatus = data.alimtalkSuccess ? 
-                '📱 알림톡이 발송되었습니다!' :
-                '⚠️ 알림톡 발송에 실패했지만 번호표는 정상 발급되었습니다.';
-            
-            resultInfoEl.innerHTML = `
-                <strong>${data.courseName}</strong><br>
-                현재 대기: <span>${data.waitingCount}</span>명<br>
-                예상 대기시간: 약 <span>${Math.max(5, data.waitingCount * 5)}</span>분<br><br>
-                ${alimtalkStatus}<br>
-                호출 시 카카오톡으로 안내해 드립니다.
-            `;
-            
-            document.getElementById('resultModal').classList.add('show');
+            try {
+                const ticketNumberEl = document.getElementById('resultTicketNumber');
+                const waitingEl = document.getElementById('resultWaiting');
+                const timeEl = document.getElementById('resultTime');
+                const resultInfoEl = document.getElementById('resultInfo');
+                
+                // DOM 요소 존재 확인
+                if (!ticketNumberEl || !waitingEl || !timeEl || !resultInfoEl) {
+                    console.error('❌ 결과 모달 요소를 찾을 수 없음:', {
+                        ticketNumberEl: !!ticketNumberEl,
+                        waitingEl: !!waitingEl,
+                        timeEl: !!timeEl,
+                        resultInfoEl: !!resultInfoEl
+                    });
+                    
+                    // 대체 알림으로 결과 표시
+                    const waitingCount = data.waitingCount || 0;
+                    const estimatedTime = Math.max(5, waitingCount * 5);
+                    const alimtalkStatus = data.alimtalkSuccess ? '✅ 알림톡 발송 성공' : '⚠️ 알림톡 발송 실패';
+                    
+                    alert(`🎉 번호표 발급 완료!\n\n` +
+                          `📱 번호: ${data.ticketNumber}\n` +
+                          `📚 과정: ${data.courseName}\n` +
+                          `👥 대기: ${waitingCount}명\n` +
+                          `⏰ 예상시간: 약 ${estimatedTime}분\n\n` +
+                          `${alimtalkStatus}`);
+                    
+                    // 초기 상태로 복원
+                    setTimeout(() => {
+                        goBack();
+                    }, 1000);
+                    return;
+                }
+                
+                // 안전하게 값 설정
+                ticketNumberEl.textContent = data.ticketNumber || 'ERROR';
+                waitingEl.textContent = data.waitingCount || 0;
+                timeEl.textContent = Math.max(5, (data.waitingCount || 0) * 5);
+                
+                // 알림톡 상태에 따른 메시지
+                const alimtalkStatus = data.alimtalkSuccess ? 
+                    '📱 알림톡이 발송되었습니다!' :
+                    '⚠️ 알림톡 발송에 실패했지만 번호표는 정상 발급되었습니다.';
+                
+                resultInfoEl.innerHTML = `
+                    <strong>${data.courseName || '과정명 없음'}</strong><br>
+                    현재 대기: <span>${data.waitingCount || 0}</span>명<br>
+                    예상 대기시간: 약 <span>${Math.max(5, (data.waitingCount || 0) * 5)}</span>분<br><br>
+                    ${alimtalkStatus}<br>
+                    호출 시 카카오톡으로 안내해 드립니다.
+                `;
+                
+                // 모달 표시
+                const resultModal = document.getElementById('resultModal');
+                if (resultModal) {
+                    resultModal.classList.add('show');
+                } else {
+                    console.error('❌ 결과 모달을 찾을 수 없음');
+                    // 대체 알림 표시
+                    alert(`🎉 번호표 발급 완료!\n번호: ${data.ticketNumber}`);
+                }
+                
+                console.log('✅ 결과 표시 완료:', data);
+                
+            } catch (error) {
+                console.error('❌ 결과 표시 오류:', error);
+                
+                // 오류 발생 시 기본 알림으로 대체
+                alert(`🎉 번호표 발급 완료!\n\n` +
+                      `번호: ${data.ticketNumber || 'ERROR'}\n` +
+                      `과정: ${data.courseName || '알 수 없음'}\n` +
+                      `대기: ${data.waitingCount || 0}명`);
+                      
+                // 초기 상태로 복원
+                setTimeout(() => {
+                    goBack();
+                }, 1000);
+            }
         }
 
-        // 결과 닫기
+        // 결과 닫기 (안전한 버전)
         function closeResult() {
-            document.getElementById('resultModal').classList.remove('show');
-            
-            // 초기 상태로 복원
-            setTimeout(() => {
-                goBack();
-            }, 300);
+            try {
+                const resultModal = document.getElementById('resultModal');
+                if (resultModal) {
+                    resultModal.classList.remove('show');
+                    console.log('✅ 결과 모달 닫기 완료');
+                } else {
+                    console.warn('⚠️ 결과 모달을 찾을 수 없음');
+                }
+                
+                // 초기 상태로 복원
+                setTimeout(() => {
+                    try {
+                        goBack();
+                    } catch (error) {
+                        console.error('❌ goBack 함수 오류:', error);
+                        // 수동으로 초기화
+                        selectedCourse = null;
+                        document.querySelectorAll('.course-btn').forEach(btn => {
+                            btn.classList.remove('selected');
+                        });
+                        
+                        const phoneSection = document.getElementById('phoneSection');
+                        const backBtn = document.getElementById('backBtn');
+                        const phoneInput = document.getElementById('phoneInput');
+                        const issueBtn = document.getElementById('issueBtn');
+                        
+                        if (phoneSection) phoneSection.classList.remove('show');
+                        if (backBtn) backBtn.style.display = 'none';
+                        if (phoneInput) phoneInput.value = '';
+                        if (issueBtn) issueBtn.disabled = true;
+                    }
+                }, 300);
+                
+            } catch (error) {
+                console.error('❌ 결과 닫기 오류:', error);
+            }
         }
 
         // 설정 모달 표시/숨기기
@@ -2470,7 +2638,7 @@
             }
         });
 
-        // 초기화 (안전한 버전)
+        // 초기화 (더 안전한 버전)
         function initialize() {
             console.log('🚀 터치 키오스크 시스템 초기화 시작');
             console.log('📋 기본 시스템 설정:', systemSettings);
@@ -2505,24 +2673,40 @@
                 // 6. Firebase 상태 확인 (3초 후)
                 setTimeout(() => {
                     try {
-                        if (window.firebaseDB) {
-                            console.log('6️⃣ Firebase 연결 확인 완료');
+                        const isConnected = isFirebaseConnected();
+                        if (isConnected) {
+                            console.log('6️⃣ ✅ Firebase 연결 확인 완료');
                         } else {
-                            console.warn('⚠️ Firebase 연결 문제: 데이터베이스가 초기화되지 않음');
+                            console.warn('6️⃣ ⚠️ Firebase 연결 문제 감지');
                         }
                     } catch (error) {
-                        console.warn('⚠️ Firebase 연결 문제:', error.message);
+                        console.warn('6️⃣ ⚠️ Firebase 연결 확인 오류:', error.message);
                     }
                 }, 3000);
                 
                 console.log('✅ 터치 키오스크 시스템 초기화 완료');
                 
+                // 7. 전역 오류 핸들러 설정
+                window.addEventListener('error', (event) => {
+                    console.error('🚨 전역 오류 감지:', event.error);
+                });
+                
+                window.addEventListener('unhandledrejection', (event) => {
+                    console.error('🚨 처리되지 않은 Promise 거부:', event.reason);
+                });
+                
             } catch (error) {
                 console.error('❌ 초기화 실패:', error);
                 
                 // 초기화 실패 시 기본값으로 복구
-                ensureCourseDataSafety();
-                renderCourses();
+                try {
+                    ensureCourseDataSafety();
+                    renderCourses();
+                    alert('시스템 초기화 중 일부 오류가 발생했습니다.\n기본 기능은 사용 가능합니다.');
+                } catch (recoveryError) {
+                    console.error('❌ 복구 실패:', recoveryError);
+                    alert('시스템을 초기화할 수 없습니다.\n페이지를 새로고침해 주세요.');
+                }
             }
         }
 
