@@ -553,7 +553,7 @@
             line-height: 1.5;
         }
         
-        /* 🎯 수정 1: 로딩창을 작은 중앙 팝업으로 변경 */
+        /* 로딩창 스타일 */
         .loading {
             display: none;
             position: fixed;
@@ -612,80 +612,6 @@
         .loading-sub {
             font-size: 0.8rem;
             color: #666;
-        }
-        
-        /* 🎯 수정 2: 결과 모달 완전히 숨김 (display: none으로 강제) */
-        .result-modal {
-            display: none !important; /* 🎯 강제로 숨김 처리 */
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 10000;
-            backdrop-filter: blur(5px);
-        }
-        
-        /* 결과 모달 관련 CSS는 유지하되 사용하지 않음 */
-        .result-modal.show {
-            display: none !important; /* 🎯 show 클래스가 있어도 숨김 */
-        }
-        
-        .result-content {
-            background: white;
-            border-radius: 30px;
-            padding: 60px;
-            text-align: center;
-            max-width: 600px;
-            width: 90%;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
-            position: relative;
-        }
-        
-        .result-icon {
-            font-size: 6rem;
-            margin-bottom: 30px;
-        }
-        
-        .result-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: #333;
-        }
-        
-        .ticket-number {
-            font-size: 5rem;
-            font-weight: 900;
-            color: #667eea;
-            margin: 30px 0;
-            text-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-        
-        .result-info {
-            font-size: 1.3rem;
-            color: #666;
-            line-height: 1.8;
-            margin-bottom: 40px;
-        }
-        
-        .close-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 20px 40px;
-            border-radius: 30px;
-            font-size: 1.3rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            touch-action: manipulation;
-        }
-        
-        .close-btn:hover, .close-btn:active {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
         }
         
         /* 설정 모달 스타일 */
@@ -1177,28 +1103,11 @@
         </div>
     </div>
 
-    <!-- 로딩 모달 (크기 줄임) -->
+    <!-- 로딩 모달 -->
     <div class="loading" id="loadingModal">
         <div class="spinner"></div>
         <div class="loading-text">번호표 발급 중...</div>
         <div class="loading-sub">알림톡 발송까지 잠시만 기다려 주세요</div>
-    </div>
-
-    <!-- 성공 결과 모달 (완전 숨김 처리) -->
-    <div class="result-modal" id="resultModal">
-        <div class="result-content">
-            <div class="result-icon">🎉</div>
-            <h2 class="result-title">번호표 발급 완료!</h2>
-            <div class="ticket-number" id="resultTicketNumber">CH001</div>
-            <div class="result-info" id="resultInfo">
-                <strong>중국어 과정</strong><br>
-                현재 대기: <span id="resultWaiting">0</span>명<br>
-                예상 대기시간: 약 <span id="resultTime">5</span>분<br><br>
-                📱 알림톡이 발송되었습니다!<br>
-                호출 시 카카오톡으로 안내해 드립니다.
-            </div>
-            <button class="close-btn" onclick="closeResult()">확인 (2초 후 자동 닫기)</button>
-        </div>
     </div>
 
     <!-- 설정 모달 -->
@@ -1345,7 +1254,6 @@
         // 전역 변수
         let selectedCourseForPopup = null;
         let phoneInputValue = '';
-        let autoCloseTimer = null;
         
         // 기본 설정
         let systemSettings = {
@@ -1870,11 +1778,8 @@
                 await saveKioskSettings();
                 console.log('✅ 통계 업데이트 완료');
                 
-                // 🎯 수정 2: 모든 알림 제거 - 조용하게 발급 완료
+                // 🎯 발급 완료 - 조용하게 처리 (알림 없음)
                 console.log('🎉 발급 완료 - 조용히 처리');
-                
-                // 아무런 알림 없이 조용하게 완료 처리
-                // alert, 팝업 등 모든 사용자 알림 제거
                 
             } catch (error) {
                 console.error('❌ 팝업 번호표 발급 실패:', error);
@@ -2697,12 +2602,7 @@
 
         // 모달 외부 클릭 시 닫기
         window.onclick = function(event) {
-            const resultModal = document.getElementById('resultModal');
             const settingsModal = document.getElementById('settingsModal');
-            
-            if (event.target === resultModal) {
-                closeResult();
-            }
             
             if (event.target === settingsModal) {
                 hideSettings();
@@ -2712,12 +2612,9 @@
         // 키보드 단축키
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                const resultModal = document.getElementById('resultModal');
                 const settingsModal = document.getElementById('settingsModal');
                 
-                if (resultModal && resultModal.classList.contains('show')) {
-                    closeResult();
-                } else if (settingsModal && settingsModal.style.display === 'block') {
+                if (settingsModal && settingsModal.style.display === 'block') {
                     hideSettings();
                 }
             }
