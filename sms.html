@@ -553,7 +553,7 @@
             line-height: 1.5;
         }
         
-        /* 로딩 모달 */
+        /* 🎯 수정 1: 로딩 모달 크기 줄이기 */
         .loading {
             display: none;
             background: rgba(255, 255, 255, 0.95);
@@ -574,13 +574,13 @@
         }
         
         .spinner {
-            width: 100px;
-            height: 100px;
-            border: 10px solid #f3f3f3;
-            border-top: 10px solid #667eea;
+            width: 50px;  /* 🎯 100px → 50px로 크기 줄임 */
+            height: 50px; /* 🎯 100px → 50px로 크기 줄임 */
+            border: 5px solid #f3f3f3;  /* 🎯 10px → 5px로 줄임 */
+            border-top: 5px solid #667eea; /* 🎯 10px → 5px로 줄임 */
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 40px;
+            margin-bottom: 20px; /* 🎯 40px → 20px로 줄임 */
         }
         
         @keyframes spin {
@@ -589,20 +589,20 @@
         }
         
         .loading-text {
-            font-size: 2rem;
+            font-size: 1.2rem; /* 🎯 2rem → 1.2rem로 줄임 */
             font-weight: 700;
             color: #333;
-            margin-bottom: 15px;
+            margin-bottom: 8px; /* 🎯 15px → 8px로 줄임 */
         }
         
         .loading-sub {
-            font-size: 1.2rem;
+            font-size: 0.9rem; /* 🎯 1.2rem → 0.9rem로 줄임 */
             color: #666;
         }
         
-        /* 결과 모달 */
+        /* 🎯 수정 2: 결과 모달 완전히 숨김 (display: none으로 강제) */
         .result-modal {
-            display: none;
+            display: none !important; /* 🎯 강제로 숨김 처리 */
             position: fixed;
             top: 0;
             left: 0;
@@ -613,10 +613,9 @@
             backdrop-filter: blur(5px);
         }
         
+        /* 결과 모달 관련 CSS는 유지하되 사용하지 않음 */
         .result-modal.show {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: none !important; /* 🎯 show 클래스가 있어도 숨김 */
         }
         
         .result-content {
@@ -1164,14 +1163,14 @@
         </div>
     </div>
 
-    <!-- 로딩 모달 -->
+    <!-- 로딩 모달 (크기 줄임) -->
     <div class="loading" id="loadingModal">
         <div class="spinner"></div>
         <div class="loading-text">번호표 발급 중...</div>
         <div class="loading-sub">알림톡 발송까지 잠시만 기다려 주세요</div>
     </div>
 
-    <!-- 성공 결과 모달 (2초 자동 닫기) -->
+    <!-- 성공 결과 모달 (완전 숨김 처리) -->
     <div class="result-modal" id="resultModal">
         <div class="result-content">
             <div class="result-icon">🎉</div>
@@ -1329,7 +1328,7 @@
     </div>
 
     <script>
-        // 🎯 전역 변수
+        // 전역 변수
         let selectedCourseForPopup = null;
         let phoneInputValue = '';
         let autoCloseTimer = null;
@@ -1376,7 +1375,7 @@
         // Firebase Functions URL
         const FUNCTIONS_URL = 'https://sendalimtalk-74viab6pza-an.a.run.app';
 
-        // 🕐 시간 표시 업데이트
+        // 시간 표시 업데이트
         function updateTimeDisplay() {
             const now = new Date();
             const timeString = now.toLocaleTimeString('ko-KR', { 
@@ -1396,7 +1395,7 @@
             }
         }
 
-        // 🕐 시간별 과정 노출 체크
+        // 시간별 과정 노출 체크
         function checkCourseAvailability() {
             try {
                 const now = new Date();
@@ -1473,7 +1472,7 @@
                         background: rgba(255,255,255,0.1);
                         border-radius: 20px;
                         border: 2px dashed rgba(255,255,255,0.3);
-                        color: rgba(255,255,255,0.8);
+                        color: #333;
                         font-size: 1.5rem;
                         font-weight: 500;
                         animation: fadeIn 0.5s ease-in;
@@ -1564,7 +1563,7 @@
             }
         }
 
-        // 🎯 과정 선택 (터치패드 팝업 방식)
+        // 과정 선택 (터치패드 팝업 방식)
         function selectCourse(course, index) {
             try {
                 console.log('📚 과정 선택 시도:', course, 'index:', index);
@@ -1583,7 +1582,6 @@
                     return;
                 }
                 
-                // ✅ 선택된 과정을 전역 변수에 저장
                 selectedCourseForPopup = {
                     code: course.code,
                     name: course.name,
@@ -1594,12 +1592,10 @@
                 
                 console.log('✅ selectedCourseForPopup 설정 완료:', selectedCourseForPopup);
                 
-                // 모든 과정 버튼 선택 해제
                 document.querySelectorAll('.course-btn').forEach(btn => {
                     btn.classList.remove('selected');
                 });
                 
-                // 클릭된 과정 버튼 선택 상태로 변경
                 const courseBtn = document.querySelector(`[data-course-index="${index}"]`);
                 if (courseBtn) {
                     courseBtn.classList.add('selected');
@@ -1608,36 +1604,32 @@
                     console.warn('⚠️ 과정 버튼을 찾을 수 없음, index:', index);
                 }
                 
-                // 터치패드 팝업 표시
                 showPhonePopup();
-                
                 console.log('🎯 과정 선택 완료:', course.name);
                 
             } catch (error) {
                 console.error('❌ 과정 선택 오류:', error);
-                selectedCourseForPopup = null; // 오류 시 초기화
+                selectedCourseForPopup = null;
                 alert('과정 선택 중 오류가 발생했습니다.');
             }
         }
 
-        // 📱 터치패드 팝업 표시
+        // 터치패드 팝업 표시
         function showPhonePopup() {
             try {
                 phoneInputValue = '010-';
-                
                 const popup = document.getElementById('phonePopup');
                 if (popup) {
                     popup.classList.add('show');
                     updatePhoneDisplay();
                     updateSubmitButton();
                 }
-                
             } catch (error) {
                 console.error('❌ 팝업 표시 오류:', error);
             }
         }
 
-        // 📱 터치패드 팝업 닫기
+        // 터치패드 팝업 닫기
         function closePhonePopup() {
             try {
                 console.log('📱 터치패드 팝업 닫기 시작');
@@ -1650,15 +1642,9 @@
                     console.warn('⚠️ phonePopup 요소를 찾을 수 없음');
                 }
                 
-                // 입력값 초기화
                 phoneInputValue = '';
                 console.log('✅ 전화번호 입력값 초기화');
-                
-                // ⚠️ 여기서 selectedCourseForPopup을 null로 만들지 않음
-                // 발급 과정에서 사용하기 때문에 유지
                 console.log('📚 selectedCourseForPopup 유지:', selectedCourseForPopup);
-                
-                // 과정 버튼 선택 상태는 유지 (발급 중 표시를 위해)
                 console.log('✅ 팝업 닫기 완료');
                 
             } catch (error) {
@@ -1666,7 +1652,7 @@
             }
         }
 
-        // 🔢 숫자 입력
+        // 숫자 입력
         function inputNumber(digit) {
             try {
                 if (!/^[0-9]$/.test(digit)) {
@@ -1690,7 +1676,7 @@
             }
         }
 
-        // ⬅️ 마지막 숫자 삭제
+        // 마지막 숫자 삭제
         function deleteLastNumber() {
             try {
                 let numbers = phoneInputValue.replace(/-/g, '');
@@ -1710,20 +1696,18 @@
             }
         }
 
-        // 🗑️ 전체 숫자 삭제
+        // 전체 숫자 삭제
         function clearAllNumbers() {
             try {
                 phoneInputValue = '010-';
-                
                 updatePhoneDisplay();
                 updateSubmitButton();
-                
             } catch (error) {
                 console.error('❌ 전체 삭제 오류:', error);
             }
         }
 
-        // 📱 전화번호 자동 포맷팅
+        // 전화번호 자동 포맷팅
         function formatPhoneNumberAuto(numbers) {
             try {
                 if (!numbers || numbers.length <= 3) {
@@ -1752,7 +1736,7 @@
             }
         }
 
-        // 📱 화면 전화번호 표시 업데이트
+        // 화면 전화번호 표시 업데이트
         function updatePhoneDisplay() {
             try {
                 const display = document.getElementById('phoneDisplay');
@@ -1777,7 +1761,7 @@
             }
         }
 
-        // 🎫 발급 버튼 활성화/비활성화
+        // 발급 버튼 활성화/비활성화
         function updateSubmitButton() {
             try {
                 const submitBtn = document.getElementById('phoneSubmitBtn');
@@ -1801,7 +1785,7 @@
             }
         }
 
-        // 🎫 팝업에서 번호표 발급
+        // 팝업에서 번호표 발급
         async function submitPhoneNumber() {
             try {
                 console.log('🎫 번호표 발급 버튼 클릭됨');
@@ -1814,7 +1798,6 @@
                     return;
                 }
                 
-                // 과정 데이터 안전 체크
                 if (!selectedCourseForPopup.code || !selectedCourseForPopup.name) {
                     console.error('❌ 과정 데이터가 불완전함:', selectedCourseForPopup);
                     alert('과정 정보에 오류가 있습니다.\n다시 과정을 선택해 주세요.');
@@ -1831,21 +1814,14 @@
                 console.log('📱 전화번호 검증 완료:', numbers);
                 console.log('📚 선택된 과정:', selectedCourseForPopup);
                 
-                // 발급 중 피드백 표시
                 showIssuingFeedback(selectedCourseForPopup);
-                
-                // 팝업 닫기
                 closePhonePopup();
-                
-                // 로딩 표시
                 showLoading(true);
                 
-                // 번호 생성
                 console.log('🔢 번호 생성 시작...');
                 const ticketNumber = generateTicketNumber(selectedCourseForPopup.code);
                 console.log('✅ 생성된 번호:', ticketNumber);
                 
-                // 티켓 데이터 생성
                 const ticketData = {
                     number: ticketNumber,
                     course: selectedCourseForPopup.name,
@@ -1860,17 +1836,14 @@
                 
                 console.log('📋 티켓 데이터 생성 완료:', ticketData);
                 
-                // Firebase에 대기열 추가
                 console.log('🔥 Firebase 대기열 추가 중...');
                 await addToWaitingQueue(ticketData);
                 console.log('✅ Firebase 대기열 추가 완료');
                 
-                // 대기 인원 계산
                 console.log('👥 대기 인원 계산 중...');
                 const waitingCount = await getWaitingCount(selectedCourseForPopup.code);
                 console.log('✅ 현재 대기 인원:', waitingCount);
                 
-                // 알림톡 발송
                 console.log('📱 알림톡 발송 시작...');
                 const alimtalkResult = await sendAlimtalk({
                     ...ticketData,
@@ -1878,29 +1851,27 @@
                 }, 'issue');
                 console.log('📱 알림톡 발송 결과:', alimtalkResult);
                 
-                // 통계 업데이트
                 console.log('📊 통계 업데이트 중...');
                 kioskData.totalToday++;
                 await saveKioskSettings();
                 console.log('✅ 통계 업데이트 완료');
                 
-                // 결과 데이터 준비
-                const resultData = {
-                    ticketNumber: ticketNumber,
-                    courseName: selectedCourseForPopup.name,
-                    waitingCount: waitingCount,
-                    alimtalkSuccess: alimtalkResult.success
-                };
+                // 🎯 수정 3: 결과 팝업 표시 대신 간단한 완료 알림만 표시
+                console.log('🎉 발급 완료 - 간단한 알림 표시');
                 
-                console.log('🎉 발급 완료 - 결과 표시:', resultData);
-                showResult(resultData);
+                // 간단한 완료 알림 (alert 사용)
+                const alimtalkStatus = alimtalkResult.success ? '✅ 알림톡 발송 성공' : '⚠️ 알림톡 발송 실패';
+                alert(`🎉 번호표 발급 완료!\n\n` +
+                      `📱 번호: ${ticketNumber}\n` +
+                      `📚 과정: ${selectedCourseForPopup.name}\n` +
+                      `👥 대기: ${waitingCount}명\n` +
+                      `⏰ 예상시간: 약 ${Math.max(5, waitingCount * 5)}분\n\n` +
+                      `${alimtalkStatus}`);
                 
             } catch (error) {
                 console.error('❌ 팝업 번호표 발급 실패:', error);
                 console.error('❌ 오류 스택:', error.stack);
-                console.error('❌ 오류 위치:', error.fileName, error.lineNumber);
                 
-                // 팝업이 아직 열려있다면 닫기
                 try {
                     closePhonePopup();
                 } catch (closeError) {
@@ -1920,20 +1891,17 @@
                 }
                 
                 errorMessage += '\n\n잠시 후 다시 시도해 주세요.';
-                
                 alert(errorMessage);
                 
             } finally {
                 console.log('🔄 발급 프로세스 정리 중...');
                 
-                // 로딩 숨기기
                 try {
                     showLoading(false);
                 } catch (loadingError) {
                     console.warn('⚠️ 로딩 숨기기 중 오류:', loadingError);
                 }
                 
-                // 피드백 숨기기
                 try {
                     hideIssuingFeedback();
                 } catch (feedbackError) {
@@ -1944,7 +1912,7 @@
             }
         }
 
-        // 🎯 발급 중 시각적 피드백 표시
+        // 발급 중 시각적 피드백 표시
         function showIssuingFeedback(course) {
             try {
                 console.log('⏳ 발급 중 피드백 표시 시작:', course?.name);
@@ -1971,11 +1939,10 @@
                 
             } catch (error) {
                 console.error('❌ 발급 중 표시 오류:', error);
-                // 오류가 발생해도 진행은 계속
             }
         }
 
-        // 🎯 발급 중 시각적 피드백 제거
+        // 발급 중 시각적 피드백 제거
         function hideIssuingFeedback() {
             try {
                 console.log('🔄 발급 중 피드백 제거 시작');
@@ -1991,11 +1958,14 @@
                     }
                 });
                 
+                // 전역 변수 초기화
+                selectedCourseForPopup = null;
+                phoneInputValue = '';
+                
                 console.log('✅ 발급 중 피드백 제거 완료');
                 
             } catch (error) {
                 console.error('❌ 발급 중 피드백 제거 오류:', error);
-                // 오류가 발생해도 진행은 계속
             }
         }
 
@@ -2239,124 +2209,15 @@
             }
         }
 
-        // 성공 결과 표시 (2초 자동 닫기)
+        // 🎯 수정 2: 결과 모달 관련 함수들은 유지하되 실제로는 사용하지 않음
         function showResult(data) {
-            try {
-                if (autoCloseTimer) {
-                    clearTimeout(autoCloseTimer);
-                    autoCloseTimer = null;
-                }
-                
-                const ticketNumberEl = document.getElementById('resultTicketNumber');
-                const waitingEl = document.getElementById('resultWaiting');
-                const timeEl = document.getElementById('resultTime');
-                const resultInfoEl = document.getElementById('resultInfo');
-                
-                if (!ticketNumberEl || !waitingEl || !timeEl || !resultInfoEl) {
-                    const waitingCount = data.waitingCount || 0;
-                    const estimatedTime = Math.max(5, waitingCount * 5);
-                    const alimtalkStatus = data.alimtalkSuccess ? '✅ 알림톡 발송 성공' : '⚠️ 알림톡 발송 실패';
-                    
-                    alert(`🎉 번호표 발급 완료!\n\n` +
-                          `📱 번호: ${data.ticketNumber}\n` +
-                          `📚 과정: ${data.courseName}\n` +
-                          `👥 대기: ${waitingCount}명\n` +
-                          `⏰ 예상시간: 약 ${estimatedTime}분\n\n` +
-                          `${alimtalkStatus}`);
-                    
-                    setTimeout(() => {
-                        hideIssuingFeedback();
-                    }, 1000);
-                    return;
-                }
-                
-                ticketNumberEl.textContent = data.ticketNumber || 'ERROR';
-                waitingEl.textContent = data.waitingCount || 0;
-                timeEl.textContent = Math.max(5, (data.waitingCount || 0) * 5);
-                
-                const alimtalkStatus = data.alimtalkSuccess ? 
-                    '📱 알림톡이 발송되었습니다!' :
-                    '⚠️ 알림톡 발송에 실패했지만 번호표는 정상 발급되었습니다.';
-                
-                resultInfoEl.innerHTML = `
-                    <strong>${data.courseName || '과정명 없음'}</strong><br>
-                    현재 대기: <span>${data.waitingCount || 0}</span>명<br>
-                    예상 대기시간: 약 <span>${Math.max(5, (data.waitingCount || 0) * 5)}</span>분<br><br>
-                    ${alimtalkStatus}<br>
-                    호출 시 카카오톡으로 안내해 드립니다.
-                `;
-                
-                const resultModal = document.getElementById('resultModal');
-                if (resultModal) {
-                    resultModal.classList.add('show');
-                    
-                    autoCloseTimer = setTimeout(() => {
-                        closeResult();
-                    }, 2000);
-                    
-                } else {
-                    alert(`🎉 번호표 발급 완료!\n번호: ${data.ticketNumber}`);
-                }
-                
-            } catch (error) {
-                console.error('❌ 결과 표시 오류:', error);
-                
-                alert(`🎉 번호표 발급 완료!\n\n` +
-                      `번호: ${data.ticketNumber || 'ERROR'}\n` +
-                      `과정: ${data.courseName || '알 수 없음'}\n` +
-                      `대기: ${data.waitingCount || 0}명`);
-                      
-                setTimeout(() => {
-                    hideIssuingFeedback();
-                }, 1000);
-            }
+            // 결과 모달을 표시하지 않고, 피드백만 제거
+            hideIssuingFeedback();
         }
 
-        // 결과 닫기 (타이머 관리 포함)
         function closeResult() {
-            try {
-                console.log('🔄 결과 모달 닫기 시작');
-                
-                if (autoCloseTimer) {
-                    clearTimeout(autoCloseTimer);
-                    autoCloseTimer = null;
-                    console.log('⏰ 자동 닫기 타이머 취소');
-                }
-                
-                const resultModal = document.getElementById('resultModal');
-                if (resultModal) {
-                    resultModal.classList.remove('show');
-                    console.log('✅ 결과 모달 숨김 완료');
-                } else {
-                    console.warn('⚠️ resultModal 요소를 찾을 수 없음');
-                }
-                
-                // 피드백 제거
-                hideIssuingFeedback();
-                
-                // ✅ 이제 selectedCourseForPopup 초기화
-                selectedCourseForPopup = null;
-                phoneInputValue = '';
-                console.log('🧹 전역 변수 초기화 완료');
-                
-                // 300ms 후 과정 버튼 상태 초기화
-                setTimeout(() => {
-                    try {
-                        document.querySelectorAll('.course-btn').forEach(btn => {
-                            btn.classList.remove('selected', 'issuing');
-                        });
-                        console.log('✅ 과정 버튼 상태 초기화 완료');
-                        
-                    } catch (error) {
-                        console.error('❌ 과정 버튼 초기화 오류:', error);
-                    }
-                }, 300);
-                
-                console.log('✅ 결과 닫기 완료');
-                
-            } catch (error) {
-                console.error('❌ 결과 닫기 오류:', error);
-            }
+            // 결과 모달 관련 처리 (실제로는 사용되지 않음)
+            hideIssuingFeedback();
         }
 
         // 설정 모달 표시/숨기기
