@@ -1774,6 +1774,8 @@
         // 🎫 팝업에서 번호표 발급
         async function submitPhoneNumber() {
             try {
+                console.log('🎫 번호표 발급 버튼 클릭됨');
+                
                 if (!selectedCourseForPopup) {
                     alert('과정이 선택되지 않았습니다.');
                     return;
@@ -1785,12 +1787,24 @@
                     return;
                 }
                 
+                console.log('📱 전화번호 검증 완료:', numbers);
+                console.log('📚 선택된 과정:', selectedCourseForPopup);
+                
+                // 발급 중 피드백 표시
                 showIssuingFeedback(selectedCourseForPopup);
+                
+                // 팝업 닫기
                 closePhonePopup();
+                
+                // 로딩 표시
                 showLoading(true);
                 
+                // 번호 생성
+                console.log('🔢 번호 생성 시작...');
                 const ticketNumber = generateTicketNumber(selectedCourseForPopup.code);
+                console.log('✅ 생성된 번호:', ticketNumber);
                 
+                // 티켓 데이터 생성
                 const ticketData = {
                     number: ticketNumber,
                     course: selectedCourseForPopup.name,
@@ -1803,18 +1817,33 @@
                     courseCode: selectedCourseForPopup.code
                 };
                 
+                console.log('📋 티켓 데이터 생성 완료:', ticketData);
+                
+                // Firebase에 대기열 추가
+                console.log('🔥 Firebase 대기열 추가 중...');
                 await addToWaitingQueue(ticketData);
+                console.log('✅ Firebase 대기열 추가 완료');
                 
+                // 대기 인원 계산
+                console.log('👥 대기 인원 계산 중...');
                 const waitingCount = await getWaitingCount(selectedCourseForPopup.code);
+                console.log('✅ 현재 대기 인원:', waitingCount);
                 
+                // 알림톡 발송
+                console.log('📱 알림톡 발송 시작...');
                 const alimtalkResult = await sendAlimtalk({
                     ...ticketData,
                     waitingCount: waitingCount
                 }, 'issue');
+                console.log('📱 알림톡 발송 결과:', alimtalkResult);
                 
+                // 통계 업데이트
+                console.log('📊 통계 업데이트 중...');
                 kioskData.totalToday++;
                 await saveKioskSettings();
+                console.log('✅ 통계 업데이트 완료');
                 
+                // 결과 데이터 준비
                 const resultData = {
                     ticketNumber: ticketNumber,
                     courseName: selectedCourseForPopup.name,
@@ -1822,12 +1851,20 @@
                     alimtalkSuccess: alimtalkResult.success
                 };
                 
+                console.log('🎉 발급 완료 - 결과 표시:', resultData);
                 showResult(resultData);
                 
             } catch (error) {
                 console.error('❌ 팝업 번호표 발급 실패:', error);
+                console.error('❌ 오류 스택:', error.stack);
+                console.error('❌ 오류 위치:', error.fileName, error.lineNumber);
                 
-                closePhonePopup();
+                // 팝업이 아직 열려있다면 닫기
+                try {
+                    closePhonePopup();
+                } catch (closeError) {
+                    console.warn('⚠️ 팝업 닫기 중 오류:', closeError);
+                }
                 
                 let errorMessage = '번호표 발급 중 오류가 발생했습니다.';
                 
@@ -1835,6 +1872,8 @@
                     errorMessage += '\n\n🔥 Firebase 연결 오류: 네트워크를 확인해 주세요.';
                 } else if (error.message.includes('알림톡')) {
                     errorMessage += '\n\n📱 알림톡 발송 오류: 번호표는 발급되었습니다.';
+                } else if (error.message.includes('null')) {
+                    errorMessage += '\n\n🔧 시스템 초기화 오류: 페이지를 새로고침해 주세요.';
                 } else {
                     errorMessage += `\n\n오류 내용: ${error.message}`;
                 }
@@ -1844,39 +1883,78 @@
                 alert(errorMessage);
                 
             } finally {
-                showLoading(false);
-                hideIssuingFeedback();
+                console.log('🔄 발급 프로세스 정리 중...');
+                
+                // 로딩 숨기기
+                try {
+                    showLoading(false);
+                } catch (loadingError) {
+                    console.warn('⚠️ 로딩 숨기기 중 오류:', loadingError);
+                }
+                
+                // 피드백 숨기기
+                try {
+                    hideIssuingFeedback();
+                } catch (feedbackError) {
+                    console.warn('⚠️ 피드백 숨기기 중 오류:', feedbackError);
+                }
+                
+                console.log('✅ 발급 프로세스 정리 완료');
             }
         }
 
         // 🎯 발급 중 시각적 피드백 표시
         function showIssuingFeedback(course) {
             try {
-                if (!course) return;
+                console.log('⏳ 발급 중 피드백 표시 시작:', course?.name);
+                
+                if (!course) {
+                    console.warn('⚠️ 과정 정보가 없어서 피드백 표시 불가');
+                    return;
+                }
                 
                 const courseBtns = document.querySelectorAll('.course-btn');
+                console.log('🔍 찾은 과정 버튼 개수:', courseBtns.length);
+                
                 courseBtns.forEach((btn, index) => {
-                    const courseData = systemSettings.courses[index];
-                    if (courseData && courseData.code === course.code) {
-                        btn.classList.add('issuing');
+                    try {
+                        const courseData = systemSettings.courses[index];
+                        if (courseData && courseData.code === course.code) {
+                            btn.classList.add('issuing');
+                            console.log('✅ 발급 중 표시 적용:', courseData.name);
+                        }
+                    } catch (btnError) {
+                        console.warn(`⚠️ 버튼 ${index} 처리 중 오류:`, btnError);
                     }
                 });
                 
             } catch (error) {
                 console.error('❌ 발급 중 표시 오류:', error);
+                // 오류가 발생해도 진행은 계속
             }
         }
 
         // 🎯 발급 중 시각적 피드백 제거
         function hideIssuingFeedback() {
             try {
+                console.log('🔄 발급 중 피드백 제거 시작');
+                
                 const courseBtns = document.querySelectorAll('.course-btn');
-                courseBtns.forEach(btn => {
-                    btn.classList.remove('issuing', 'selected');
+                console.log('🔍 찾은 과정 버튼 개수:', courseBtns.length);
+                
+                courseBtns.forEach((btn, index) => {
+                    try {
+                        btn.classList.remove('issuing', 'selected');
+                    } catch (btnError) {
+                        console.warn(`⚠️ 버튼 ${index} 정리 중 오류:`, btnError);
+                    }
                 });
                 
+                console.log('✅ 발급 중 피드백 제거 완료');
+                
             } catch (error) {
-                console.error('❌ 발급 중 표시 제거 오류:', error);
+                console.error('❌ 발급 중 피드백 제거 오류:', error);
+                // 오류가 발생해도 진행은 계속
             }
         }
 
