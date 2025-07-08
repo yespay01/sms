@@ -1153,7 +1153,7 @@
         // 전역 변수 선언
         let selectedCourse = null;
         
-        // 기본 설정
+        // 기본 설정 (운영시간 포함)
         let systemSettings = {
             courses: [
                 { code: 'CH', name: '중국어 과정', englishName: 'Chinese Course', icon: '🇨🇳', 
@@ -1175,7 +1175,7 @@
                 apiKey: 'NCSRVLD2FFGTEK7B',
                 secret: 'IYLPMGODFSDJA3Y88QZDHBQYG6XYCNV8',
                 senderNumber: '01074240832',
-                kakaoChannelId: 'KA01PF250703061140859DlTkL4q0BXu',
+                kakaoChannelId: 'KA01PF250703061140859DITkL4q0BXu',
                 testMode: false, // 이제 실제 발송 가능
                 testPhoneNumber: '',
                 templates: {
@@ -1185,6 +1185,33 @@
                 }
             }
         };
+
+        // 과정 데이터 안전성 보장
+        function ensureCourseDataSafety() {
+            if (!systemSettings.courses || !Array.isArray(systemSettings.courses)) {
+                console.warn('⚠️ courses 배열 초기화');
+                systemSettings.courses = [];
+            }
+            
+            systemSettings.courses.forEach((course, index) => {
+                // 기본 필드 보장
+                if (!course.code) course.code = `COURSE_${index}`;
+                if (!course.name) course.name = `과정 ${index + 1}`;
+                if (!course.englishName) course.englishName = `Course ${index + 1}`;
+                if (!course.icon) course.icon = '📚';
+                
+                // 운영시간 보장
+                if (!course.operationHours) {
+                    course.operationHours = { start: '09:00', end: '18:00' };
+                    console.warn(`⚠️ 과정 ${course.name}에 기본 운영시간 설정`);
+                } else {
+                    if (!course.operationHours.start) course.operationHours.start = '09:00';
+                    if (!course.operationHours.end) course.operationHours.end = '18:00';
+                }
+            });
+            
+            console.log('✅ 과정 데이터 안전성 보장 완료');
+        }
 
         let kioskData = {
             currentNumbers: {},
@@ -1215,84 +1242,163 @@
             }
         }
 
-        // 🕐 시간별 과정 노출 체크
+        // 🕐 시간별 과정 노출 체크 (안전한 버전)
         function checkCourseAvailability() {
-            const now = new Date();
-            const currentTime = now.toTimeString().substr(0, 5);
-            
-            systemSettings.courses.forEach((course, index) => {
-                const courseBtn = document.querySelector(`[data-course-index="${index}"]`);
-                if (!courseBtn) return;
+            try {
+                const now = new Date();
+                const currentTime = now.toTimeString().substr(0, 5);
                 
-                const isAvailable = isTimeInRange(currentTime, course.operationHours.start, course.operationHours.end);
-                
-                if (isAvailable) {
-                    courseBtn.classList.remove('disabled');
-                    courseBtn.style.pointerEvents = 'auto';
-                } else {
-                    courseBtn.classList.add('disabled');
-                    courseBtn.style.pointerEvents = 'none';
-                    
-                    if (selectedCourse && selectedCourse.code === course.code) {
-                        selectedCourse = null;
-                        courseBtn.classList.remove('selected');
-                        goBack(); // 자동으로 처음 화면으로
-                    }
+                if (!systemSettings.courses || !Array.isArray(systemSettings.courses)) {
+                    console.warn('⚠️ courses 배열이 유효하지 않음');
+                    return;
                 }
-            });
+                
+                systemSettings.courses.forEach((course, index) => {
+                    try {
+                        const courseBtn = document.querySelector(`[data-course-index="${index}"]`);
+                        if (!courseBtn) return;
+                        
+                        // operationHours 안전 체크
+                        if (!course.operationHours || !course.operationHours.start || !course.operationHours.end) {
+                            console.warn(`⚠️ 과정 ${course.name || index}의 운영시간이 설정되지 않음 - 기본값 적용`);
+                            
+                            // 기본 운영시간 설정
+                            if (!course.operationHours) {
+                                course.operationHours = {};
+                            }
+                            course.operationHours.start = course.operationHours.start || '09:00';
+                            course.operationHours.end = course.operationHours.end || '18:00';
+                        }
+                        
+                        const isAvailable = isTimeInRange(currentTime, course.operationHours.start, course.operationHours.end);
+                        
+                        if (isAvailable) {
+                            courseBtn.classList.remove('disabled');
+                            courseBtn.style.pointerEvents = 'auto';
+                        } else {
+                            courseBtn.classList.add('disabled');
+                            courseBtn.style.pointerEvents = 'none';
+                            
+                            if (selectedCourse && selectedCourse.code === course.code) {
+                                selectedCourse = null;
+                                courseBtn.classList.remove('selected');
+                                goBack(); // 자동으로 처음 화면으로
+                            }
+                        }
+                        
+                    } catch (courseError) {
+                        console.error(`❌ 과정 ${index} 가용성 체크 오류:`, courseError);
+                    }
+                });
+                
+            } catch (error) {
+                console.error('❌ checkCourseAvailability 전체 오류:', error);
+            }
         }
 
-        // 시간 범위 체크 함수
+        // 시간 범위 체크 함수 (안전한 버전)
         function isTimeInRange(currentTime, startTime, endTime) {
-            const current = timeToMinutes(currentTime);
-            const start = timeToMinutes(startTime);
-            const end = timeToMinutes(endTime);
-            
-            if (end < start) {
-                return current >= start || current <= end;
-            } else {
-                return current >= start && current <= end;
+            try {
+                if (!currentTime || !startTime || !endTime) {
+                    console.warn('⚠️ 시간 데이터가 유효하지 않음:', { currentTime, startTime, endTime });
+                    return true; // 기본적으로 이용 가능으로 처리
+                }
+                
+                const current = timeToMinutes(currentTime);
+                const start = timeToMinutes(startTime);
+                const end = timeToMinutes(endTime);
+                
+                if (isNaN(current) || isNaN(start) || isNaN(end)) {
+                    console.warn('⚠️ 시간 변환 실패:', { current, start, end });
+                    return true; // 기본적으로 이용 가능으로 처리
+                }
+                
+                if (end < start) {
+                    // 자정을 넘어가는 경우 (예: 22:00 - 02:00)
+                    return current >= start || current <= end;
+                } else {
+                    // 일반적인 경우 (예: 09:00 - 18:00)
+                    return current >= start && current <= end;
+                }
+            } catch (error) {
+                console.error('❌ 시간 범위 체크 오류:', error);
+                return true; // 오류 시 기본적으로 이용 가능으로 처리
             }
         }
 
-        // 시간을 분으로 변환
+        // 시간을 분으로 변환 (안전한 버전)
         function timeToMinutes(time) {
-            const [hours, minutes] = time.split(':').map(Number);
-            return hours * 60 + minutes;
+            try {
+                if (!time || typeof time !== 'string') {
+                    console.warn('⚠️ 유효하지 않은 시간 형식:', time);
+                    return 0;
+                }
+                
+                const parts = time.split(':');
+                if (parts.length !== 2) {
+                    console.warn('⚠️ 잘못된 시간 형식:', time);
+                    return 0;
+                }
+                
+                const hours = parseInt(parts[0], 10);
+                const minutes = parseInt(parts[1], 10);
+                
+                if (isNaN(hours) || isNaN(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+                    console.warn('⚠️ 유효하지 않은 시간 값:', { hours, minutes });
+                    return 0;
+                }
+                
+                return hours * 60 + minutes;
+            } catch (error) {
+                console.error('❌ 시간 변환 오류:', error);
+                return 0;
+            }
         }
 
-        // 🎯 과정 선택
+        // 🎯 과정 선택 (안전한 버전)
         function selectCourse(course, index) {
-            const now = new Date();
-            const currentTime = now.toTimeString().substr(0, 5);
-            
-            if (!isTimeInRange(currentTime, course.operationHours.start, course.operationHours.end)) {
-                alert(`${course.name}은(는) ${course.operationHours.start} - ${course.operationHours.end} 시간에만 이용 가능합니다.`);
-                return;
+            try {
+                const now = new Date();
+                const currentTime = now.toTimeString().substr(0, 5);
+                
+                // 과정 데이터 안전 체크
+                if (!course || !course.operationHours) {
+                    alert('이 과정의 운영시간이 설정되지 않았습니다.');
+                    return;
+                }
+                
+                if (!isTimeInRange(currentTime, course.operationHours.start, course.operationHours.end)) {
+                    alert(`${course.name}은(는) ${course.operationHours.start} - ${course.operationHours.end} 시간에만 이용 가능합니다.`);
+                    return;
+                }
+                
+                selectedCourse = course;
+                
+                document.querySelectorAll('.course-btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                
+                const courseBtn = document.querySelector(`[data-course-index="${index}"]`);
+                if (courseBtn) {
+                    courseBtn.classList.add('selected');
+                }
+                
+                // 전화번호 입력 섹션 표시
+                document.getElementById('phoneSection').classList.add('show');
+                document.getElementById('backBtn').style.display = 'block';
+                
+                // 스크롤 이동
+                document.getElementById('phoneSection').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+                
+                console.log('📚 과정 선택:', course.name);
+                
+            } catch (error) {
+                console.error('❌ 과정 선택 오류:', error);
+                alert('과정 선택 중 오류가 발생했습니다.');
             }
-            
-            selectedCourse = course;
-            
-            document.querySelectorAll('.course-btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            
-            const courseBtn = document.querySelector(`[data-course-index="${index}"]`);
-            if (courseBtn) {
-                courseBtn.classList.add('selected');
-            }
-            
-            // 전화번호 입력 섹션 표시
-            document.getElementById('phoneSection').classList.add('show');
-            document.getElementById('backBtn').style.display = 'block';
-            
-            // 스크롤 이동
-            document.getElementById('phoneSection').scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'center' 
-            });
-            
-            console.log('📚 과정 선택:', course.name);
         }
 
         // 전화번호 입력 설정
@@ -1660,7 +1766,7 @@
             }
         }
 
-        // Firebase 리스너 설정
+        // Firebase 리스너 설정 (안전한 버전)
         function setupFirebaseListeners() {
             if (!window.firebaseDB) {
                 console.error('❌ Firebase가 초기화되지 않았습니다.');
@@ -1671,75 +1777,96 @@
 
             const kioskRef = window.firebaseRef(window.firebaseDB, 'kioskGlobalSettings');
             window.firebaseOnValue(kioskRef, (snapshot) => {
-                const data = snapshot.val();
-                
-                console.log('🔥 Firebase 데이터 수신:', data);
-                
-                if (data) {
-                    let hasChanges = false;
+                try {
+                    const data = snapshot.val();
                     
-                    // 과정 설정 로드
-                    if (data.courses && Array.isArray(data.courses)) {
-                        console.log('📚 과정 설정 로드:', data.courses.length, '개');
-                        systemSettings.courses = data.courses;
-                        renderCourses();
-                        checkCourseAvailability();
-                        hasChanges = true;
-                    }
+                    console.log('🔥 Firebase 데이터 수신:', data);
                     
-                    // 현재 번호 데이터 로드
-                    if (data.currentNumbers) {
-                        console.log('🔢 현재 번호 데이터 로드:', data.currentNumbers);
-                        kioskData.currentNumbers = data.currentNumbers;
-                        hasChanges = true;
-                    }
-                    
-                    // 오늘 총 발급 수 로드
-                    if (data.totalToday !== undefined) {
-                        console.log('📊 오늘 총 발급 수:', data.totalToday);
-                        kioskData.totalToday = data.totalToday;
-                        hasChanges = true;
-                    }
-                    
-                    // 마지막 날짜 로드
-                    if (data.lastDate) {
-                        console.log('📅 마지막 날짜:', data.lastDate);
-                        kioskData.lastDate = data.lastDate;
-                        checkDateReset();
-                        hasChanges = true;
-                    }
+                    if (data) {
+                        let hasChanges = false;
+                        
+                        // 과정 설정 로드 (안전하게)
+                        if (data.courses && Array.isArray(data.courses)) {
+                            console.log('📚 과정 설정 로드:', data.courses.length, '개');
+                            systemSettings.courses = data.courses;
+                            
+                            // 과정 데이터 안전성 보장
+                            ensureCourseDataSafety();
+                            
+                            renderCourses();
+                            checkCourseAvailability();
+                            hasChanges = true;
+                        }
+                        
+                        // 현재 번호 데이터 로드
+                        if (data.currentNumbers) {
+                            console.log('🔢 현재 번호 데이터 로드:', data.currentNumbers);
+                            kioskData.currentNumbers = data.currentNumbers;
+                            hasChanges = true;
+                        }
+                        
+                        // 오늘 총 발급 수 로드
+                        if (data.totalToday !== undefined) {
+                            console.log('📊 오늘 총 발급 수:', data.totalToday);
+                            kioskData.totalToday = data.totalToday;
+                            hasChanges = true;
+                        }
+                        
+                        // 마지막 날짜 로드
+                        if (data.lastDate) {
+                            console.log('📅 마지막 날짜:', data.lastDate);
+                            kioskData.lastDate = data.lastDate;
+                            checkDateReset();
+                            hasChanges = true;
+                        }
 
-                    // 솔라피 설정 로드
-                    if (data.solapiSettings) {
-                        console.log('📱 솔라피 설정 로드');
-                        systemSettings.solapiSettings = { 
-                            ...systemSettings.solapiSettings, 
-                            ...data.solapiSettings 
-                        };
-                        hasChanges = true;
-                    }
+                        // 솔라피 설정 로드
+                        if (data.solapiSettings) {
+                            console.log('📱 솔라피 설정 로드');
+                            systemSettings.solapiSettings = { 
+                                ...systemSettings.solapiSettings, 
+                                ...data.solapiSettings 
+                            };
+                            hasChanges = true;
+                        }
 
-                    // 시간 설정 로드
-                    if (data.timeSettings) {
-                        console.log('⏰ 시간 설정 로드');
-                        systemSettings.timeSettings = { 
-                            ...systemSettings.timeSettings, 
-                            ...data.timeSettings 
-                        };
-                        hasChanges = true;
+                        // 시간 설정 로드
+                        if (data.timeSettings) {
+                            console.log('⏰ 시간 설정 로드');
+                            systemSettings.timeSettings = { 
+                                ...systemSettings.timeSettings, 
+                                ...data.timeSettings 
+                            };
+                            hasChanges = true;
+                        }
+                        
+                        if (hasChanges) {
+                            console.log('✅ 설정 동기화 완료');
+                            console.log('📋 현재 시스템 설정:', systemSettings);
+                        }
+                        
+                    } else {
+                        console.log('📭 Firebase 데이터 없음 - 기본값으로 초기화');
+                        
+                        // 기본값 데이터 안전성 보장
+                        ensureCourseDataSafety();
+                        
+                        // 기본값으로 Firebase 저장
+                        saveKioskSettings();
                     }
                     
-                    if (hasChanges) {
-                        console.log('✅ 설정 동기화 완료');
-                        console.log('📋 현재 시스템 설정:', systemSettings);
-                    }
+                } catch (error) {
+                    console.error('❌ Firebase 데이터 처리 오류:', error);
                     
-                } else {
-                    console.log('📭 Firebase 데이터 없음 - 기본값으로 초기화');
-                    saveKioskSettings();
+                    // 오류 발생 시 기본값으로 복구
+                    ensureCourseDataSafety();
                 }
+                
             }, (error) => {
                 console.error('❌ Firebase 리스너 오류:', error);
+                
+                // 오류 발생 시 기본값으로 복구
+                ensureCourseDataSafety();
             });
         }
 
@@ -1870,40 +1997,73 @@
             e.target.value = value;
         }
 
-        // 과정 관리 렌더링
+        // 과정 관리 렌더링 (안전한 버전)
         function renderCourseManagement() {
             const container = document.getElementById('courseManagement');
-            if (!container) return;
+            if (!container) {
+                console.warn('⚠️ courseManagement 컨테이너를 찾을 수 없음');
+                return;
+            }
             
-            container.innerHTML = '';
-            
-            systemSettings.courses.forEach((course, index) => {
-                const div = document.createElement('div');
-                div.className = 'course-item';
-                div.innerHTML = `
-                    <input type="text" class="setting-input course-icon-input" 
-                           value="${course.icon}" placeholder="🎓" 
-                           onchange="updateCourse(${index}, 'icon', this.value)">
-                    <input type="text" class="setting-input course-code-input" 
-                           value="${course.code}" placeholder="CODE" 
-                           onchange="updateCourse(${index}, 'code', this.value.toUpperCase())">
-                    <input type="text" class="setting-input" 
-                           value="${course.name}" placeholder="과정명" 
-                           onchange="updateCourse(${index}, 'name', this.value)">
-                    <div class="time-inputs">
-                        <input type="time" class="setting-input time-input" 
-                               value="${course.operationHours?.start || '09:00'}" 
-                               onchange="updateCourseTime(${index}, 'start', this.value)" 
-                               placeholder="시작시간">
-                        <input type="time" class="setting-input time-input" 
-                               value="${course.operationHours?.end || '18:00'}" 
-                               onchange="updateCourseTime(${index}, 'end', this.value)" 
-                               placeholder="종료시간">
-                    </div>
-                    <button class="remove-course-btn" onclick="removeCourse(${index})">🗑️</button>
-                `;
-                container.appendChild(div);
-            });
+            try {
+                container.innerHTML = '';
+                
+                // 과정 데이터 안전성 재보장
+                ensureCourseDataSafety();
+                
+                if (!systemSettings.courses || systemSettings.courses.length === 0) {
+                    console.warn('⚠️ 관리할 과정이 없음');
+                    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">등록된 과정이 없습니다.</div>';
+                    return;
+                }
+                
+                systemSettings.courses.forEach((course, index) => {
+                    try {
+                        const div = document.createElement('div');
+                        div.className = 'course-item';
+                        
+                        // 안전한 값 가져오기
+                        const icon = course.icon || '📚';
+                        const code = course.code || 'CODE';
+                        const name = course.name || '과정명';
+                        const startTime = course.operationHours?.start || '09:00';
+                        const endTime = course.operationHours?.end || '18:00';
+                        
+                        div.innerHTML = `
+                            <input type="text" class="setting-input course-icon-input" 
+                                   value="${icon}" placeholder="🎓" 
+                                   onchange="updateCourse(${index}, 'icon', this.value)">
+                            <input type="text" class="setting-input course-code-input" 
+                                   value="${code}" placeholder="CODE" 
+                                   onchange="updateCourse(${index}, 'code', this.value.toUpperCase())">
+                            <input type="text" class="setting-input" 
+                                   value="${name}" placeholder="과정명" 
+                                   onchange="updateCourse(${index}, 'name', this.value)">
+                            <div class="time-inputs">
+                                <input type="time" class="setting-input time-input" 
+                                       value="${startTime}" 
+                                       onchange="updateCourseTime(${index}, 'start', this.value)" 
+                                       placeholder="시작시간">
+                                <input type="time" class="setting-input time-input" 
+                                       value="${endTime}" 
+                                       onchange="updateCourseTime(${index}, 'end', this.value)" 
+                                       placeholder="종료시간">
+                            </div>
+                            <button class="remove-course-btn" onclick="removeCourse(${index})">🗑️</button>
+                        `;
+                        container.appendChild(div);
+                        
+                    } catch (courseError) {
+                        console.error(`❌ 과정 ${index} 관리 UI 렌더링 오류:`, courseError);
+                    }
+                });
+                
+                console.log(`✅ ${systemSettings.courses.length}개 과정 관리 UI 렌더링 완료`);
+                
+            } catch (error) {
+                console.error('❌ 과정 관리 렌더링 전체 오류:', error);
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: #e74c3c;">과정 관리 UI 로딩 중 오류가 발생했습니다.</div>';
+            }
         }
 
         // 과정 업데이트 (자동 저장 포함)
@@ -2169,71 +2329,122 @@
             }
         }
 
-        // 통계 표시
+        // 통계 표시 (안전한 버전)
         function showStats() {
             console.log('📊 통계 버튼 클릭됨');
-            const totalToday = kioskData.totalToday || 0;
-            const courseCounts = {};
             
-            Object.keys(kioskData.currentNumbers || {}).forEach(code => {
-                const course = systemSettings.courses.find(c => c.code === code);
-                if (course) {
-                    courseCounts[course.name] = kioskData.currentNumbers[code];
-                }
-            });
-            
-            let statsText = `📊 오늘의 통계 (${kioskData.lastDate})\n\n`;
-            statsText += `전체 발급: ${totalToday}개\n\n`;
-            statsText += `과정별 현황:\n`;
-            
-            if (Object.keys(courseCounts).length === 0) {
-                statsText += '아직 발급된 번호가 없습니다.';
-            } else {
-                Object.entries(courseCounts).forEach(([name, count]) => {
-                    statsText += `• ${name}: ${count}개\n`;
+            try {
+                // 과정 데이터 안전성 보장
+                ensureCourseDataSafety();
+                
+                const totalToday = kioskData.totalToday || 0;
+                const courseCounts = {};
+                
+                Object.keys(kioskData.currentNumbers || {}).forEach(code => {
+                    const course = systemSettings.courses.find(c => c.code === code);
+                    if (course && course.name) {
+                        courseCounts[course.name] = kioskData.currentNumbers[code];
+                    }
                 });
+                
+                let statsText = `📊 오늘의 통계 (${kioskData.lastDate})\n\n`;
+                statsText += `전체 발급: ${totalToday}개\n\n`;
+                statsText += `과정별 현황:\n`;
+                
+                if (Object.keys(courseCounts).length === 0) {
+                    statsText += '아직 발급된 번호가 없습니다.';
+                } else {
+                    Object.entries(courseCounts).forEach(([name, count]) => {
+                        statsText += `• ${name}: ${count}개\n`;
+                    });
+                }
+                
+                const now = new Date();
+                const currentTime = now.toTimeString().substr(0, 5);
+                statsText += `\n\n현재 시간: ${currentTime}`;
+                statsText += `\n\n과정별 운영 상태:`;
+                
+                if (systemSettings.courses && Array.isArray(systemSettings.courses)) {
+                    systemSettings.courses.forEach(course => {
+                        try {
+                            const courseName = course.name || '이름 없음';
+                            
+                            if (course.operationHours && course.operationHours.start && course.operationHours.end) {
+                                const isOpen = isTimeInRange(currentTime, course.operationHours.start, course.operationHours.end);
+                                const status = isOpen ? '✅ 운영중' : '❌ 운영종료';
+                                statsText += `\n• ${courseName}: ${status} (${course.operationHours.start}-${course.operationHours.end})`;
+                            } else {
+                                statsText += `\n• ${courseName}: ⚠️ 운영시간 미설정`;
+                            }
+                        } catch (courseError) {
+                            console.error('과정별 통계 처리 오류:', courseError);
+                        }
+                    });
+                } else {
+                    statsText += '\n등록된 과정이 없습니다.';
+                }
+                
+                alert(statsText);
+                
+            } catch (error) {
+                console.error('❌ 통계 표시 오류:', error);
+                alert('통계를 불러오는 중 오류가 발생했습니다.');
             }
-            
-            const now = new Date();
-            const currentTime = now.toTimeString().substr(0, 5);
-            statsText += `\n\n현재 시간: ${currentTime}`;
-            statsText += `\n\n과정별 운영 상태:`;
-            
-            systemSettings.courses.forEach(course => {
-                const isOpen = isTimeInRange(currentTime, course.operationHours.start, course.operationHours.end);
-                const status = isOpen ? '✅ 운영중' : '❌ 운영종료';
-                statsText += `\n• ${course.name}: ${status} (${course.operationHours.start}-${course.operationHours.end})`;
-            });
-            
-            alert(statsText);
         }
 
-        // 과정 렌더링
+        // 과정 렌더링 (안전한 버전)
         function renderCourses() {
             const container = document.getElementById('courseGrid');
-            if (!container) return;
+            if (!container) {
+                console.warn('⚠️ courseGrid 컨테이너를 찾을 수 없음');
+                return;
+            }
             
-            container.innerHTML = '';
-            
-            systemSettings.courses.forEach((course, index) => {
-                const button = document.createElement('button');
-                button.className = 'course-btn';
-                button.setAttribute('data-course-index', index);
-                button.onclick = () => selectCourse(course, index);
+            try {
+                container.innerHTML = '';
                 
-                const timeDisplay = course.operationHours ? 
-                    `${course.operationHours.start} - ${course.operationHours.end}` : 
-                    '운영시간 미설정';
+                // 과정 데이터 안전성 재보장
+                ensureCourseDataSafety();
                 
-                button.innerHTML = `
-                    <span class="course-icon">${course.icon}</span>
-                    <div class="course-name">${course.name}</div>
-                    <div class="course-desc">${course.englishName || course.code}</div>
-                    <div class="course-time">운영시간: ${timeDisplay}</div>
-                `;
+                if (!systemSettings.courses || systemSettings.courses.length === 0) {
+                    console.warn('⚠️ 렌더링할 과정이 없음');
+                    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">등록된 과정이 없습니다.</div>';
+                    return;
+                }
                 
-                container.appendChild(button);
-            });
+                systemSettings.courses.forEach((course, index) => {
+                    try {
+                        const button = document.createElement('button');
+                        button.className = 'course-btn';
+                        button.setAttribute('data-course-index', index);
+                        button.onclick = () => selectCourse(course, index);
+                        
+                        // 안전한 시간 표시
+                        let timeDisplay = '운영시간 미설정';
+                        if (course.operationHours && course.operationHours.start && course.operationHours.end) {
+                            timeDisplay = `${course.operationHours.start} - ${course.operationHours.end}`;
+                        }
+                        
+                        button.innerHTML = `
+                            <span class="course-icon">${course.icon || '📚'}</span>
+                            <div class="course-name">${course.name || '과정명 없음'}</div>
+                            <div class="course-desc">${course.englishName || course.code || 'Course'}</div>
+                            <div class="course-time">운영시간: ${timeDisplay}</div>
+                        `;
+                        
+                        container.appendChild(button);
+                        
+                    } catch (courseError) {
+                        console.error(`❌ 과정 ${index} 렌더링 오류:`, courseError);
+                    }
+                });
+                
+                console.log(`✅ ${systemSettings.courses.length}개 과정 렌더링 완료`);
+                
+            } catch (error) {
+                console.error('❌ 과정 렌더링 전체 오류:', error);
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: #e74c3c;">과정 로딩 중 오류가 발생했습니다.</div>';
+            }
         }
 
         // 모달 외부 클릭 시 닫기
@@ -2259,12 +2470,16 @@
             }
         });
 
-        // 초기화
+        // 초기화 (안전한 버전)
         function initialize() {
             console.log('🚀 터치 키오스크 시스템 초기화 시작');
             console.log('📋 기본 시스템 설정:', systemSettings);
             
             try {
+                // 0. 과정 데이터 안전성 보장 (최우선)
+                console.log('0️⃣ 과정 데이터 안전성 보장...');
+                ensureCourseDataSafety();
+                
                 // 1. Firebase 리스너 설정 (우선순위 1)
                 console.log('1️⃣ Firebase 리스너 설정...');
                 setupFirebaseListeners();
@@ -2288,10 +2503,13 @@
                 setInterval(checkCourseAvailability, 60000);
                 
                 // 6. Firebase 상태 확인 (3초 후)
-                setTimeout(async () => {
+                setTimeout(() => {
                     try {
-                        await checkFirebaseConnection();
-                        console.log('6️⃣ Firebase 연결 확인 완료');
+                        if (window.firebaseDB) {
+                            console.log('6️⃣ Firebase 연결 확인 완료');
+                        } else {
+                            console.warn('⚠️ Firebase 연결 문제: 데이터베이스가 초기화되지 않음');
+                        }
                     } catch (error) {
                         console.warn('⚠️ Firebase 연결 문제:', error.message);
                     }
@@ -2301,6 +2519,10 @@
                 
             } catch (error) {
                 console.error('❌ 초기화 실패:', error);
+                
+                // 초기화 실패 시 기본값으로 복구
+                ensureCourseDataSafety();
+                renderCourses();
             }
         }
 
